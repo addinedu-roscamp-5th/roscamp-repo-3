@@ -1,0 +1,4 @@
+[console_scripts]
+aruco_path_tracker = aruco_marker_pkg.aruco_path_tracker:main
+marker_publisher_node = aruco_marker_pkg.aruco_detector:main
+pose_publisher = aruco_marker_pkg.pose_publisher:main
