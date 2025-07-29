@@ -49,7 +49,7 @@ namespace core
         ////////
         bool RequestCallback(const Commondefine::GUIRequest& request) override;
         
-        bool DoneCallback(const std::string& requester);
+        bool DoneCallback(const std::string& requester) override;
 
         
     };
