@@ -22,15 +22,17 @@ namespace core
         Logger::s_ptr                       log_;
         Adapter::AmrAdapter::u_ptr          pAmrAdapter_;
         Adapter::RobotArmAdapter::u_ptr     pRobotArmAdapter_;
-        Manager::RequestManager::u_ptr      pRequestManager_;     ///////////////////////////
+        Manager::RequestManager::u_ptr      pRequestManager_;     
         std::mutex                          assignmtx_;
         interface::RosInterface::w_ptr      Interface_;
+        
+        std::vector<Adapter::AmrAdapter::u_ptr> amr_adapters_;
     
     public:
         using s_ptr = std::shared_ptr<Core>;
         using u_ptr = std::unique_ptr<Core>;
         using w_ptr = std::weak_ptr<Core>;
-        using ReqServiceType = robocallee_fms::srv::ShoeRequest;    ///////////////
+        using ReqServiceType = robocallee_fms::srv::ShoeRequest;    
         using DoneServiceType = robocallee_fms::srv::DoneMsg;
     
 
@@ -46,10 +48,11 @@ namespace core
 
         bool SetRobotArmNextStep(Commondefine::RobotArmStep step) override;
         
-        ////////
         bool RequestCallback(const Commondefine::GUIRequest& request) override;
         
         bool DoneCallback(const std::string& requester);
+
+        std::vector<Adapter::AmrAdapter::u_ptr>& Core::GetAmrAdapters();
 
         
     };

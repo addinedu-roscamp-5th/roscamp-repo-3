@@ -21,6 +21,8 @@ namespace Manager
 
         void EnqueueRequest(const Commondefine::GUIRequest& r);
         bool PopRequest(Commondefine::GUIRequest& r);
+
+        void best_pinky_selector();
         
     };
 

@@ -20,6 +20,8 @@ namespace core
         virtual bool RequestCallback(const Commondefine::GUIRequest& request) = 0;
 
         virtual bool DoneCallback(const std::string& requester) = 0;
+
+        virtual std::vector<Adapter::AmrAdapter::u_ptr>& GetAmrAdapters() = 0;
     };
 };
 

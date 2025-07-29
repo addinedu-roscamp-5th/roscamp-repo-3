@@ -11,6 +11,23 @@ Core::Core(Logger::s_ptr log, interface::RosInterface::s_ptr Interface)
     :log_(log) , Interface_(Interface)
 {
     log_->Log(Log::LogLevel::INFO,"Core 객체 생성");
+
+    Integrated::w_ptr<core::ICore> icore
+    
+    for (int i=0; i<Commondefine::_AMR_NUM_; ++i){
+        auto adapter = u_ptr<Adapter::AmrAdapter>(icore, log_)
+
+        std::string name = "amr" + std::to_string(i+1);
+        
+        // double battery = 100-i*20
+        adapter->GetTaskInfo().robot_id = name;
+        // adapter->GetTaskInfo().battery = battery;
+
+        amr_adapters_.emplace_back(std::move(adapter));
+           
+    }
+
+    log_->Log(Log::LogLevel::INFO,"Adapter 3개 객체 생성");
 }
 
 Core::~Core()
@@ -101,4 +118,9 @@ bool Core::DoneCallback(const std::string& requester)
     }
     
     else return false;
+}
+
+std::vector<Adapter::AmrAdapter::u_ptr>& Core::GetAmrAdapters()
+{
+    return amr_adapters_;
 }

@@ -8,6 +8,8 @@ namespace Commondefine
 
     #define _MAX_EXECUTOR_NUM_ 5
 
+    #define _AMR_NUM_ 3
+
     enum AmrStep {AmrStep_num = 0};
 
     enum RobotArmStep {RobotArmStep_num = 0};
@@ -54,9 +56,18 @@ namespace Commondefine
         pose2d                 dest2;
     }GUIRequest; 
 
+    typedef struct RequestInfo
+    {
+        std::string         requester;
+        pose2d              dest1;
+        pose2d              dest2;
+        std::string         customer_id;
+        shoesproperty       shoes_proptery;
+    }RequestQueue;
+
     typedef struct RobotTaskInfo
     {
-        int                                 robot_id;
+        std::string                         robot_id;
         Robot_state                         robot_state;
         int                                 battery             = 100;
         shoesproperty                       shoes_property;
