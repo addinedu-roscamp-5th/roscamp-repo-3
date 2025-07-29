@@ -5,7 +5,7 @@
             "name": "C/C++: g++ build and debug active file",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/install/robocallee_fms/lib/robocallee_fms/robocallee_fms",
+            "program": "${workspaceFolder}/install/robocallee_pickbot/lib/robocallee_pickbot/robocallee_pickbot",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
@@ -29,4 +29,3 @@
         }
     ]
 }
-// "program": "${workspaceFolder}/build/robocallee_fms",

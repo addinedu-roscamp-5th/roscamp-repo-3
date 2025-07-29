@@ -26,8 +26,8 @@ namespace RA
     class RobotArm
     {
     private:
-        int                             timeout_; //Timeout     
-        int                             fd_; //filedescriptor
+        int                             timeout_;   //Timeout     
+        int                             fd_;        //filedescriptor
         speed_t                         baudrate_;
         termios                         tty_;
 

@@ -4,6 +4,7 @@
 #include "RobotArm.hpp"
 #include "Commondefine.hpp"
 #include "Calibrator.hpp"
+#include "DepthEstimate.hpp"
 #include "RosInterface.hpp"
 
 #include "opencv2/opencv.hpp"
@@ -22,8 +23,5 @@ namespace core
     public:
         Core(Logger::s_ptr log , Integrated::w_ptr<interface::RosInterface> Interface);
         ~Core();
-
-        
-
     };
 };

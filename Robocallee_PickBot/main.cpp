@@ -10,11 +10,11 @@ int main(int argc, char** argv)
 {
     Log::Logger::s_ptr Log = make_sptr<Log::Logger>(_LOG_FILE_DIR_, true);
 
+    rclcpp::init(argc, argv);
 
     const s_ptr<interface::RosInterface> pnterface = make_sptr<interface::RosInterface>(Log);
     const u_ptr<core::Core> pCore = make_uptr<core::Core>(Log, pnterface);
 
-    rclcpp::init(argc, argv); 
     rclcpp::spin(pnterface);
     
     rclcpp::shutdown();

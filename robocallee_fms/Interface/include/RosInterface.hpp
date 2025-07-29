@@ -2,7 +2,6 @@
 
 #include "ICore.hpp"
 #include "Integrated.hpp"
-#include "Commondefine.hpp"
 
 //Ros 관련
 #include "rclcpp/rclcpp.hpp"

@@ -30,12 +30,12 @@ double Calibrator::CameraCalibration(
 	vvp3f objectPoints;
 	vvp2f imagePoints;
 
-	if (!GetChessboardPoints(imgs, objectPoints, imagePoints, board, resolution, subpix)) return rms;
+	if (!GetMultiChessboardPoints(imgs, objectPoints, imagePoints, board, resolution, subpix)) return rms;
 
-	return CameraCalibration(objectPoints, imagePoints, this->cameraMatrix_, this->distCoeffs_, board);
+	return MultiCameraCalibration(objectPoints, imagePoints, this->cameraMatrix_, this->distCoeffs_, board);
 }
 
-double Calibrator::CameraCalibration(
+double Calibrator::MultiCameraCalibration(
 	vvp3f& objectPoints,
 	vvp2f& imagePoints,
 	cv::Mat& cameraMatrix,
@@ -75,7 +75,7 @@ double Calibrator::CameraCalibration(
 	return rms;
 }
 
-bool Calibrator::GetChessboardPoints(
+bool Calibrator::GetMultiChessboardPoints(
 	vMat& imgs,
 	vvp3f& objectPoints,
 	vvp2f& imagePoints,
@@ -214,7 +214,7 @@ bool Calibrator::MultisolvePnP(
 	
 	size_t size = objects.size();
 
-	for(int i = 0; i < size ; ++i)
+	for(size_t i = 0; i < size; ++i)
 	{
 		Mat rvec , tvec;
 		cv::solvePnP(objects[i], images[i], cameraMatrix, distCoeffs, rvec, tvec);
@@ -265,4 +265,62 @@ double Calibrator::ReprojectionError(
 	
 	return rms;
 }
+
+bool TransformCameraPose(
+            std::vector<cv::Point>& point2d,        // mm
+            std::vector<cv::Point3d>& point3d,      // mm
+            const cv::Mat& cameraMatrix,
+            const cv::Mat& distCoeffs,
+            const double depth,
+            const bool useUnDist = false
+)
+{
+	if(point2d.empty() || cameraMatrix.empty() || distCoeffs.empty()) return false;
 	
+	point3d.clear();
+	point3d.reserve(point2d.size());
+	
+	if(useUnDist)
+	{
+		std::vector<cv::Point2f> point2f(point2d.begin(), point2d.end());
+		std::vector<cv::Point2f> undistorted2f;
+
+		// 왜곡 보정 → 내부 파라미터까지 적용됨 → z=1 평면상의 좌표
+		cv::undistortPoints(point2f, undistorted2f, cameraMatrix, distCoeffs);
+
+		for (const auto& pt : undistorted2f)
+		{
+			// 동차 좌표계로 확장
+			cv::Point3d vec3D(pt.x, pt.y, 1.0);
+
+			// 단위 벡터로 정규화
+			double norm = cv::norm(vec3D);
+			cv::Point3d unitVec = vec3D * (1.0 / norm) * depth;
+			
+			point3d.emplace_back(unitVec); // 방향 성분만 있는 방향 벡터
+		}
+	}
+
+	else
+	{
+		cv::Mat invk = cameraMatrix.inv();
+		for (const auto& pt : point2d)
+		{
+			cv::Mat uv = (cv::Mat_<double>(3,1) << pt.x, pt.y, 1.0);
+			cv::Mat dir = cameraMatrix.inv() * uv;
+			
+			double x = dir.at<double>(0, 0) / dir.at<double>(2, 0);
+			double y = dir.at<double>(1, 0) / dir.at<double>(2, 0);
+
+			cv::Point3d vec3D(x, y, 1.0);
+
+			// 단위 벡터로 정규화
+			double norm = cv::norm(vec3D);
+			cv::Point3d unitVec = vec3D * (1.0 / norm) * depth;
+			
+			point3d.emplace_back(unitVec);  // 방향 성분만 있는 방향 벡터
+		}
+	}
+
+	return true;
+}

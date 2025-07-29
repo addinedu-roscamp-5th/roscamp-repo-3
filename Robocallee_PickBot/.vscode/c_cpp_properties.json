@@ -4,16 +4,21 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/../Utile/Logger/include",
-                "${workspaceFolder}/../Utile/Common/include",
                 "${workspaceFolder}/Core/include",
                 "${workspaceFolder}/ImageProcessing/Calibration/include",
                 "${workspaceFolder}/ImageProcessing/Detectors/include",
+                "${workspaceFolder}/ImageProcessing/DepthEstimate/include",
                 "${workspaceFolder}/Interface/include",
                 "${workspaceFolder}/RobotArm/include",
-                "${workspaceFolder}/lib/opencv/include",
+
+                "${workspaceFolder}/../Utile/Logger/include",
+                "${workspaceFolder}/../Utile/Common/include",
+
+                "${workspaceFolder}/../Lib/opencv_r/include",
+		        
                 "/opt/ros/jazzy/include",
                 "/opt/ros/jazzy/include/rclcpp"
+                
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",

@@ -45,6 +45,7 @@ namespace Calib
 
 		const cv::Mat GetCameraMatrix() const { return cameraMatrix_; }
 		const cv::Mat GetdistCoeffs() const { return distCoeffs_; }
+		const cv::Mat Getcam2gripper() const { return cam2gripper_; }
 
 		double CameraCalibration(
 			vMat& imgs,
@@ -53,7 +54,7 @@ namespace Calib
 			const bool subpix = true
 		);
 
-		double CameraCalibration(
+		double MultiCameraCalibration(
 			vvp3f& objectPoints,
 			vvp2f& imagePoints,
 			cv::Mat& cameraMatrix,
@@ -69,7 +70,7 @@ namespace Calib
             cv::Size size
 		);
 
-		bool GetChessboardPoints(
+		bool GetMultiChessboardPoints(
             vMat& imgs,
             vvp3f& objectPoints,
             vvp2f& imagePoints,
@@ -119,5 +120,14 @@ namespace Calib
 			cv::Mat& rvec,
 			cv::Mat& tvec
 		);
+
+		bool TransformCameraPose(
+            std::vector<cv::Point>& 		point2d, // mm
+            std::vector<cv::Point3d>& 		point3d, // mm
+            const cv::Mat& 					cameraMatrix,
+            const cv::Mat& 					distCoeffs,
+            const double 					depth,
+            const bool 						useUnDist = false
+        );
 	};
 };
