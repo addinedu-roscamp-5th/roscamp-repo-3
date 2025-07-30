@@ -20,6 +20,13 @@ namespace core
         virtual bool RequestCallback(const Commondefine::GUIRequest& request) = 0;
 
         virtual bool DoneCallback(const std::string& requester) = 0;
+
+        virtual std::string GetAmrState(int index) const = 0;
+
+        virtual void SetAmrState(int index, const std::string& state) = 0;
+
+        virtual int GetAmrVecSize() = 0;
     };
+
 };
 

@@ -8,13 +8,17 @@ namespace Commondefine
 
     #define _MAX_EXECUTOR_NUM_ 5
 
+<<<<<<< HEAD
     #define _MAX_AMR_NUM_ 3
+=======
+    #define _AMR_NUM_ 3
+>>>>>>> main
 
     enum AmrStep {AmrStep_num = 0};
 
     enum RobotArmStep {RobotArmStep_num = 0};
 
-    enum Robot_state {Robot_state_Idle = 0 , Robot_state_busy, Robot_state_stop};
+    enum class RobotState {IDLE = 0 , BUSY, STOP};
 
     typedef struct pose2f
     {
@@ -47,11 +51,33 @@ namespace Commondefine
         int             size;
         std::string     model;
         std::string     color;
+<<<<<<< HEAD
     };
     
     typedef struct RobotTaskInfo 
+=======
+    }shoesproperty;
+
+    typedef struct GUIRequest
     {
-        int                                 robot_id;
+        std::string            requester;
+        shoesproperty          shoes_property;
+        pose2d                 dest2;
+    }GUIRequest; 
+
+    typedef struct RequestInfo
+    {
+        std::string         requester;
+        pose2d              dest1;
+        pose2d              dest2;
+        std::string         customer_id;
+        shoesproperty       shoes_proptery;
+    }RequestQueue;
+
+    typedef struct RobotTaskInfo
+>>>>>>> main
+    {
+        std::string                         robot_id;
         Robot_state                         robot_state;
         int                                 battery             = 100;
         shoesproperty                       shoes_property;
