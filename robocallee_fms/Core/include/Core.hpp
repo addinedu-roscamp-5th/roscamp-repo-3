@@ -23,7 +23,8 @@ namespace core
         Logger::s_ptr                       log_;
         Adapter::AmrAdapter::u_ptr          pAmrAdapter_;  //std::unique_ptr<Adapter::ArmAdapter>
         Adapter::RobotArmAdapter::u_ptr     pRobotArmAdapter_;
-        Manager::RequestManager::u_ptr      pRequestManager_;     
+        Manager::RequestManager::u_ptr      pRequestManager_;
+        
         std::mutex                          assignmtx_;
         interface::RosInterface::w_ptr      Interface_;
         
