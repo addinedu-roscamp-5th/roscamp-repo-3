@@ -8,11 +8,7 @@ namespace Commondefine
 
     #define _MAX_EXECUTOR_NUM_ 5
 
-<<<<<<< HEAD
-    #define _MAX_AMR_NUM_ 3
-=======
     #define _AMR_NUM_ 3
->>>>>>> main
 
     enum AmrStep {AmrStep_num = 0};
 
@@ -51,11 +47,6 @@ namespace Commondefine
         int             size;
         std::string     model;
         std::string     color;
-<<<<<<< HEAD
-    };
-    
-    typedef struct RobotTaskInfo 
-=======
     }shoesproperty;
 
     typedef struct GUIRequest
@@ -75,7 +66,6 @@ namespace Commondefine
     }RequestQueue;
 
     typedef struct RobotTaskInfo
->>>>>>> main
     {
         std::string                         robot_id;
         Robot_state                         robot_state;

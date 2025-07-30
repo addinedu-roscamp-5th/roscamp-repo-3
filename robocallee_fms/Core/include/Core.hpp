@@ -19,15 +19,6 @@ namespace core
     class Core : public std::enable_shared_from_this<Core> , public ICore
     {
     private:
-<<<<<<< HEAD
-        task::Dispatcher::u_ptr                                 pdispatcher_;
-        Logger::s_ptr                                           log_;
-        std::array<Adapter::AmrAdapter::u_ptr, _MAX_AMR_NUM_>   pAmrAdapters_;
-        Adapter::RobotArmAdapter::u_ptr                         pRobotArmAdapter_;
-        Manager::RequestManager::u_ptr                          pRequestManager_;
-        std::mutex                                              assignmtx_;
-        interface::RosInterface::w_ptr                          Interface_;
-=======
         task::Dispatcher::u_ptr             pdispatcher_;
         Logger::s_ptr                       log_;
         Adapter::AmrAdapter::u_ptr          pAmrAdapter_;  //std::unique_ptr<Adapter::ArmAdapter>
@@ -37,19 +28,13 @@ namespace core
         interface::RosInterface::w_ptr      Interface_;
         
         Integrated::vec<Integrated::u_ptr<Adapter::AmrAdapter>> amr_adapters_;
->>>>>>> main
     
     public:
         using s_ptr = std::shared_ptr<Core>;
         using u_ptr = std::unique_ptr<Core>;
         using w_ptr = std::weak_ptr<Core>;
-<<<<<<< HEAD
-        using ReqServiceType = robocallee_fms::srv::ProcessRequest;
-        using DoneServiceType = robocallee_fms::srv::ProcessDone;
-=======
         using ReqServiceType = robocallee_fms::srv::ShoeRequest;    
         using DoneServiceType = robocallee_fms::srv::DoneMsg;
->>>>>>> main
     
 
         Core(Logger::s_ptr log , interface::RosInterface::s_ptr Interface_);
@@ -64,12 +49,7 @@ namespace core
 
         bool SetRobotArmNextStep(Commondefine::RobotArmStep step) override;
         
-<<<<<<< HEAD
-        void HandleRequestService(const std::shared_ptr<ReqServiceType::Request>& request,
-                                  std::shared_ptr<ReqServiceType::Response>& response);
-=======
         bool RequestCallback(const Commondefine::GUIRequest& request) override;
->>>>>>> main
         
         bool DoneCallback(const std::string& requester) override;
 
