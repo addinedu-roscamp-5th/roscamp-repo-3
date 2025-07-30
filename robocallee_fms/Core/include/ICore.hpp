@@ -21,9 +21,9 @@ namespace core
 
         virtual bool DoneCallback(const std::string& requester) = 0;
 
-        virtual std::string GetAmrState(int index) const = 0;
+        virtual Commondefine::RobotState GetAmrState(int index) const = 0;
 
-        virtual void SetAmrState(int index, const std::string& state) = 0;
+        virtual void SetAmrState(int index, const Commondefine::RobotState& state) = 0;
 
         virtual int GetAmrVecSize() = 0;
     };

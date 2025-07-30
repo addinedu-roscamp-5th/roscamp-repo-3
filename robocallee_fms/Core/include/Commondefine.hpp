@@ -14,7 +14,7 @@ namespace Commondefine
 
     enum RobotArmStep {RobotArmStep_num = 0};
 
-    enum class RobotState {IDLE = 0 , BUSY, STOP};
+    enum RobotState {IDLE = 0 , BUSY, STOP , INVALID};
 
     typedef struct pose2f
     {
@@ -68,8 +68,8 @@ namespace Commondefine
     typedef struct RobotTaskInfo
     {
         std::string                         robot_id;
-        Robot_state                         robot_state;
-        int                                 battery             = 100;
+        RobotState                          robot_state;
+        int                                 battery;
         shoesproperty                       shoes_property;
         pose2d                              current_position;
         pose2d                              dest1;
@@ -80,18 +80,18 @@ namespace Commondefine
         
         RobotTaskInfo& operator=(const RobotTaskInfo& rhs)
         {
-            if(this != &other)
+            if(this != &rhs)
             {
-                this->robot_id = rhs.robot_id
-                this->robot_state = rhs.robot_state
-                this->batterty = rhs.batterty
-                this->shoe_model = rhs.shoe_model
-                this->current_position = rhs.current_position
-                this->dest1 = rhs.dest1
-                this->dest2 = rhs.dest2
-                this->dest3 = rhs.dest3
-                this->requester = rhs.requester
-                this->customer_id = rhs.customer_id
+                this->robot_id = rhs.robot_id;
+                this->robot_state = rhs.robot_state;
+                this->battery = rhs.battery;
+                this->shoes_property = rhs.shoes_property;
+                this->current_position = rhs.current_position;
+                this->dest1 = rhs.dest1;
+                this->dest2 = rhs.dest2;
+                this->dest3 = rhs.dest3;
+                this->requester = rhs.requester;
+                this->customer_id = rhs.customer_id;
             }
             
             return *this;

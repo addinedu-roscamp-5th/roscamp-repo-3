@@ -28,10 +28,10 @@ void AmrAdapter::UpdateTaskInfo(const Commondefine::RequestInfo& request)
         
     // }
 
-    task_info_.shoes_property = request.shoes_proptery;
+    // task_info_.shoes_property = request.shoes_proptery;
    
-    task_info_.requester = request.requester;
-    task_info_.customer_id = request.customer_id;
+    // task_info_.requester = request.requester;
+    // task_info_.customer_id = request.customer_id;
 
     
 }

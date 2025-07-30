@@ -34,9 +34,6 @@ namespace core
         using s_ptr = std::shared_ptr<Core>;
         using u_ptr = std::unique_ptr<Core>;
         using w_ptr = std::weak_ptr<Core>;
-        using ReqServiceType = robocallee_fms::srv::ShoeRequest;    
-        using DoneServiceType = robocallee_fms::srv::DoneMsg;
-    
 
         Core(Logger::s_ptr log , interface::RosInterface::s_ptr Interface_);
         ~Core();
@@ -54,9 +51,9 @@ namespace core
         
         bool DoneCallback(const std::string& requester) override;
 
-        std::string GetAmrState(int index) const override;
+        Commondefine::RobotState GetAmrState(int index) const override;
 
-        void SetAmrState(int index, const std::string& state) override;
+        void SetAmrState(int index, const Commondefine::RobotState& state) override;
 
         int GetAmrVecSize();
     };

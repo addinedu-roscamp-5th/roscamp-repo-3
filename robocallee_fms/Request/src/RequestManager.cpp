@@ -36,9 +36,11 @@ void RequestManager::best_pinky_selector()
     if (auto core = Icore_.lock()){
         int amrs_num = core->GetAmrVecSize();
 
-        for (int i=0; i<amrs_num; i++){
-            std::string status = core->GetAmrState(i);
-            if (status=="IDLE"){
+        for (int i=0; i<amrs_num; i++)
+        {
+            Commondefine::RobotState  status = core->GetAmrState(i);
+            if (status == Commondefine::RobotState::IDLE)
+            {
                 
             }
         }
@@ -47,13 +49,14 @@ void RequestManager::best_pinky_selector()
 
 }
 
-void UpdateAmrTask(int index)
+void RequestManager::UpdateAmrTask(int index)
 {
-    if (auto core = icore_.lock())
+    if (auto core = Icore_.lock())
     {
-        std::string status = core->GetAmrStatus(index);
-        log_->Log(Log::INFO, "Current Amr[" + std::to_string(index) + "] status: " + status);
+        Commondefine::RobotState  status = core->GetAmrState(index);
+        log_->Log(Log::INFO, "Current Amr[" + std::to_string(index) + "] status: IDEL");
 
-        core->SetAmrState(index, "BUSY");
+        core->SetAmrState(index, Commondefine::RobotState::BUSY);
+        log_->Log(Log::INFO, "Current Amr[" + std::to_string(index) + "] status: BUSY");
     }
 }

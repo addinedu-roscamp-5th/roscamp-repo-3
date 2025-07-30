@@ -11,6 +11,9 @@
 
 namespace interface
 {
+    using ReqServiceType = robocallee_fms::srv::ShoeRequest;    
+    using DoneServiceType = robocallee_fms::srv::DoneMsg;
+
     class RosInterface : public rclcpp::Node
     {
     private:
@@ -18,7 +21,7 @@ namespace interface
         Integrated::w_ptr<core::ICore>          Icore_;
 
         rclcpp::Service<robocallee_fms::srv::ShoeRequest>::SharedPtr    req_service_;
-        rclcpp::Service<robocallee_fms::srv::DoneMsg>::SharedPtr        done_service_
+        rclcpp::Service<robocallee_fms::srv::DoneMsg>::SharedPtr        done_service_;
 
         void cbRequestService(const std::shared_ptr<ReqServiceType::Request> request, std::shared_ptr<ReqServiceType::Response> response);
         void cbDoneService(const std::shared_ptr<DoneServiceType::Request> request,std::shared_ptr<DoneServiceType::Response> response);
@@ -33,4 +36,4 @@ namespace interface
 
         bool Initialize(Integrated::w_ptr<core::ICore> Icore);
     };
-};-
+};

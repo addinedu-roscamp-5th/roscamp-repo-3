@@ -6,6 +6,7 @@ using namespace Integrated;
 using namespace Commondefine;
 using namespace Adapter;
 using namespace std;
+using namespace Manager;
 
 Core::Core(Logger::s_ptr log, interface::RosInterface::s_ptr Interface)
     :log_(log) , Interface_(Interface)
@@ -31,10 +32,10 @@ bool Core::Initialize()
     
     pRobotArmAdapter_ = make_uptr<RobotArmAdapter>(self, log_);
 
-    pRequestManager_ = make_uptr<RequestManager>(self, log);
+    pRequestManager_ = make_uptr<RequestManager>(self, log_);
 
     // arm adapter 객체 생성 및 vector에 추가
-    for (int i=0; i<Commondefine::_AMR_NUM_; ++i)
+    for(int i = 0; i < _AMR_NUM_ ; ++i)
     {
         std::string name = "amr" + std::to_string(i+1);
         amr_adapters_.emplace_back(make_uptr<Adapter::AmrAdapter>(self, log_ , name));   
@@ -114,19 +115,19 @@ bool Core::DoneCallback(const std::string& requester)
     else return false;
 }
 
-std::string Core::GetAmrState(int index) const
+Commondefine::RobotState Core::GetAmrState(int index) const
 {
-    if (index<0 || index>=amr_adapters_.size()) return "Invalid";
+    if (index<0 || index>=amr_adapters_.size()) return Commondefine::RobotState::INVALID;
     
-    return amr_adapters_[index]->GetTaskInfo().state;
+    return amr_adapters_[index]->GetTaskInfo().robot_state;
 }
 
 
-void Core::SetAmrState(int index, const std::string& state)
+void Core::SetAmrState(int index, const RobotState& state)
 {
-    if (index<0 || index>=amr_adapters_.size()) return;
+    if(index < 0 || index >= amr_adapters_.size()) return;
 
-    amr_adapters_[index]->GetTaskInfo().state = state;
+    amr_adapters_[index]->GetTaskInfo().robot_state = state;
 }
 
 int Core::GetAmrVecSize()
