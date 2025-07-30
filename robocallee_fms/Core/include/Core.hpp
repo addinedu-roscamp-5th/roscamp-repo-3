@@ -8,8 +8,9 @@
 #include "Commondefine.hpp"
 #include "AmrAdapter.hpp"
 #include "RobotArmAdapter.hpp"
-#include "RosInterface.hpp"
 #include "RequestManager.hpp"
+#include "RosInterface.hpp"
+
 
 using namespace Integrated;
 
@@ -20,13 +21,13 @@ namespace core
     private:
         task::Dispatcher::u_ptr             pdispatcher_;
         Logger::s_ptr                       log_;
-        Adapter::AmrAdapter::u_ptr          pAmrAdapter_;
+        Adapter::AmrAdapter::u_ptr          pAmrAdapter_;  //std::unique_ptr<Adapter::ArmAdapter>
         Adapter::RobotArmAdapter::u_ptr     pRobotArmAdapter_;
         Manager::RequestManager::u_ptr      pRequestManager_;     
         std::mutex                          assignmtx_;
         interface::RosInterface::w_ptr      Interface_;
         
-        std::vector<Adapter::AmrAdapter::u_ptr> amr_adapters_;
+        Integrated::vec<Integrated::u_ptr<Adapter::AmrAdapter>> amr_adapters_;
     
     public:
         using s_ptr = std::shared_ptr<Core>;
@@ -50,11 +51,13 @@ namespace core
         
         bool RequestCallback(const Commondefine::GUIRequest& request) override;
         
-        bool DoneCallback(const std::string& requester);
+        bool DoneCallback(const std::string& requester) override;
 
-        std::vector<Adapter::AmrAdapter::u_ptr>& Core::GetAmrAdapters();
+        std::string GetAmrState(int index) const override;
 
-        
+        void SetAmrState(int index, const std::string& state) override;
+
+        int GetAmrVecSize();
     };
 
     template<typename F, typename... Args>

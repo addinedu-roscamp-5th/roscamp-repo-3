@@ -24,6 +24,7 @@ namespace Manager
 
         void best_pinky_selector();
         
+        void UpdateAmrTask(int index);
     };
 
 };

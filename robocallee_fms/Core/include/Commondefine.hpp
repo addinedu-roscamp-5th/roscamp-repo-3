@@ -14,7 +14,7 @@ namespace Commondefine
 
     enum RobotArmStep {RobotArmStep_num = 0};
 
-    enum Robot_state {Robot_state_Idle = 0 , Robot_state_busy, Robot_state_stop};
+    enum class RobotState {IDLE = 0 , BUSY, STOP};
 
     typedef struct pose2f
     {

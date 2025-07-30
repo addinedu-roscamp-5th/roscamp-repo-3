@@ -33,5 +33,27 @@ bool RequestManager::PopRequest(Commondefine::GUIRequest& r)
 
 void RequestManager::best_pinky_selector()
 {
+    if (auto core = Icore_.lock()){
+        int amrs_num = core->GetAmrVecSize();
 
+        for (int i=0; i<amrs_num; i++){
+            std::string status = core->GetAmrState(i);
+            if (status=="IDLE"){
+                
+            }
+        }
+        
+    }
+
+}
+
+void UpdateAmrTask(int index)
+{
+    if (auto core = icore_.lock())
+    {
+        std::string status = core->GetAmrStatus(index);
+        log_->Log(Log::INFO, "Current Amr[" + std::to_string(index) + "] status: " + status);
+
+        core->SetAmrState(index, "BUSY");
+    }
 }

@@ -12,20 +12,7 @@ Core::Core(Logger::s_ptr log, interface::RosInterface::s_ptr Interface)
 {
     log_->Log(Log::LogLevel::INFO,"Core 객체 생성");
 
-    Integrated::w_ptr<core::ICore> icore
-    
-    for (int i=0; i<Commondefine::_AMR_NUM_; ++i){
-        auto adapter = u_ptr<Adapter::AmrAdapter>(icore, log_)
-
-        std::string name = "amr" + std::to_string(i+1);
-        
-        // double battery = 100-i*20
-        adapter->GetTaskInfo().robot_id = name;
-        // adapter->GetTaskInfo().battery = battery;
-
-        amr_adapters_.emplace_back(std::move(adapter));
-           
-    }
+  
 
     log_->Log(Log::LogLevel::INFO,"Adapter 3개 객체 생성");
 }
@@ -41,10 +28,17 @@ bool Core::Initialize()
     auto self = shared_from_this();
 
     pdispatcher_ = make_uptr<Dispatcher>(_MAX_EXECUTOR_NUM_, log_);
-
-    pAmrAdapter_ = make_uptr<AmrAdapter>(self, log_);
-
+    
     pRobotArmAdapter_ = make_uptr<RobotArmAdapter>(self, log_);
+
+    pRequestManager_ = make_uptr<RequestManager>(self, log);
+
+    // arm adapter 객체 생성 및 vector에 추가
+    for (int i=0; i<Commondefine::_AMR_NUM_; ++i)
+    {
+        std::string name = "amr" + std::to_string(i+1);
+        amr_adapters_.emplace_back(make_uptr<Adapter::AmrAdapter>(self, log_ , name));   
+    }
 
     log_->Log(Log::LogLevel::INFO,"Core Initialize Done");
     
@@ -80,7 +74,7 @@ bool Core::SetRobotArmNextStep(Commondefine::RobotArmStep step)
     return true;
 }
 
-//////////
+
 bool Core::RequestCallback(const Commondefine::GUIRequest& request)
 {
     log_->Log(Log::LogLevel::INFO, "Request received: " + request.shoes_property.model);
@@ -120,7 +114,22 @@ bool Core::DoneCallback(const std::string& requester)
     else return false;
 }
 
-std::vector<Adapter::AmrAdapter::u_ptr>& Core::GetAmrAdapters()
+std::string Core::GetAmrState(int index) const
 {
-    return amr_adapters_;
+    if (index<0 || index>=amr_adapters_.size()) return "Invalid";
+    
+    return amr_adapters_[index]->GetTaskInfo().state;
+}
+
+
+void Core::SetAmrState(int index, const std::string& state)
+{
+    if (index<0 || index>=amr_adapters_.size()) return;
+
+    amr_adapters_[index]->GetTaskInfo().state = state;
+}
+
+int Core::GetAmrVecSize()
+{
+    return amr_adapters_.size();
 }

@@ -6,6 +6,7 @@ AmrAdapter::AmrAdapter(Integrated::w_ptr<core::ICore> Icore, Logger::s_ptr log, 
     :Icore_(Icore),log_(log)
 {
     log_->Log(Log::LogLevel::INFO,"AmrAdapter 객체 생성");
+    task_info_.robot_id = name;
 }
 
 AmrAdapter::~AmrAdapter()
@@ -13,7 +14,7 @@ AmrAdapter::~AmrAdapter()
     log_->Log(Log::LogLevel::INFO,"AmrAdapter 객체 소멸");
 }
 
-void Adapter::UpdateTaskInfo(const Commondefine::RequestInfo& request)
+void AmrAdapter::UpdateTaskInfo(const Commondefine::RequestInfo& request)
 {
     // if (request.requester=="customer"){
     //     // task_info_.dest1 = 창고
@@ -26,7 +27,6 @@ void Adapter::UpdateTaskInfo(const Commondefine::RequestInfo& request)
         
     // }
 
-    task_info_.id = request.id;
     task_info_.shoes_property = request.shoes_proptery;
    
     task_info_.requester = request.requester;
@@ -35,7 +35,7 @@ void Adapter::UpdateTaskInfo(const Commondefine::RequestInfo& request)
     
 }
 
-Commondefine::RobotTaskInfo& GetTaskInfo()
+Commondefine::RobotTaskInfo& AmrAdapter::GetTaskInfo()
 {
     return task_info_;
 }
