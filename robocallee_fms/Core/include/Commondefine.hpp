@@ -16,6 +16,8 @@ namespace Commondefine
 
     enum RobotState {IDLE = 0 , BUSY, STOP , INVALID};
 
+    // enum Requester {CUSTOMER = 0, EMPLOYEE};
+
     typedef struct pose2f
     {
         float x;
@@ -54,16 +56,8 @@ namespace Commondefine
         std::string            requester;
         shoesproperty          shoes_property;
         pose2d                 dest2;
+        int                    customer_id;
     }GUIRequest; 
-
-    typedef struct RequestInfo
-    {
-        std::string         requester;
-        pose2d              dest1;
-        pose2d              dest2;
-        std::string         customer_id;
-        shoesproperty       shoes_proptery;
-    }RequestQueue;
 
     typedef struct RobotTaskInfo
     {

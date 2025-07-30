@@ -158,6 +158,16 @@
               "nested_type_name": ""
             },
             "default_value": ""
+          },
+          {
+            "name": "customer_id",
+            "type": {
+              "type_id": 6,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": ""
+            },
+            "default_value": ""
           }
         ]
       },
@@ -226,7 +236,7 @@
   "type_hashes": [
     {
       "type_name": "robocallee_fms/srv/ShoeRequest",
-      "hash_string": "RIHS01_c8a6158f246fb2f5e29de2824af1a8852ba27ea8bebc9f41902598e6a7ac59bb"
+      "hash_string": "RIHS01_0dd501cac90d5b0fca918ae389f46050f206bf81b5653f957d5d44c0b5a97073"
     },
     {
       "type_name": "builtin_interfaces/msg/Time",
@@ -234,11 +244,11 @@
     },
     {
       "type_name": "robocallee_fms/srv/ShoeRequest_Event",
-      "hash_string": "RIHS01_f2b9f66207323787c2884404c5da54f5ec2666c4465972ceb553d18d20ed9643"
+      "hash_string": "RIHS01_d676e161db60cdf7b6e3318c59edf6d083b47ae825081e2ac2d303e5ffbefa18"
     },
     {
       "type_name": "robocallee_fms/srv/ShoeRequest_Request",
-      "hash_string": "RIHS01_4a2d3e4b01abe4c9ca86917864e006e180a70512a6e523c1c9be6b126ca6d40c"
+      "hash_string": "RIHS01_160e30a8195e425ae83f511a54bbc10fed44276c9f6f7020e0b26aee221f118f"
     },
     {
       "type_name": "robocallee_fms/srv/ShoeRequest_Response",

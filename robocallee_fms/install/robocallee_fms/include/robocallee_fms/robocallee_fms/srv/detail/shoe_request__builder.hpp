@@ -24,16 +24,32 @@ namespace srv
 namespace builder
 {
 
+class Init_ShoeRequest_Request_customer_id
+{
+public:
+  explicit Init_ShoeRequest_Request_customer_id(::robocallee_fms::srv::ShoeRequest_Request & msg)
+  : msg_(msg)
+  {}
+  ::robocallee_fms::srv::ShoeRequest_Request customer_id(::robocallee_fms::srv::ShoeRequest_Request::_customer_id_type arg)
+  {
+    msg_.customer_id = std::move(arg);
+    return std::move(msg_);
+  }
+
+private:
+  ::robocallee_fms::srv::ShoeRequest_Request msg_;
+};
+
 class Init_ShoeRequest_Request_y
 {
 public:
   explicit Init_ShoeRequest_Request_y(::robocallee_fms::srv::ShoeRequest_Request & msg)
   : msg_(msg)
   {}
-  ::robocallee_fms::srv::ShoeRequest_Request y(::robocallee_fms::srv::ShoeRequest_Request::_y_type arg)
+  Init_ShoeRequest_Request_customer_id y(::robocallee_fms::srv::ShoeRequest_Request::_y_type arg)
   {
     msg_.y = std::move(arg);
-    return std::move(msg_);
+    return Init_ShoeRequest_Request_customer_id(msg_);
   }
 
 private:

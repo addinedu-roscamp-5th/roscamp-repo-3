@@ -30,6 +30,7 @@ void RosInterface::cbRequestService(const std::shared_ptr<ReqServiceType::Reques
     r.shoes_property.color = request->color;
     r.dest2.x = request->x;
     r.dest2.y = request->y;
+    r.customer_id = request->customer_id;
 
     auto icore = Icore_.lock();
     if(icore == nullptr)

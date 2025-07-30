@@ -37,7 +37,7 @@ void robocallee_fms__srv__ShoeRequest_Request__rosidl_typesupport_introspection_
   robocallee_fms__srv__ShoeRequest_Request__fini(message_memory);
 }
 
-static rosidl_typesupport_introspection_c__MessageMember robocallee_fms__srv__ShoeRequest_Request__rosidl_typesupport_introspection_c__ShoeRequest_Request_message_member_array[6] = {
+static rosidl_typesupport_introspection_c__MessageMember robocallee_fms__srv__ShoeRequest_Request__rosidl_typesupport_introspection_c__ShoeRequest_Request_message_member_array[7] = {
   {
     "requester",  // name
     rosidl_typesupport_introspection_c__ROS_TYPE_STRING,  // type
@@ -145,13 +145,31 @@ static rosidl_typesupport_introspection_c__MessageMember robocallee_fms__srv__Sh
     NULL,  // fetch(index, &value) function pointer
     NULL,  // assign(index, value) function pointer
     NULL  // resize(index) function pointer
+  },
+  {
+    "customer_id",  // name
+    rosidl_typesupport_introspection_c__ROS_TYPE_INT32,  // type
+    0,  // upper bound of string
+    NULL,  // members of sub message
+    false,  // is key
+    false,  // is array
+    0,  // array size
+    false,  // is upper bound
+    offsetof(robocallee_fms__srv__ShoeRequest_Request, customer_id),  // bytes offset in struct
+    NULL,  // default value
+    NULL,  // size() function pointer
+    NULL,  // get_const(index) function pointer
+    NULL,  // get(index) function pointer
+    NULL,  // fetch(index, &value) function pointer
+    NULL,  // assign(index, value) function pointer
+    NULL  // resize(index) function pointer
   }
 };
 
 static const rosidl_typesupport_introspection_c__MessageMembers robocallee_fms__srv__ShoeRequest_Request__rosidl_typesupport_introspection_c__ShoeRequest_Request_message_members = {
   "robocallee_fms__srv",  // message namespace
   "ShoeRequest_Request",  // message name
-  6,  // number of fields
+  7,  // number of fields
   sizeof(robocallee_fms__srv__ShoeRequest_Request),
   false,  // has_any_key_member_
   robocallee_fms__srv__ShoeRequest_Request__rosidl_typesupport_introspection_c__ShoeRequest_Request_message_member_array,  // message members

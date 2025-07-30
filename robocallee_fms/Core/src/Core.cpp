@@ -37,7 +37,7 @@ bool Core::Initialize()
     // arm adapter 객체 생성 및 vector에 추가
     for(int i = 0; i < _AMR_NUM_ ; ++i)
     {
-        std::string name = "amr" + std::to_string(i+1);
+        std::string name = "AMR" + std::to_string(i+1);
         amr_adapters_.emplace_back(make_uptr<Adapter::AmrAdapter>(self, log_ , name));   
     }
 
@@ -60,6 +60,7 @@ bool Core::SetAmrNextStep(Commondefine::AmrStep step)
 
     return true;
 }
+
 
 bool Core::SetRobotArmNextStep(Commondefine::RobotArmStep step)
 {
@@ -94,7 +95,8 @@ bool Core::RequestCallback(const Commondefine::GUIRequest& request)
         return false;
     }
 }
-                    
+   
+
 bool Core::DoneCallback(const std::string& requester)
 {
     log_->Log(Log::LogLevel::INFO, "Done received from: " + requester);
@@ -115,22 +117,33 @@ bool Core::DoneCallback(const std::string& requester)
     else return false;
 }
 
-Commondefine::RobotState Core::GetAmrState(int index) const
+
+Commondefine::RobotState Core::GetAmrState(int index) 
 {
-    if (index<0 || index>=amr_adapters_.size()) return Commondefine::RobotState::INVALID;
+    if (index < 0 || index >= static_cast<int>(amr_adapters_.size())) return Commondefine::RobotState::INVALID;
     
     return amr_adapters_[index]->GetTaskInfo().robot_state;
 }
 
 
-void Core::SetAmrState(int index, const RobotState& state)
+int Core::GetAmrBattery(int index) 
 {
-    if(index < 0 || index >= amr_adapters_.size()) return;
-
-    amr_adapters_[index]->GetTaskInfo().robot_state = state;
+    if (index < 0 || index >= static_cast<int>(amr_adapters_.size())) return -1;
+    
+    return amr_adapters_[index]->GetTaskInfo().battery;
 }
+
 
 int Core::GetAmrVecSize()
 {
     return amr_adapters_.size();
+}
+
+
+void Core::SetTaskInfo(int index, const Commondefine::GUIRequest& request)
+{
+    if(index < 0 || index >= static_cast<int>(amr_adapters_.size())) return;
+
+    amr_adapters_[index]->SetTaskInfo(request);
+
 }

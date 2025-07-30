@@ -4,5 +4,6 @@ int32 size
 string color
 int32 x
 int32 y
+int32 customer_id
 ---
 bool accepted

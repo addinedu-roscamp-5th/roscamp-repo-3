@@ -40,6 +40,7 @@ robocallee_fms__srv__ShoeRequest_Request__init(robocallee_fms__srv__ShoeRequest_
   }
   // x
   // y
+  // customer_id
   return true;
 }
 
@@ -58,6 +59,7 @@ robocallee_fms__srv__ShoeRequest_Request__fini(robocallee_fms__srv__ShoeRequest_
   rosidl_runtime_c__String__fini(&msg->color);
   // x
   // y
+  // customer_id
 }
 
 bool
@@ -96,6 +98,10 @@ robocallee_fms__srv__ShoeRequest_Request__are_equal(const robocallee_fms__srv__S
   if (lhs->y != rhs->y) {
     return false;
   }
+  // customer_id
+  if (lhs->customer_id != rhs->customer_id) {
+    return false;
+  }
   return true;
 }
 
@@ -131,6 +137,8 @@ robocallee_fms__srv__ShoeRequest_Request__copy(
   output->x = input->x;
   // y
   output->y = input->y;
+  // customer_id
+  output->customer_id = input->customer_id;
   return true;
 }
 

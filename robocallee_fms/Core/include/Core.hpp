@@ -51,11 +51,14 @@ namespace core
         
         bool DoneCallback(const std::string& requester) override;
 
-        Commondefine::RobotState GetAmrState(int index) const override;
-
-        void SetAmrState(int index, const Commondefine::RobotState& state) override;
+        Commondefine::RobotState GetAmrState(int index) override;
 
         int GetAmrVecSize();
+
+        int GetAmrBattery(int index) override;
+
+        void SetTaskInfo(int index, const Commondefine::GUIRequest& request) override;
+    
     };
 
     template<typename F, typename... Args>

@@ -21,12 +21,14 @@ namespace core
 
         virtual bool DoneCallback(const std::string& requester) = 0;
 
-        virtual Commondefine::RobotState GetAmrState(int index) const = 0;
-
-        virtual void SetAmrState(int index, const Commondefine::RobotState& state) = 0;
-
+        virtual Commondefine::RobotState GetAmrState(int index) = 0;
+        
         virtual int GetAmrVecSize() = 0;
-    };
 
+        virtual int GetAmrBattery(int index) = 0;
+
+        virtual void SetTaskInfo(int index, const Commondefine::GUIRequest& request) = 0;
+
+    };
 };
 

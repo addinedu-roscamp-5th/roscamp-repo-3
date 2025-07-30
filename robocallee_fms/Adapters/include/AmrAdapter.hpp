@@ -12,6 +12,7 @@ namespace Adapter
         Logger::s_ptr                             log_;
 
         Commondefine::RobotTaskInfo               task_info_;
+        std::mutex                                mtx_;
         
 
     public:
@@ -21,7 +22,7 @@ namespace Adapter
         AmrAdapter(Integrated::w_ptr<core::ICore> Icore, Logger::s_ptr log, const std::string& name);
         ~AmrAdapter();
 
-        void UpdateTaskInfo(const Commondefine::RequestInfo& request);
+        void SetTaskInfo(const Commondefine::GUIRequest& request);
 
         Commondefine::RobotTaskInfo& GetTaskInfo();
 

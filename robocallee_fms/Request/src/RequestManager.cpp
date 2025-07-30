@@ -16,47 +16,66 @@ RequestManager::~RequestManager()
 
 void RequestManager::EnqueueRequest(const Commondefine::GUIRequest& r)
 {
-    std::lock_guard<std::mutex> lock(request_mtx_);
+    std::lock_guard<std::mutex> lock(mtx_);
     request_queue_.push(r);
 }
 
-bool RequestManager::PopRequest(Commondefine::GUIRequest& r)
+void RequestManager::PopRequest(Commondefine::GUIRequest& r)
 {
-    std::lock_guard<std::mutex> lock(request_mtx_);
-    if (request_queue_.empty()) return false;
+    std::lock_guard<std::mutex> lock(mtx_);
+    if (request_queue_.empty()) return;
     
     r = request_queue_.front();
     request_queue_.pop();
-    return true;
 
 }
 
 void RequestManager::best_pinky_selector()
 {
     if (auto core = Icore_.lock()){
+
+        Commondefine::GUIRequest req;
+
         int amrs_num = core->GetAmrVecSize();
+        int best_amr = -1;
+        int max_battery = -1;
 
         for (int i=0; i<amrs_num; i++)
         {
-            Commondefine::RobotState  status = core->GetAmrState(i);
+            Commondefine::RobotState status = core->GetAmrState(i);
+            int battery = core->GetAmrBattery(i);
+
             if (status == Commondefine::RobotState::IDLE)
             {
-                
+                if (battery>max_battery){
+                    max_battery = battery;
+                    best_amr = i+1;
+                }
             }
         }
+
+        if (best_amr == -1){
+            log_->Log(Log::LogLevel::INFO, "IDLE인 AMR 없음");
+            return;
+        }
+
+        log_->Log(Log::INFO, "선택된 AMR: AMR" + best_amr);
+
+        //밀린 작업 없음
+        if (request_queue_.empty()){
+            // addTask(MoveTo_dest3(dest3,pinky_id));
+            return;
+        }
+
+        //요청 밀린 작업 있음
+        PopRequest(req);
+        core->SetTaskInfo(best_amr, req);
+
+        // addTask(MoveTo_dest1(dest1, pinky_id));
+        // addTask(로봇팔1_상차(신발정보, pinky_id));
+            
+        return;
         
     }
 
-}
-
-void RequestManager::UpdateAmrTask(int index)
-{
-    if (auto core = Icore_.lock())
-    {
-        Commondefine::RobotState  status = core->GetAmrState(index);
-        log_->Log(Log::INFO, "Current Amr[" + std::to_string(index) + "] status: IDEL");
-
-        core->SetAmrState(index, Commondefine::RobotState::BUSY);
-        log_->Log(Log::INFO, "Current Amr[" + std::to_string(index) + "] status: BUSY");
-    }
 }

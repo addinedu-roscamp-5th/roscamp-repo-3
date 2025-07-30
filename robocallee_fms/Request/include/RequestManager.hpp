@@ -11,7 +11,7 @@ namespace Manager
         Integrated::w_ptr<core::ICore>              Icore_;
         Logger::s_ptr                               log_;
         std::queue<Commondefine::GUIRequest>        request_queue_;
-        std::mutex                                  request_mtx_;
+        std::mutex                                  mtx_;
 
     public:
         using u_ptr = Integrated::u_ptr<RequestManager>;
@@ -20,11 +20,11 @@ namespace Manager
         ~RequestManager();
 
         void EnqueueRequest(const Commondefine::GUIRequest& r);
-        bool PopRequest(Commondefine::GUIRequest& r);
+
+        void PopRequest(Commondefine::GUIRequest& r);
 
         void best_pinky_selector();
         
-        void UpdateAmrTask(int index);
     };
 
 };

@@ -35,6 +35,7 @@ typedef struct robocallee_fms__srv__ShoeRequest_Request
   rosidl_runtime_c__String color;
   int32_t x;
   int32_t y;
+  int32_t customer_id;
 } robocallee_fms__srv__ShoeRequest_Request;
 
 // Struct for a sequence of robocallee_fms__srv__ShoeRequest_Request.

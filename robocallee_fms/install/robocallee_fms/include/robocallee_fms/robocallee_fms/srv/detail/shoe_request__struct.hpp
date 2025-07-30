@@ -47,6 +47,7 @@ struct ShoeRequest_Request_
       this->color = "";
       this->x = 0l;
       this->y = 0l;
+      this->customer_id = 0l;
     }
   }
 
@@ -64,6 +65,7 @@ struct ShoeRequest_Request_
       this->color = "";
       this->x = 0l;
       this->y = 0l;
+      this->customer_id = 0l;
     }
   }
 
@@ -86,6 +88,9 @@ struct ShoeRequest_Request_
   using _y_type =
     int32_t;
   _y_type y;
+  using _customer_id_type =
+    int32_t;
+  _customer_id_type customer_id;
 
   // setters for named parameter idiom
   Type & set__requester(
@@ -122,6 +127,12 @@ struct ShoeRequest_Request_
     const int32_t & _arg)
   {
     this->y = _arg;
+    return *this;
+  }
+  Type & set__customer_id(
+    const int32_t & _arg)
+  {
+    this->customer_id = _arg;
     return *this;
   }
 
@@ -183,6 +194,9 @@ struct ShoeRequest_Request_
       return false;
     }
     if (this->y != other.y) {
+      return false;
+    }
+    if (this->customer_id != other.customer_id) {
       return false;
     }
     return true;

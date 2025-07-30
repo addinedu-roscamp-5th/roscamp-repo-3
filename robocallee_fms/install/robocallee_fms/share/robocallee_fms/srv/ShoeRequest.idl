@@ -17,6 +17,8 @@ module robocallee_fms {
       int32 x;
 
       int32 y;
+
+      int32 customer_id;
     };
     struct ShoeRequest_Response {
       boolean accepted;
