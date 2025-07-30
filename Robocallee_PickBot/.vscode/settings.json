@@ -82,5 +82,5 @@
         "stdfloat": "cpp",
         "*.txx": "cpp"
     },
-    "cmake.sourceDirectory": "/home/addinedu/workspace/RoboCallee/Robocallee_Fms"
+    "cmake.sourceDirectory": "/home/addinedu/workspace/RoboCallee/Robocallee_PickBot"
 }

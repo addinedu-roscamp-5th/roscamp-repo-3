@@ -61,6 +61,7 @@ add_executable(robocallee_pickbot
     ImageProcessing/Detectors/src/ArUcoMakerDetector.cpp
     ImageProcessing/Detectors/src/QRcodeDetector.cpp
     ImageProcessing/Detectors/src/ImageProcDetector.cpp
+    ImageProcessing/DepthEstimate/src/DepthEstimate.cpp
     ImageProcessing/Calibration/src/Calibrator.cpp
     ImageProcessing/DepthEstimate/src/DepthEstimate.cpp
     

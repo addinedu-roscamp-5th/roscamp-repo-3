@@ -1,21 +1,35 @@
+#pragma once
+
 #include "Integrated.hpp"
 #include "opencv2/opencv.hpp"
+#include "Geometry.hpp"
+
+#include "objectDetector.hpp"
+#include "ArUcoMakerDetector.hpp"
+
+#include "Calibrator.hpp"
 
 namespace depth
 {
     class DepthEstimate
     {
     private:
+        Integrated::w_ptr<OB::objectDetector>           detector_;
+        Integrated::w_ptr<Calib::Calibrator>            calib_;
 
     public:
-        DepthEstimate();
+        DepthEstimate(
+            Integrated::w_ptr<OB::objectDetector> detector,
+            Integrated::w_ptr<Calib::Calibrator> calib
+        );
         ~DepthEstimate();
 
-        bool MonoDepthEstimate(
-            const cv::Mat& left,
-            const cv::Mat& right,
-            const cv::Mat& K,
-            const cv::Mat& D,
+        double MonoDepthEstimate(
+            cv::Mat& left,
+            cv::Mat& right,
+            cv::Mat& K,
+            cv::Mat& D,
             cv::Mat& DepthMap);
+        
     };
 };
