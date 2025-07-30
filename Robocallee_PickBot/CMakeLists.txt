@@ -18,6 +18,7 @@ set(CORE_INCLUDE_DIR            "${CMAKE_SOURCE_DIR}/Core/include")
 set(CALIBRATION_INCLUDE_DIR     "${CMAKE_SOURCE_DIR}/ImageProcessing/Calibration/include")
 set(DETECTORS_INCLUDE_DIR       "${CMAKE_SOURCE_DIR}/ImageProcessing/Detectors/include")
 set(DEPTHESTIMATE_INCLUDE_DIR   "${CMAKE_SOURCE_DIR}/ImageProcessing/DepthEstimate/include")
+set(GEOMETRY_INCLUDE_DIR        "${CMAKE_SOURCE_DIR}/ImageProcessing/Geometry/include")
 set(INTERFACE_INCLUDE_DIR       "${CMAKE_SOURCE_DIR}/Interface/include")
 set(ROBOTARM_INCLUDE_DIR        "${CMAKE_SOURCE_DIR}/RobotArm/include")
 set(LIB_INCLUDE_DIR             "${CMAKE_SOURCE_DIR}/lib/")
@@ -42,6 +43,7 @@ include_directories(
 	${CALIBRATION_INCLUDE_DIR}
 	${DETECTORS_INCLUDE_DIR}
   ${DEPTHESTIMATE_INCLUDE_DIR}
+  ${GEOMETRY_INCLUDE_DIR}
   ${INTERFACE_INCLUDE_DIR}
   ${ROBOTARM_INCLUDE_DIR}
   ${LIB_INCLUDE_DIR}
@@ -64,6 +66,7 @@ add_executable(robocallee_pickbot
     ImageProcessing/DepthEstimate/src/DepthEstimate.cpp
     ImageProcessing/Calibration/src/Calibrator.cpp
     ImageProcessing/DepthEstimate/src/DepthEstimate.cpp
+    ImageProcessing/Geometry/src/Geometry.cpp
     
     RobotArm/src/RobotArm.cpp
 )

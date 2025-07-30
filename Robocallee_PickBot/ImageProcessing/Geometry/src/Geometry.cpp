@@ -2,23 +2,55 @@
 
 using namespace geometry;
 using namespace cv;
+using namespace std;
 
 
-
-
-static bool Geometry::transformCameraPose(
+bool Geometry::transformCameraPose(
     cv::Point point2d, // mm
     cv::Point3d point3d, // mm
     const cv::Mat& cameraMatrix,
     const cv::Mat& distCoeffs,
-    const bool useUnDist = false
+    const bool useUnDist
 )
 {
-    
-}
+    if(cameraMatrix.empty() || distCoeffs.empty()) return false;
+	
+	if(useUnDist)
+	{
+		cv::Point2f point2f(point2d.x, point2d.y);
+		cv::Point2f undistorted2f;
 
+		// 왜곡 보정 → 내부 파라미터까지 적용됨 → z=1 평면상의 좌표
+		cv::undistortPoints(point2f, undistorted2f, cameraMatrix, distCoeffs);
+        
+        // 동차 좌표계로 확장
+        cv::Point3d vec3D(undistorted2f.x, undistorted2f.y, 1.0);
 
-static bool Geometry::estimateRigidTransformSVD(
+        // 단위 벡터로 정규화
+        double norm = cv::norm(vec3D);
+        cv::Point3d unitVec = vec3D * (1.0 / norm);
+	}
+	else
+	{
+		cv::Mat invk = cameraMatrix.inv();
+
+        cv::Mat uv = (cv::Mat_<double>(3,1) << point2d.x, point2d.y, 1.0);
+        cv::Mat dir = cameraMatrix.inv() * uv;
+        
+        double x = dir.at<double>(0, 0) / dir.at<double>(2, 0);
+        double y = dir.at<double>(1, 0) / dir.at<double>(2, 0);
+
+        cv::Point3d vec3D(x, y, 1.0);
+
+        // 단위 벡터로 정규화
+        double norm = cv::norm(vec3D);
+        cv::Point3d unitVec = vec3D * (1.0 / norm);
+    }
+
+	return true;
+};
+
+bool Geometry::estimateRigidTransformSVD(
     const std::vector<cv::Point3d>& P1,
     const std::vector<cv::Point3d>& P2,
     cv::Mat& R, cv::Mat& t)

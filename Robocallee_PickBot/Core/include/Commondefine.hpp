@@ -1,5 +1,5 @@
 #pragma once
-#include <math>
+#include <cmath>
 
 namespace Commondefine
 {

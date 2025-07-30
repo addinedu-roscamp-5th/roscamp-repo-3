@@ -53,7 +53,7 @@ namespace geometry
     {
         // 2D Point
         if constexpr (std::is_same<PointT, cv::Point2f>::value || std::is_same<PointT, cv::Point2d>::value ||
-                    std::is_same<PointT, cv::Point2i>::value || std::is_same<PointT, cv::Point2l>::value)
+                    std::is_same<PointT, cv::Point2i>::value)
                     {
             using ScalarT = decltype(pt.x);
             return (cv::Mat_<ScalarT>(2, 1) << pt.x, pt.y);
@@ -61,7 +61,7 @@ namespace geometry
 
         // 3D Point
         else if constexpr (std::is_same<PointT, cv::Point3f>::value || std::is_same<PointT, cv::Point3d>::value ||
-                        std::is_same<PointT, cv::Point3i>::value || std::is_same<PointT, cv::Point3l>::value)
+                        std::is_same<PointT, cv::Point3i>::value)
                         {
             using ScalarT = decltype(pt.x);
             return (cv::Mat_<ScalarT>(3, 1) << pt.x, pt.y, pt.z);
@@ -86,8 +86,8 @@ namespace geometry
         // 2D Point
         if constexpr (
             std::is_same_v<PointT, cv::Point2f> || std::is_same_v<PointT, cv::Point2d> ||
-            std::is_same_v<PointT, cv::Point2i> || std::is_same_v<PointT, cv::Point2l>
-        ) {
+            std::is_same_v<PointT, cv::Point2i>)
+            {
             CV_Assert(mat.total() == 2);
             return PointT(
                 mat.at<typename PointT::value_type>(0, 0),
@@ -97,8 +97,8 @@ namespace geometry
         // 3D Point
         else if constexpr (
             std::is_same_v<PointT, cv::Point3f> || std::is_same_v<PointT, cv::Point3d> ||
-            std::is_same_v<PointT, cv::Point3i> || std::is_same_v<PointT, cv::Point3l>
-        ) {
+            std::is_same_v<PointT, cv::Point3i>)
+            {
             CV_Assert(mat.total() == 3);
             return PointT(
                 mat.at<typename PointT::value_type>(0, 0),
