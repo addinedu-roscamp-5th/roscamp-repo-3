@@ -25,12 +25,11 @@ DepthEstimate::~DepthEstimate()
 double DepthEstimate::MonoDepthEstimate(
             cv::Mat& left,
             cv::Mat& right,
-            cv::Mat& K,
-            cv::Mat& D,
-            cv::Mat& DepthMap)
+            cv::Mat& DepthMap,
+            double baseline)
 {
     const double err = -1;
-    if(left.empty() || right.empty() || K.empty() || D.empty()) return err;
+    if(left.empty() || right.empty()) return err;
 
     auto detector = detector_.lock();
     if(detector == nullptr) return err;
@@ -86,17 +85,14 @@ double DepthEstimate::MonoDepthEstimate(
 
     double residual_error = 0.0;
 
-    Mat R;
-    cv::Rodrigues(rvec, R);
-
     for (size_t i = 0; i < ptsls.size(); ++i)
     {
         cv::Mat v1 = (Mat_<double>(3,1) << ptsls[i].x, ptsls[i].y, ptsls[i].z);
         cv::Mat v2 = (Mat_<double>(3,1) << ptsrs[i].x, ptsrs[i].y, ptsrs[i].z);
 
         // R, t 적용
-        Mat v2p = R.t() * v2;
-        Mat tp = R.t() * tvec;
+        Mat v2p = rvec.t() * v2;
+        Mat tp = rvec.t() * tvec;
 
         Mat A(3, 2, CV_64F), b(3, 1, CV_64F);
         for (int j = 0; j < 3; ++j)
@@ -111,24 +107,62 @@ double DepthEstimate::MonoDepthEstimate(
 
         double depth = lambda.at<double>(0);
 
+        Mat temp = depth * v1;
+        double depth_real = temp.at<double>(2);
+
+        
         if (depth > 0 && depth < 10000) // 합리적인 범위 필터링
         {
             int x = (int)kp1[matches[i].queryIdx].pt.x;
             int y = (int)kp1[matches[i].queryIdx].pt.y;
+
+            cout << "X : " << x <<" y : " << " z : " << depth_real << endl;
 
             if (x >= 0 && x < DepthMap.cols && y >= 0 && y < DepthMap.rows)
                 DepthMap.at<double>(y, x) = depth;
         }
 
         Mat P1 = lambda.at<double>(0) * (Mat_<double>(3,1) << ptsls[i].x, ptsls[i].y, ptsls[i].z);
-        Mat P2 = R * P1 + tvec;
+        Mat P2 = rvec * P1 + tvec;
         Mat diff = P2 - (Mat_<double>(3,1) << ptsrs[i].x, ptsrs[i].y, ptsrs[i].z);
         residual_error += norm(diff);
 
     }
+    cv::Mat mat_8u;
+    cv::normalize(DepthMap, mat_8u, 0, 255, cv::NORM_MINMAX);
+    mat_8u.convertTo(mat_8u, CV_8U);
 
+    cv::imwrite("debug_img.bmp", mat_8u);
     residual_error /= ptsls.size();
 
     return residual_error;
 }
 
+double DepthEstimate::computeBaseLine(cv::Mat& T_base_grip1 , cv::Mat& T_base_grip2)
+{
+    double baseline = -1.0;
+
+    auto calib = calib_.lock();
+    if(calib == nullptr) return baseline;
+
+    Mat G2C; 
+    Geometry::homogeneousInverse(calib->Getcam2gripper(), G2C);
+
+    Mat T_cam1 = (T_base_grip1.inv()) * G2C;
+    Mat T_cam2 = (T_base_grip2.inv()) * G2C;
+
+        // Translation 벡터 추출
+    cv::Vec3d p1(T_cam1.at<double>(0,3),
+                 T_cam1.at<double>(1,3),
+                 T_cam1.at<double>(2,3));
+
+    cv::Vec3d p2(T_cam2.at<double>(0,3),
+                 T_cam2.at<double>(1,3),
+                 T_cam2.at<double>(2,3));
+
+
+    cv::Vec3d delta = p2 - p1;
+    baseline = cv::norm(delta);
+
+    return baseline;
+}

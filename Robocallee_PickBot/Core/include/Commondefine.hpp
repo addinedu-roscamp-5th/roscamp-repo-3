@@ -19,6 +19,10 @@ namespace Commondefine
 
     enum RobotArm_ID {RobotArm_1 = 0 , RobotArm_2 = 1};
 
+    enum Params {a = 0, alpha, d, theta_offset};
+
+    #define DH_PARAM 4
+
     const std::vector<std::array<double, 4>> mycobot280_dh_params =
     {
         //{   a,   alpha,            d, theta_offset }

@@ -14,6 +14,9 @@ int main(int argc, char** argv)
 
     const s_ptr<interface::RosInterface> pnterface = make_sptr<interface::RosInterface>(Log);
     const u_ptr<core::Core> pCore = make_uptr<core::Core>(Log, pnterface);
+    pCore->initialize();
+
+    pCore->computeDepth();
 
     rclcpp::spin(pnterface);
     

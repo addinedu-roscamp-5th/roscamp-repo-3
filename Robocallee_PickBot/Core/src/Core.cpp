@@ -3,8 +3,10 @@
 using namespace core;
 using namespace Integrated;
 using namespace Commondefine;
+using namespace geometry;
 using namespace Calib;
 using namespace RA;
+using namespace OB;
 using namespace cv;
 
 Core::Core(Logger::s_ptr log , Integrated::w_ptr<interface::RosInterface> Interface)
@@ -50,3 +52,24 @@ bool Core::initialize()
     log_->Log(INFO,"Core Initialize Done");
     return true;
 }
+
+bool Core::computeDepth()
+{
+    std::vector<double> left_joint = {0.021, 0.015, -1.224, -0.29, 0.051, 0.798};
+    std::vector<double> right_joint = {-0.086, -0.073, -1.163, -0.32, 0.051, 0.69};
+
+    cv::Mat lT , rT;
+    Geometry::compute_forward_kinematics(left_joint, mycobot280_dh_params, lT);
+    Geometry::compute_forward_kinematics(right_joint, mycobot280_dh_params, rT);
+
+    double baseline = depth_->computeBaseLine(lT, rT);
+
+    cv::Mat left = cv::imread("calib_file/img_pos1.bmp");
+    cv::Mat right = cv::imread("calib_file/img_pos2.bmp");
+    cv::Mat depthmap;
+    depth_->MonoDepthEstimate(left,right,depthmap,baseline);
+
+    return true;
+
+}
+

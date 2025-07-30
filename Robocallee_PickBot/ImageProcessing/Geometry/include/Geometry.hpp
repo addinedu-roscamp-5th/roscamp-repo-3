@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Integrated.hpp"
+#include "Commondefine.hpp"
 #include "opencv2/opencv.hpp"
 
 namespace geometry
@@ -35,13 +36,17 @@ namespace geometry
             static bool transformCameraPose
             (
                 cv::Point point2d, // mm
-                cv::Point3d point3d, // mm
+                cv::Point3d& point3d, // mm
                 const cv::Mat& cameraMatrix,
                 const cv::Mat& distCoeffs,
                 const bool useUnDist = false
             );
 
             static bool estimateRigidTransformSVD(const std::vector<cv::Point3d>& P1, const std::vector<cv::Point3d>& P2, cv::Mat& R, cv::Mat& t);
+            
+            static bool dh_to_transform(const double a, const  double alpha, const double d, const double theta , cv::Mat& T);
+
+            static bool compute_forward_kinematics(const std::vector<double>& joint_angles, const std::vector<std::array<double, 4>> DH, cv::Mat& FK);
     };
 
     // -------------------------

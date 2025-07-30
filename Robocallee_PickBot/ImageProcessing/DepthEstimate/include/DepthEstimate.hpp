@@ -27,9 +27,11 @@ namespace depth
         double MonoDepthEstimate(
             cv::Mat& left,
             cv::Mat& right,
-            cv::Mat& K,
-            cv::Mat& D,
-            cv::Mat& DepthMap);
-        
+            cv::Mat& DepthMap,
+            double baseline);
+
+
+
+        double computeBaseLine(cv::Mat& T_base_grip1 , cv::Mat& T_base_grip2);
     };
 };

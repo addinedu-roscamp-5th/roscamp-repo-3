@@ -6,6 +6,7 @@
 #include "Calibrator.hpp"
 #include "DepthEstimate.hpp"
 #include "objectDetector.hpp"
+#include "Geometry.hpp"
 #include "RosInterface.hpp"
 
 #include "opencv2/opencv.hpp"
@@ -31,5 +32,7 @@ namespace core
         ~Core();
 
         bool initialize();
+
+        bool computeDepth();
     };
 };
