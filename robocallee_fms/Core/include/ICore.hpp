@@ -15,8 +15,13 @@ namespace core
 
         virtual bool SetAmrNextStep(int idx, Commondefine::AmrStep step) = 0;
 
-        virtual bool SetRobotArmNextStep(Commondefine::RobotArmStep step) = 0;
-        
+        // virtual bool SetRobotArmNextStep(Commondefine::RobotArmStep step) = 0;
+        virtual bool SetRobotArmNextStep(Commondefine::RobotArmStep step , Commondefine::shoesproperty shoe_info , int pinky_num ) = 0 ;
+
+        // virtual bool ArmRequestMakeCall(const Commondefine::shoesproperty shoe_info , int pinky_num) = 0;
+
+
+
         virtual bool RequestCallback(const Commondefine::GUIRequest& request) = 0;
 
         virtual bool DoneCallback(const std::string& requester, const int& customer_id) = 0;

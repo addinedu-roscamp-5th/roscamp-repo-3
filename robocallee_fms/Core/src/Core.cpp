@@ -62,19 +62,48 @@ bool Core::SetAmrNextStep(int idx, Commondefine::AmrStep step)
 }
 
 
-bool Core::SetRobotArmNextStep(Commondefine::RobotArmStep step)
+// auto Core::assignTask(F&& f, Args&&... args)-> std::future<typename std::invoke_result<F, Args...>::type>
+bool Core::SetRobotArmNextStep(Commondefine::RobotArmStep step , Commondefine::shoesproperty shoe_info , int pinky_num )
+
 {
     switch (step)
     {
-    case RobotArmStep_num:
+    case 1: //shelf_to_buffer
+        // assignTask(pRobotArmAdapter_-> arm1_shelf_to_buffer, shoe_info, pinky_num);
+        log_->Log(Log::LogLevel::INFO, "assignTask 직전" );
+        assignTask( [this, shoe_info, pinky_num]() {pRobotArmAdapter_->arm1_shelf_to_buffer(shoe_info, pinky_num); } );
+        // assignTask(Adapter::RobotArmAdapter::arm1_shelf_to_buffer);
+        
+        break;
+
+    case 2: //buffer_to_pinky
+        break;
+
+    case 3: //pinky_to_buffer
+        break;
+
+
+    case 4: //buffer_to_shelf
         break;
     
+
     default:
         break;
     }
 
     return true;
 }
+
+
+// bool Core::ArmRequestMakeCall(const Commondefine::shoesproperty shoe_info , int pinky_num){
+
+//     Interface_.arm1_response_callback()
+
+
+
+//     return true;
+// }
+
 
 
 bool Core::RequestCallback(const Commondefine::GUIRequest& request)
@@ -89,6 +118,10 @@ bool Core::RequestCallback(const Commondefine::GUIRequest& request)
             // core->SetAmrNextStep(best_pinky_selector);
         // }
         pRequestManager_->BestRobotSelector();
+
+
+
+        return true;
     }
     else
     {

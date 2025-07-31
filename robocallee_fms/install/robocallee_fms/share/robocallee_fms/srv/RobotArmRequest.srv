@@ -1,0 +1,4 @@
+int32 shelf_num
+int32 pinky_num
+---
+bool accepted

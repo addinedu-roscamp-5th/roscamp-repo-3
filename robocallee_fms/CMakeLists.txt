@@ -47,7 +47,10 @@ include_directories(
   # 서비스 메시지 생성
 rosidl_generate_interfaces(${PROJECT_NAME}
     "srv/ShoeRequest.srv"
-    "srv/DoneMsg.srv")
+    "srv/DoneMsg.srv"
+    "srv/RobotArmRequest.srv"
+
+    )
 
 add_executable(robocallee_fms_node
     main.cpp
@@ -84,9 +87,14 @@ install(TARGETS
 #메시지 타입이(자동 생성된 헤더)을 이 실행 파일(robocallee_fms_node)이 사용할 수 있도록 연결
 # rosidl_target_interfaces(robocallee_fms_node
   # ${PROJECT_NAME} "rosidl_typesupport_cpp")
+
+
 rosidl_get_typesupport_target(cpp_typesupport_target 
                              "${PROJECT_NAME}" "rosidl_typesupport_cpp")
 target_link_libraries(${PROJECT_NAME}_node "${cpp_typesupport_target}")
+
+
+
 
 
 ament_package()

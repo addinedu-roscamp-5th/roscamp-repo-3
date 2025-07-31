@@ -1,13 +1,13 @@
 // generated from rosidl_generator_c/resource/idl__type_support.c.em
-// with input from robocallee_fms:srv/ShoeRequest.idl
+// with input from robocallee_fms:srv/RobotArmRequest.idl
 // generated code does not contain a copyright notice
 
 #include <string.h>
 
-#include "robocallee_fms/srv/detail/shoe_request__functions.h"
-#include "robocallee_fms/srv/detail/shoe_request__type_support.h"
+#include "robocallee_fms/srv/detail/robot_arm_request__type_support.h"
 #include "rosidl_typesupport_interface/macros.h"
-#include "robocallee_fms/srv/detail/shoe_request__struct.h"
+#include "robocallee_fms/srv/detail/robot_arm_request__functions.h"
+#include "robocallee_fms/srv/detail/robot_arm_request__struct.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -20,7 +20,7 @@ ROSIDL_TYPESUPPORT_INTERFACE__SERVICE_CREATE_EVENT_MESSAGE_SYMBOL_NAME(
   rosidl_typesupport_c,
   robocallee_fms,
   srv,
-  ShoeRequest
+  RobotArmRequest
 )(
   const rosidl_service_introspection_info_t * info,
   rcutils_allocator_t * allocator,
@@ -30,8 +30,8 @@ ROSIDL_TYPESUPPORT_INTERFACE__SERVICE_CREATE_EVENT_MESSAGE_SYMBOL_NAME(
   if (!allocator || !info) {
     return NULL;
   }
-  robocallee_fms__srv__ShoeRequest_Event * event_msg = (robocallee_fms__srv__ShoeRequest_Event *)(allocator->allocate(sizeof(robocallee_fms__srv__ShoeRequest_Event), allocator->state));
-  if (!robocallee_fms__srv__ShoeRequest_Event__init(event_msg)) {
+  robocallee_fms__srv__RobotArmRequest_Event * event_msg = (robocallee_fms__srv__RobotArmRequest_Event *)(allocator->allocate(sizeof(robocallee_fms__srv__RobotArmRequest_Event), allocator->state));
+  if (!robocallee_fms__srv__RobotArmRequest_Event__init(event_msg)) {
     allocator->deallocate(event_msg, allocator->state);
     return NULL;
   }
@@ -42,19 +42,19 @@ ROSIDL_TYPESUPPORT_INTERFACE__SERVICE_CREATE_EVENT_MESSAGE_SYMBOL_NAME(
   event_msg->info.stamp.nanosec = info->stamp_nanosec;
   memcpy(event_msg->info.client_gid, info->client_gid, 16);
   if (request_message) {
-    robocallee_fms__srv__ShoeRequest_Request__Sequence__init(
+    robocallee_fms__srv__RobotArmRequest_Request__Sequence__init(
       &event_msg->request,
       1);
-    if (!robocallee_fms__srv__ShoeRequest_Request__copy((const robocallee_fms__srv__ShoeRequest_Request *)(request_message), event_msg->request.data)) {
+    if (!robocallee_fms__srv__RobotArmRequest_Request__copy((const robocallee_fms__srv__RobotArmRequest_Request *)(request_message), event_msg->request.data)) {
       allocator->deallocate(event_msg, allocator->state);
       return NULL;
     }
   }
   if (response_message) {
-    robocallee_fms__srv__ShoeRequest_Response__Sequence__init(
+    robocallee_fms__srv__RobotArmRequest_Response__Sequence__init(
       &event_msg->response,
       1);
-    if (!robocallee_fms__srv__ShoeRequest_Response__copy((const robocallee_fms__srv__ShoeRequest_Response *)(response_message), event_msg->response.data)) {
+    if (!robocallee_fms__srv__RobotArmRequest_Response__copy((const robocallee_fms__srv__RobotArmRequest_Response *)(response_message), event_msg->response.data)) {
       allocator->deallocate(event_msg, allocator->state);
       return NULL;
     }
@@ -68,7 +68,7 @@ ROSIDL_TYPESUPPORT_INTERFACE__SERVICE_DESTROY_EVENT_MESSAGE_SYMBOL_NAME(
   rosidl_typesupport_c,
   robocallee_fms,
   srv,
-  ShoeRequest
+  RobotArmRequest
 )(
   void * event_msg,
   rcutils_allocator_t * allocator)
@@ -79,9 +79,9 @@ ROSIDL_TYPESUPPORT_INTERFACE__SERVICE_DESTROY_EVENT_MESSAGE_SYMBOL_NAME(
   if (NULL == event_msg) {
     return false;
   }
-  robocallee_fms__srv__ShoeRequest_Event * _event_msg = (robocallee_fms__srv__ShoeRequest_Event *)(event_msg);
+  robocallee_fms__srv__RobotArmRequest_Event * _event_msg = (robocallee_fms__srv__RobotArmRequest_Event *)(event_msg);
 
-  robocallee_fms__srv__ShoeRequest_Event__fini((robocallee_fms__srv__ShoeRequest_Event *)(_event_msg));
+  robocallee_fms__srv__RobotArmRequest_Event__fini((robocallee_fms__srv__RobotArmRequest_Event *)(_event_msg));
   if (_event_msg->request.data) {
     allocator->deallocate(_event_msg->request.data, allocator->state);
   }

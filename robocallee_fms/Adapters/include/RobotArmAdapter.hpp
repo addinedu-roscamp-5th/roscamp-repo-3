@@ -16,5 +16,14 @@ namespace Adapter
 
         RobotArmAdapter(Integrated::w_ptr<core::ICore> Icore, Logger::s_ptr log);
         ~RobotArmAdapter();
+
+
+
+        void arm1_shelf_to_buffer(Commondefine::shoesproperty shoe, int pinky_num);
+        // void RobotArmAdapter::arm1_shelf_to_buffer();
+
+
+
+
     };
 };

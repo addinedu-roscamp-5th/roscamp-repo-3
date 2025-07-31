@@ -1,0 +1,17 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from robocallee_fms/srv/RobotArmRequest.srv
+// generated code does not contain a copyright notice
+
+
+module robocallee_fms {
+  module srv {
+    struct RobotArmRequest_Request {
+      int32 shelf_num;
+
+      int32 pinky_num;
+    };
+    struct RobotArmRequest_Response {
+      boolean accepted;
+    };
+  };
+};

@@ -12,7 +12,8 @@ namespace Commondefine
 
     enum AmrStep {AmrStep_num = 0, MoveTo_dest1, Load, MoveTo_dest2, Unload, MoveTo_dest3};
 
-    enum RobotArmStep {RobotArmStep_num = 0};
+    // enum RobotArmStep {RobotArmStep_num = 0};
+    enum RobotArmStep {shelf_to_buffer=1, buffer_to_pinky, pinky_to_buffer, buffer_to_shelf };
 
     enum RobotState {IDLE = 0 , BUSY, STOP , INVALID};
 

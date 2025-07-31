@@ -62,6 +62,7 @@ void RequestManager::BestRobotSelector()
 
         log_->Log(Log::INFO, "선택된 AMR: AMR" + best_amr);
 
+
         //밀린 작업 없음
         if (request_queue_.empty()){
             core->SetAmrNextStep(best_amr, Commondefine::AmrStep::MoveTo_dest3);
@@ -72,8 +73,33 @@ void RequestManager::BestRobotSelector()
         PopRequest(req);
         core->SetTaskInfo(best_amr, req);
 
-        // addTask(MoveTo_dest1(dest1, pinky_id));
-        // addTask(로봇팔1_상차(신발정보, pinky_id));
+
+        Commondefine::shoesproperty shoe_info = req.shoes_property;
+        log_->Log(Log::LogLevel::INFO, "로봇팔 작업 지정: " + shoe_info.model + ", " + shoe_info.color + ", " + std::to_string(shoe_info.size) + ", 핑키 번호: " + std::to_string(best_amr));
+
+
+        // typedef struct GUIRequest
+        // {
+        //     std::string            requester;
+        //     shoesproperty          shoes_property;
+        //     pose2d                 dest2;
+        //     int                    customer_id;
+        // }GUIRequest; 
+
+
+        // 로봇팔 작업 지정. shelf_to_buffer 로 시작
+
+        if(req.requester == "customer")
+        {
+            core->SetRobotArmNextStep(Commondefine::RobotArmStep::shelf_to_buffer , shoe_info , best_amr );
+        }
+        else if(req.requester == "employee")
+        {
+            // 직원 요청에 대한 로봇팔 작업 지정
+            core->SetRobotArmNextStep(Commondefine::RobotArmStep::pinky_to_buffer , shoe_info , best_amr  );
+        }
+
+
             
         return;
         
