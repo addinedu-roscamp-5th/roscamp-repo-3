@@ -18,6 +18,7 @@ void RequestManager::EnqueueRequest(const Commondefine::GUIRequest& r)
 {
     std::lock_guard<std::mutex> lock(mtx_);
     request_queue_.push(r);
+    log_->Log(Log::LogLevel::INFO, "EnqueueRequest 완료");
 }
 
 void RequestManager::PopRequest(Commondefine::GUIRequest& r)
@@ -30,7 +31,7 @@ void RequestManager::PopRequest(Commondefine::GUIRequest& r)
 
 }
 
-void RequestManager::best_pinky_selector()
+void RequestManager::BestRobotSelector()
 {
     if (auto core = Icore_.lock()){
 
@@ -63,7 +64,7 @@ void RequestManager::best_pinky_selector()
 
         //밀린 작업 없음
         if (request_queue_.empty()){
-            // addTask(MoveTo_dest3(dest3,pinky_id));
+            core->SetAmrNextStep(best_amr, Commondefine::AmrStep::MoveTo_dest3);
             return;
         }
 

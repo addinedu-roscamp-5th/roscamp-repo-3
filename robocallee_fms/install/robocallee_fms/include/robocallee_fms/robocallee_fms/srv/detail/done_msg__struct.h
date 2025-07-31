@@ -28,6 +28,7 @@ extern "C"
 typedef struct robocallee_fms__srv__DoneMsg_Request
 {
   rosidl_runtime_c__String requester;
+  int32_t customer_id;
 } robocallee_fms__srv__DoneMsg_Request;
 
 // Struct for a sequence of robocallee_fms__srv__DoneMsg_Request.

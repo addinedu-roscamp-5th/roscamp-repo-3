@@ -7,6 +7,8 @@ module robocallee_fms {
   module srv {
     struct DoneMsg_Request {
       string requester;
+
+      int32 customer_id;
     };
     struct DoneMsg_Response {
       boolean accepted;

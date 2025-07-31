@@ -10,7 +10,7 @@ namespace Commondefine
 
     #define _AMR_NUM_ 3
 
-    enum AmrStep {AmrStep_num = 0};
+    enum AmrStep {AmrStep_num = 0, MoveTo_dest1, Load, MoveTo_dest2, Unload, MoveTo_dest3};
 
     enum RobotArmStep {RobotArmStep_num = 0};
 
@@ -62,13 +62,13 @@ namespace Commondefine
     typedef struct RobotTaskInfo
     {
         std::string                         robot_id;
-        RobotState                          robot_state;
-        int                                 battery;
+        RobotState                          robot_state         = RobotState::IDLE;
+        int                                 battery             = 100;
         shoesproperty                       shoes_property;
         pose2d                              current_position;
         pose2d                              dest1;
         pose2d                              dest2;
-        pose2d                              dest3;
+        pose2d                              dest3               = {1.0,0.4};
         std::string                         requester;
         int                                 customer_id;
         

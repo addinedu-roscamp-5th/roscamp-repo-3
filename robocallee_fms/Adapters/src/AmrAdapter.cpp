@@ -7,7 +7,7 @@ AmrAdapter::AmrAdapter(Integrated::w_ptr<core::ICore> Icore, Logger::s_ptr log, 
 {
     log_->Log(Log::LogLevel::INFO,"AmrAdapter 객체 생성");
 
-    task_info_.robot_id = name;
+    robot_task_info_.robot_id = name;
 }
 
 AmrAdapter::~AmrAdapter()
@@ -18,7 +18,7 @@ AmrAdapter::~AmrAdapter()
 
 Commondefine::RobotTaskInfo& AmrAdapter::GetTaskInfo()
 {
-    return task_info_;
+    return robot_task_info_;
 }
 
 void AmrAdapter::SetTaskInfo(const Commondefine::GUIRequest& request)
@@ -27,22 +27,33 @@ void AmrAdapter::SetTaskInfo(const Commondefine::GUIRequest& request)
         std::lock_guard<std::mutex> lock(mtx_);
 
         // if (request.requester=="customer"){
-        //     task_info_.dest1 = 창고
-        //     task_info_.dest2 = 배달지
+        //     robot_task_info_.dest1 = 창고
+        //     robot_task_info_.dest2 = 배달지
             
         // }
         // else if (request.requester=="employee"){
-        //     task_info_.dest1 = 수거함
-        //     task_info_.dest2 = 창고
+        //     robot_task_info_.dest1 = 수거함
+        //     robot_task_info_.dest2 = 창고
             
         // }
 
-        task_info_.robot_state = Commondefine::RobotState::BUSY;
-        task_info_.shoes_property = request.shoes_property;
+        robot_task_info_.robot_state = Commondefine::RobotState::BUSY;
+        robot_task_info_.shoes_property = request.shoes_property;
     
-        task_info_.requester = request.requester;
-        task_info_.customer_id = request.customer_id;
+        robot_task_info_.requester = request.requester;
+        robot_task_info_.customer_id = request.customer_id;
+
+        log_->Log(Log::LogLevel::INFO,"SetTaskInfo 완료");
 
     }
 
+}
+
+void AmrAdapter::SetAmrState(const Commondefine::RobotState& state)
+{
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        
+        robot_task_info_.robot_state = state;
+    }
 }

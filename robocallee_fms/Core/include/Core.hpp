@@ -43,21 +43,25 @@ namespace core
 
         bool Initialize();
 
-        bool SetAmrNextStep(Commondefine::AmrStep step) override;
+        bool SetAmrNextStep(int idx, Commondefine::AmrStep step) override;
 
         bool SetRobotArmNextStep(Commondefine::RobotArmStep step) override;
         
         bool RequestCallback(const Commondefine::GUIRequest& request) override;
         
-        bool DoneCallback(const std::string& requester) override;
+        bool DoneCallback(const std::string& requester, const int& customer_id) override;
 
-        Commondefine::RobotState GetAmrState(int index) override;
+        Commondefine::RobotState GetAmrState(int idx) override;
+        
+        int GetAmrBattery(int idx) override;
+        
+        int GetAmrCustID(int idx);
 
         int GetAmrVecSize();
 
-        int GetAmrBattery(int index) override;
+        void SetTaskInfo(int idx, const Commondefine::GUIRequest& request) override;
 
-        void SetTaskInfo(int index, const Commondefine::GUIRequest& request) override;
+        // void SetAmrState(int idx) override;
     
     };
 

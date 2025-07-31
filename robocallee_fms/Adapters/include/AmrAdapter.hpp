@@ -11,7 +11,7 @@ namespace Adapter
         Integrated::w_ptr<core::ICore>            Icore_;
         Logger::s_ptr                             log_;
 
-        Commondefine::RobotTaskInfo               task_info_;
+        Commondefine::RobotTaskInfo               robot_task_info_;
         std::mutex                                mtx_;
         
 
@@ -25,6 +25,8 @@ namespace Adapter
         void SetTaskInfo(const Commondefine::GUIRequest& request);
 
         Commondefine::RobotTaskInfo& GetTaskInfo();
+
+        void SetAmrState(const Commondefine::RobotState& state);
 
     };
 };

@@ -23,7 +23,7 @@ namespace Manager
 
         void PopRequest(Commondefine::GUIRequest& r);
 
-        void best_pinky_selector();
+        void BestRobotSelector();
         
     };
 

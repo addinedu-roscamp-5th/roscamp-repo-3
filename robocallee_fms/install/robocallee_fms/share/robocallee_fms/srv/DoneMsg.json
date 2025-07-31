@@ -108,6 +108,16 @@
               "nested_type_name": ""
             },
             "default_value": ""
+          },
+          {
+            "name": "customer_id",
+            "type": {
+              "type_id": 6,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": ""
+            },
+            "default_value": ""
           }
         ]
       },
@@ -176,7 +186,7 @@
   "type_hashes": [
     {
       "type_name": "robocallee_fms/srv/DoneMsg",
-      "hash_string": "RIHS01_e7b9d7d3d55bb06c1e3817e6de5c13473daa141f8836a13fa5c972e99f2e2cbe"
+      "hash_string": "RIHS01_8e5c250ce8a0d02471428418bae18c839c5b6ba7d70028c26fd78ca66cddea9e"
     },
     {
       "type_name": "builtin_interfaces/msg/Time",
@@ -184,11 +194,11 @@
     },
     {
       "type_name": "robocallee_fms/srv/DoneMsg_Event",
-      "hash_string": "RIHS01_12cba94bed6a4fbf30f876c6bceabc04f526ac6967285327cd2c53aa081facf0"
+      "hash_string": "RIHS01_a25db0e2dfc845c8d02c84a0da070e5838d8280d2fc7716ccea4d70c971bb030"
     },
     {
       "type_name": "robocallee_fms/srv/DoneMsg_Request",
-      "hash_string": "RIHS01_d1bc9c655c1d7efb7714645bd80a657e6c228560f89b1c508d69aaec1a279334"
+      "hash_string": "RIHS01_aab4e8e77f57c2777d11910dd3e4da85d497d10c4f6c14061f570e6f2b32d99c"
     },
     {
       "type_name": "robocallee_fms/srv/DoneMsg_Response",

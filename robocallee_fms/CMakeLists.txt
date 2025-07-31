@@ -17,7 +17,7 @@ endif()
 set(ADAPTERS_INCLUDE_DIR    "${CMAKE_SOURCE_DIR}/Adapters/include")
 set(CORE_INCLUDE_DIR        "${CMAKE_SOURCE_DIR}/Core/include")
 set(LIB_INCLUDE_DIR         "${CMAKE_SOURCE_DIR}/lib")
-set(REQUEST_INCLUDE_DIR     "${CMAKE_SOURCE_DIR}/Request/include")
+set(REQUEST_INCLUDE_DIR     "${CMAKE_SOURCE_DIR}/Manager/include")
 set(INTERFACE_INCLUDE_DIR   "${CMAKE_SOURCE_DIR}/Interface/include")
 set(TASK_INCLUDE_DIR        "${CMAKE_SOURCE_DIR}/Task/include")
 set(TRAFFIC_INCLUDE_DIR     "${CMAKE_SOURCE_DIR}/Traffic/include")
@@ -58,7 +58,7 @@ add_executable(robocallee_fms_node
     Interface/src/RosInterface.cpp
     Adapters/src/AmrAdapter.cpp
     Adapters/src/RobotArmAdapter.cpp
-    Request/src/RequestManager.cpp      
+    Manager/src/RequestManager.cpp      
 )
 
 target_include_directories(robocallee_fms_node PUBLIC
@@ -82,7 +82,11 @@ install(TARGETS
 
 
 #메시지 타입이(자동 생성된 헤더)을 이 실행 파일(robocallee_fms_node)이 사용할 수 있도록 연결
-rosidl_target_interfaces(robocallee_fms_node
-  ${PROJECT_NAME} "rosidl_typesupport_cpp")
+# rosidl_target_interfaces(robocallee_fms_node
+  # ${PROJECT_NAME} "rosidl_typesupport_cpp")
+rosidl_get_typesupport_target(cpp_typesupport_target 
+                             "${PROJECT_NAME}" "rosidl_typesupport_cpp")
+target_link_libraries(${PROJECT_NAME}_node "${cpp_typesupport_target}")
+
 
 ament_package()

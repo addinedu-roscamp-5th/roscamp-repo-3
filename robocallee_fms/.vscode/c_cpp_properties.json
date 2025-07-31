@@ -6,7 +6,7 @@
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/Core/include",
                 "${workspaceFolder}/Adapters/include",
-                "${workspaceFolder}/Request/include",
+                "${workspaceFolder}/Manager/include",
                 "${workspaceFolder}/Task/include",
                 "${workspaceFolder}/Traffic/include",
                 "${workspaceFolder}/Interface/include",

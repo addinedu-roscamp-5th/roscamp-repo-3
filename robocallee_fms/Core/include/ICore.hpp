@@ -13,21 +13,25 @@ namespace core
         ICore() = default; 
         virtual ~ICore() = default;
 
-        virtual bool SetAmrNextStep(Commondefine::AmrStep step) = 0;
+        virtual bool SetAmrNextStep(int idx, Commondefine::AmrStep step) = 0;
 
         virtual bool SetRobotArmNextStep(Commondefine::RobotArmStep step) = 0;
         
         virtual bool RequestCallback(const Commondefine::GUIRequest& request) = 0;
 
-        virtual bool DoneCallback(const std::string& requester) = 0;
+        virtual bool DoneCallback(const std::string& requester, const int& customer_id) = 0;
 
-        virtual Commondefine::RobotState GetAmrState(int index) = 0;
+        virtual Commondefine::RobotState GetAmrState(int idx) = 0;
+
+        virtual int GetAmrBattery(int idx) = 0;
+
+        virtual int GetAmrCustID(int idx) = 0;
         
         virtual int GetAmrVecSize() = 0;
 
-        virtual int GetAmrBattery(int index) = 0;
+        virtual void SetTaskInfo(int idx, const Commondefine::GUIRequest& request) = 0;
 
-        virtual void SetTaskInfo(int index, const Commondefine::GUIRequest& request) = 0;
+        // virtual void SetAmrState(int idx) = 0;
 
     };
 };

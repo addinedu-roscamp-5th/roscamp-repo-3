@@ -15,8 +15,8 @@ bool RosInterface::Initialize(Integrated::w_ptr<core::ICore> Icore)
 {
     Icore_ = Icore;
 
-    req_service_ = create_service<ReqServiceType>("process_request", std::bind(&RosInterface::cbRequestService, this, std::placeholders::_1, std::placeholders::_2));
-    done_service_ = create_service<DoneServiceType>("process_request", std::bind(&RosInterface::cbDoneService, this, std::placeholders::_1, std::placeholders::_2));
+    req_service_ = create_service<ReqServiceType>("request_service", std::bind(&RosInterface::cbRequestService, this, std::placeholders::_1, std::placeholders::_2));
+    done_service_ = create_service<DoneServiceType>("done_service", std::bind(&RosInterface::cbDoneService, this, std::placeholders::_1, std::placeholders::_2));
     
     return true;
 }
@@ -47,12 +47,13 @@ void RosInterface::cbRequestService(const std::shared_ptr<ReqServiceType::Reques
 
 void RosInterface::cbDoneService(const std::shared_ptr<DoneServiceType::Request> request,std::shared_ptr<DoneServiceType::Response> response)
 {
-    std::string requester;
-    requester = request->requester;
+    std::string requester = request->requester;
+    int customer_id = request->customer_id;
+    
 
     if (auto icore = Icore_.lock())
     {
-        bool accepted = icore->DoneCallback(requester);
+        bool accepted = icore->DoneCallback(requester, customer_id);
         response->accepted = accepted;
     }
     else

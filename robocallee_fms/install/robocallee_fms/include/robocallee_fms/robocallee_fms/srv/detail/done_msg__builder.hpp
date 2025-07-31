@@ -24,16 +24,32 @@ namespace srv
 namespace builder
 {
 
+class Init_DoneMsg_Request_customer_id
+{
+public:
+  explicit Init_DoneMsg_Request_customer_id(::robocallee_fms::srv::DoneMsg_Request & msg)
+  : msg_(msg)
+  {}
+  ::robocallee_fms::srv::DoneMsg_Request customer_id(::robocallee_fms::srv::DoneMsg_Request::_customer_id_type arg)
+  {
+    msg_.customer_id = std::move(arg);
+    return std::move(msg_);
+  }
+
+private:
+  ::robocallee_fms::srv::DoneMsg_Request msg_;
+};
+
 class Init_DoneMsg_Request_requester
 {
 public:
   Init_DoneMsg_Request_requester()
   : msg_(::rosidl_runtime_cpp::MessageInitialization::SKIP)
   {}
-  ::robocallee_fms::srv::DoneMsg_Request requester(::robocallee_fms::srv::DoneMsg_Request::_requester_type arg)
+  Init_DoneMsg_Request_customer_id requester(::robocallee_fms::srv::DoneMsg_Request::_requester_type arg)
   {
     msg_.requester = std::move(arg);
-    return std::move(msg_);
+    return Init_DoneMsg_Request_customer_id(msg_);
   }
 
 private:

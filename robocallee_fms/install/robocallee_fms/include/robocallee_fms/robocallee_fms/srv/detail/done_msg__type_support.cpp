@@ -38,7 +38,7 @@ void DoneMsg_Request_fini_function(void * message_memory)
   typed_message->~DoneMsg_Request();
 }
 
-static const ::rosidl_typesupport_introspection_cpp::MessageMember DoneMsg_Request_message_member_array[1] = {
+static const ::rosidl_typesupport_introspection_cpp::MessageMember DoneMsg_Request_message_member_array[2] = {
   {
     "requester",  // name
     ::rosidl_typesupport_introspection_cpp::ROS_TYPE_STRING,  // type
@@ -56,13 +56,31 @@ static const ::rosidl_typesupport_introspection_cpp::MessageMember DoneMsg_Reque
     nullptr,  // fetch(index, &value) function pointer
     nullptr,  // assign(index, value) function pointer
     nullptr  // resize(index) function pointer
+  },
+  {
+    "customer_id",  // name
+    ::rosidl_typesupport_introspection_cpp::ROS_TYPE_INT32,  // type
+    0,  // upper bound of string
+    nullptr,  // members of sub message
+    false,  // is key
+    false,  // is array
+    0,  // array size
+    false,  // is upper bound
+    offsetof(robocallee_fms::srv::DoneMsg_Request, customer_id),  // bytes offset in struct
+    nullptr,  // default value
+    nullptr,  // size() function pointer
+    nullptr,  // get_const(index) function pointer
+    nullptr,  // get(index) function pointer
+    nullptr,  // fetch(index, &value) function pointer
+    nullptr,  // assign(index, value) function pointer
+    nullptr  // resize(index) function pointer
   }
 };
 
 static const ::rosidl_typesupport_introspection_cpp::MessageMembers DoneMsg_Request_message_members = {
   "robocallee_fms::srv",  // message namespace
   "DoneMsg_Request",  // message name
-  1,  // number of fields
+  2,  // number of fields
   sizeof(robocallee_fms::srv::DoneMsg_Request),
   false,  // has_any_key_member_
   DoneMsg_Request_message_member_array,  // message members

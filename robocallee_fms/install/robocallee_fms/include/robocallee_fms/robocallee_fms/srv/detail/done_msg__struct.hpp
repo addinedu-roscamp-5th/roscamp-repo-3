@@ -42,6 +42,7 @@ struct DoneMsg_Request_
       rosidl_runtime_cpp::MessageInitialization::ZERO == _init)
     {
       this->requester = "";
+      this->customer_id = 0l;
     }
   }
 
@@ -52,6 +53,7 @@ struct DoneMsg_Request_
       rosidl_runtime_cpp::MessageInitialization::ZERO == _init)
     {
       this->requester = "";
+      this->customer_id = 0l;
     }
   }
 
@@ -59,12 +61,21 @@ struct DoneMsg_Request_
   using _requester_type =
     std::basic_string<char, std::char_traits<char>, typename std::allocator_traits<ContainerAllocator>::template rebind_alloc<char>>;
   _requester_type requester;
+  using _customer_id_type =
+    int32_t;
+  _customer_id_type customer_id;
 
   // setters for named parameter idiom
   Type & set__requester(
     const std::basic_string<char, std::char_traits<char>, typename std::allocator_traits<ContainerAllocator>::template rebind_alloc<char>> & _arg)
   {
     this->requester = _arg;
+    return *this;
+  }
+  Type & set__customer_id(
+    const int32_t & _arg)
+  {
+    this->customer_id = _arg;
     return *this;
   }
 
@@ -111,6 +122,9 @@ struct DoneMsg_Request_
   bool operator==(const DoneMsg_Request_ & other) const
   {
     if (this->requester != other.requester) {
+      return false;
+    }
+    if (this->customer_id != other.customer_id) {
       return false;
     }
     return true;

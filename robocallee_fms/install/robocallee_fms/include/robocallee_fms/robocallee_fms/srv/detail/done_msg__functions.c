@@ -25,6 +25,7 @@ robocallee_fms__srv__DoneMsg_Request__init(robocallee_fms__srv__DoneMsg_Request 
     robocallee_fms__srv__DoneMsg_Request__fini(msg);
     return false;
   }
+  // customer_id
   return true;
 }
 
@@ -36,6 +37,7 @@ robocallee_fms__srv__DoneMsg_Request__fini(robocallee_fms__srv__DoneMsg_Request 
   }
   // requester
   rosidl_runtime_c__String__fini(&msg->requester);
+  // customer_id
 }
 
 bool
@@ -48,6 +50,10 @@ robocallee_fms__srv__DoneMsg_Request__are_equal(const robocallee_fms__srv__DoneM
   if (!rosidl_runtime_c__String__are_equal(
       &(lhs->requester), &(rhs->requester)))
   {
+    return false;
+  }
+  // customer_id
+  if (lhs->customer_id != rhs->customer_id) {
     return false;
   }
   return true;
@@ -67,6 +73,8 @@ robocallee_fms__srv__DoneMsg_Request__copy(
   {
     return false;
   }
+  // customer_id
+  output->customer_id = input->customer_id;
   return true;
 }
 
