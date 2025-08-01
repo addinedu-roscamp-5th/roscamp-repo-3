@@ -30,7 +30,6 @@ namespace interface
 
 
         rclcpp::Client<robocallee_fms::srv::RobotArmRequest>::SharedPtr        arm1_client_;
-        void arm1_send_request(int shelf_num, int pinky_num );
         void cbArmService(rclcpp::Client<ArmServiceType>::SharedFuture future);
 
 
@@ -53,5 +52,12 @@ namespace interface
         ~RosInterface();
 
         bool Initialize(Integrated::w_ptr<core::ICore> Icore);
+
+        void arm1_send_request(int shelf_num, int pinky_num );
+
+
     };
+
 };
+
+

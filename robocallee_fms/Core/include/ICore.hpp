@@ -18,7 +18,7 @@ namespace core
         // virtual bool SetRobotArmNextStep(Commondefine::RobotArmStep step) = 0;
         virtual bool SetRobotArmNextStep(Commondefine::RobotArmStep step , Commondefine::shoesproperty shoe_info , int pinky_num ) = 0 ;
 
-        // virtual bool ArmRequestMakeCall(const Commondefine::shoesproperty shoe_info , int pinky_num) = 0;
+        virtual bool ArmRequestMakeCall(int arm_num, int shelf_num, int pinky_num) = 0;
 
 
 

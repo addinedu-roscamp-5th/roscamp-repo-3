@@ -28,7 +28,6 @@ bool RosInterface::Initialize(Integrated::w_ptr<core::ICore> Icore)
 
 
 
-
     return true;
 }
 
@@ -38,6 +37,8 @@ bool RosInterface::Initialize(Integrated::w_ptr<core::ICore> Icore)
 
 void RosInterface::arm1_send_request(int shelf_num, int pinky_num )
 {
+    log_->Log(Log::INFO, "arm1_send_request 진입");
+
     auto request = std::make_shared<ArmServiceType::Request>();
     request->shelf_num = shelf_num;
     request->pinky_num = pinky_num;
@@ -48,8 +49,15 @@ void RosInterface::arm1_send_request(int shelf_num, int pinky_num )
 }
 
 
+
+
+
+
+// 로봇팔한테 request 보내고 response 받는 부분
 void RosInterface::cbArmService(rclcpp::Client<ArmServiceType>::SharedFuture future)
 {
+        log_->Log(Log::INFO, "acbArmService 진입");
+
     auto res = future.get();
 
     if(res->accepted)

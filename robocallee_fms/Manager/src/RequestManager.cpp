@@ -29,6 +29,9 @@ void RequestManager::PopRequest(Commondefine::GUIRequest& r)
     r = request_queue_.front();
     request_queue_.pop();
 
+        log_->Log(Log::LogLevel::INFO, "PopRequest 완료");
+
+
 }
 
 void RequestManager::BestRobotSelector()
@@ -74,9 +77,6 @@ void RequestManager::BestRobotSelector()
         core->SetTaskInfo(best_amr, req);
 
 
-        Commondefine::shoesproperty shoe_info = req.shoes_property;
-        log_->Log(Log::LogLevel::INFO, "로봇팔 작업 지정: " + shoe_info.model + ", " + shoe_info.color + ", " + std::to_string(shoe_info.size) + ", 핑키 번호: " + std::to_string(best_amr));
-
 
         // typedef struct GUIRequest
         // {
@@ -88,9 +88,14 @@ void RequestManager::BestRobotSelector()
 
 
         // 로봇팔 작업 지정. shelf_to_buffer 로 시작
+        Commondefine::shoesproperty shoe_info = req.shoes_property;
+        log_->Log(Log::LogLevel::INFO, "로봇팔 작업 지정: " + shoe_info.model + ", " + shoe_info.color + ", " + std::to_string(shoe_info.size) + ", 핑키 번호: " + std::to_string(best_amr));
+
 
         if(req.requester == "customer")
-        {
+        {   
+            log_->Log(Log::INFO, "customer 로부터의 요청");
+
             core->SetRobotArmNextStep(Commondefine::RobotArmStep::shelf_to_buffer , shoe_info , best_amr );
         }
         else if(req.requester == "employee")

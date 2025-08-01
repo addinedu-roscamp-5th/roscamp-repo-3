@@ -66,11 +66,13 @@ bool Core::SetAmrNextStep(int idx, Commondefine::AmrStep step)
 bool Core::SetRobotArmNextStep(Commondefine::RobotArmStep step , Commondefine::shoesproperty shoe_info , int pinky_num )
 
 {
+    log_->Log(Log::LogLevel::INFO, "assignTask 직전 step은 " + step);
+
     switch (step)
     {
     case 1: //shelf_to_buffer
         // assignTask(pRobotArmAdapter_-> arm1_shelf_to_buffer, shoe_info, pinky_num);
-        log_->Log(Log::LogLevel::INFO, "assignTask 직전" );
+        log_->Log(Log::LogLevel::INFO, "assignTask shelf_to_buffer" );
         assignTask( [this, shoe_info, pinky_num]() {pRobotArmAdapter_->arm1_shelf_to_buffer(shoe_info, pinky_num); } );
         // assignTask(Adapter::RobotArmAdapter::arm1_shelf_to_buffer);
         
@@ -95,14 +97,21 @@ bool Core::SetRobotArmNextStep(Commondefine::RobotArmStep step , Commondefine::s
 }
 
 
-// bool Core::ArmRequestMakeCall(const Commondefine::shoesproperty shoe_info , int pinky_num){
+bool Core::ArmRequestMakeCall(int arm_num, int shelf_num, int pinky_num){
 
-//     Interface_.arm1_response_callback()
+    if(arm_num==1){
+        if (auto iface = Interface_.lock()) {
+            iface->arm1_send_request(shelf_num, pinky_num);
+        } else {
+            log_->Log(Log::LogLevel::ERROR, "RosInterface가 유효하지 않습니다!" );
 
+        }
+    }
 
-
-//     return true;
-// }
+    // else // arm_num == 2
+        // Interface_.arm2_send_request(shelf_num, pinky_num );
+    return true;
+}
 
 
 

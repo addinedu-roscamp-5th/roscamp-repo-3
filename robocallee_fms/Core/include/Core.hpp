@@ -49,7 +49,7 @@ namespace core
         bool SetRobotArmNextStep(Commondefine::RobotArmStep step , Commondefine::shoesproperty shoe_info , int pinky_num ) override;
         // bool SetRobotArmNextStep(Commondefine::RobotArmStep step) override;
         
-        // bool ArmRequestMakeCall(const Commondefine::shoesproperty shoe_info , int pinky_num) override ;
+        bool ArmRequestMakeCall(int arm_num, int shelf_num, int pinky_num) override ;
 
 
 
@@ -87,7 +87,9 @@ namespace core
         std::future<return_type> fut = task->get_future();
 
         pdispatcher_->Enqueue([task]() { (*task)();} );
-        
+
+        log_->Log(Log::INFO, "assignTask return fut 직전");
+
         return fut;
     }
 };
