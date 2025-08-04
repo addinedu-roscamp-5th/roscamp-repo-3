@@ -18,10 +18,10 @@ int RequestManager::EnqueueRequest(const Commondefine::GUIRequest& r)
 {
     std::lock_guard<std::mutex> lock(mtx_);
     request_queue_.push(r);
-    request_queue_.push(r);
-    request_queue_.push(r);
-    request_queue_.push(r);
-    request_queue_.push(r);
+    // request_queue_.push(r);
+    // request_queue_.push(r);
+    // request_queue_.push(r);
+    // request_queue_.push(r);
     log_->Log(Log::LogLevel::INFO, "EnqueueRequest 완료");
 
     //대기번호(본인을 제외한 다른 요청자의 수)
