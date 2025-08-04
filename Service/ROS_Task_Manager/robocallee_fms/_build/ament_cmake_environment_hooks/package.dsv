@@ -1,0 +1,4 @@
+source;share/ROBOCALLEE_FMS/local_setup.bash
+source;share/ROBOCALLEE_FMS/local_setup.dsv
+source;share/ROBOCALLEE_FMS/local_setup.sh
+source;share/ROBOCALLEE_FMS/local_setup.zsh

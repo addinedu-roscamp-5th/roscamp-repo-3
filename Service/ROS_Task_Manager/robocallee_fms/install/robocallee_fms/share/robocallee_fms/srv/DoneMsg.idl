@@ -1,0 +1,17 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from robocallee_fms/srv/DoneMsg.srv
+// generated code does not contain a copyright notice
+
+
+module robocallee_fms {
+  module srv {
+    struct DoneMsg_Request {
+      string requester;
+
+      int32 customer_id;
+    };
+    struct DoneMsg_Response {
+      boolean accepted;
+    };
+  };
+};

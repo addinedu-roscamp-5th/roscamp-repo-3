@@ -1,0 +1,27 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from robocallee_fms/srv/ShoeRequest.srv
+// generated code does not contain a copyright notice
+
+
+module robocallee_fms {
+  module srv {
+    struct ShoeRequest_Request {
+      string requester;
+
+      string model;
+
+      int32 size;
+
+      string color;
+
+      float x;
+
+      float y;
+
+      int32 customer_id;
+    };
+    struct ShoeRequest_Response {
+      int32 wait_list;
+    };
+  };
+};

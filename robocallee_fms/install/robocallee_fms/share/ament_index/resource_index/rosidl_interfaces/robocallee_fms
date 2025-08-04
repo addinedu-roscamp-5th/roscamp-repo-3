@@ -1,6 +1,0 @@
-srv/DoneMsg.idl
-srv/DoneMsg.srv
-srv/RobotArmRequest.idl
-srv/RobotArmRequest.srv
-srv/ShoeRequest.idl
-srv/ShoeRequest.srv

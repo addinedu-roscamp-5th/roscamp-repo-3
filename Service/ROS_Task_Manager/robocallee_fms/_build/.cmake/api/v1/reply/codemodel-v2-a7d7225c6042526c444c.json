@@ -1,0 +1,79 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-8c963181b2a1470b0522.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.15"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "ROBOCALLEE_FMS",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "ROBOCALLEE_FMS::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ROBOCALLEE_FMS-Debug-9332242cceea74ed14eb.json",
+					"name" : "ROBOCALLEE_FMS",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ROBOCALLEE_FMS_uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ROBOCALLEE_FMS_uninstall-Debug-ab4058cf76ce4ca3600a.json",
+					"name" : "ROBOCALLEE_FMS_uninstall",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-uninstall-Debug-5fe57c387e983f46e0f9.json",
+					"name" : "uninstall",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/addinedu/workspace/RoboCallee/Robocallee_Fms/build",
+		"source" : "/home/addinedu/workspace/RoboCallee/Robocallee_Fms"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 6
+	}
+}
