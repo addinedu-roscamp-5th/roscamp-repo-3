@@ -183,11 +183,17 @@ double DepthEstimate::MonoDepthEstimate
 
     Mat T_se3, invT_se3, rvec, tvec, invrvec, invtvec;
     Geometry::estimateRigidTransformSVD(unit_lefts, unit_rights, rvec, tvec);
-    tvec *= (baseline / norm(tvec));
 
-    Geometry::composeTransform(rvec, tvec, T_se3);
-    Geometry::homogeneousInverse(T_se3, invT_se3);
-    Geometry::decomposeTransform(invT_se3, invrvec, invtvec);
+    double err_sum = 0.0;
+    for (size_t i = 0; i < size; ++i)
+    {
+        cv::Mat ul = (cv::Mat_<double>(3,1) << unit_lefts[i].x, unit_lefts[i].y, unit_lefts[i].z);
+        cv::Mat ur_pred = rvec * ul + tvec;
+        cv::Point3d ur_actual = unit_rights[i];
+        cv::Mat ur_act = (cv::Mat_<double>(3,1) << ur_actual.x, ur_actual.y, ur_actual.z);
+        err_sum += norm(ur_act - ur_pred);
+    }
+    std::cout << "Transform residual: " << err_sum / size << std::endl;
 
     double residual_error = 0.0;
     for (size_t i = 0; i < size; ++i)
@@ -196,8 +202,8 @@ double DepthEstimate::MonoDepthEstimate
         cv::Mat v2 = (Mat_<double>(3,1) << unit_rights[i].x, unit_rights[i].y, unit_rights[i].z);
 
         // R, t 적용
-        Mat v2p = invrvec * v2;
-        Mat tp = invrvec * invtvec;
+        Mat v2p = rvec.t() * v2;
+        Mat tp = rvec.t() * tvec;
 
         Mat A(3, 2, CV_64F), b(3, 1, CV_64F);
         for (int j = 0; j < 3; ++j)
@@ -209,7 +215,7 @@ double DepthEstimate::MonoDepthEstimate
 
         Mat lambda;
         solve(A, b, lambda, DECOMP_SVD);
-        double depth = lambda.at<double>(0);
+        double depth = lambda.at<double>(0) * baseline;
 
         if(depth < DEPTH_MIN || depth > DEPTH_MAX) continue;
 
@@ -236,8 +242,8 @@ double DepthEstimate::computeBaseLine(cv::Mat& T_base_grip1 , cv::Mat& T_base_gr
     Mat G2C; 
     Geometry::homogeneousInverse(calib->Getcam2gripper(), G2C);
 
-    Mat T_cam1 = (T_base_grip1.inv()) * G2C;
-    Mat T_cam2 = (T_base_grip2.inv()) * G2C;
+    Mat T_cam1 = (T_base_grip1) * G2C;
+    Mat T_cam2 = (T_base_grip2) * G2C;
 
         // Translation 벡터 추출
     cv::Vec3d p1(T_cam1.at<double>(0,3),

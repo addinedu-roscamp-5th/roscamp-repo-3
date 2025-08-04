@@ -70,6 +70,21 @@ bool ImageProcDetector::FindObject(cv::Mat& image, std::vector<object2d>& object
 
                 objects.push_back(object);
                 index++;
+
+                for (size_t i = 0; i < ordered.size(); ++i)
+                {
+                    cv::circle(image, ordered[i], 5, cv::Scalar(0, 0, 255), -1); // 빨간 점
+                    cv::putText(image, std::to_string(i), ordered[i] + cv::Point(5, -5),
+                                cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 0), 1);
+                }
+
+                // 객체 중심점도 시각화
+                cv::circle(image, center, 4, cv::Scalar(0, 255, 0), -1); // 녹색 중심
+                cv::putText(image, "ID: " + object.objectID, center + cv::Point(5, 15),
+                            cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
+
+                // cv::imshow("Detected Corners", image);
+                // cv::waitKey(0);
             }
         }
 

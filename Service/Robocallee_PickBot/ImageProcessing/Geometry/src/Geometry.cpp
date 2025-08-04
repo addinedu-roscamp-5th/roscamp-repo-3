@@ -22,33 +22,24 @@ double Geometry::transformCameraPose(
 	{
 		cv::Mat undistorted2f;
 
+        cv::Point2f distorted = cv::Point2f(point2d.x,point2d.y);
 		// 왜곡 보정 → 내부 파라미터까지 적용됨 → z=1 평면상의 좌표
-		cv::undistortPoints(pointToMat(point2d), undistorted2f, cameraMatrix, distCoeffs);
+		cv::undistortPoints(pointToMat(distorted), undistorted2f, cameraMatrix, distCoeffs);
         
-        cv::Point2f pt = matToPoint<Point2f>(undistorted2f);
+        cv::Point3f pt = matToPoint<Point3f>(undistorted2f);
 
-        // 동차 좌표계로 확장
-        cv::Point3d vec3D(pt.x, pt.y, 1.0);
-
-        // 단위 벡터로 정규화
-        double norm = cv::norm(vec3D);
-        unitVec = vec3D * (1.0 / norm);
+        unitVec = pt / cv::norm(pt); 
 	}
 	else
 	{
 		cv::Mat invk = cameraMatrix.inv();
-
-        cv::Mat uv = (cv::Mat_<double>(3,1) << point2d.x, point2d.y, 1.0);
-        cv::Mat dir = cameraMatrix.inv() * uv;
         
-        double x = dir.at<double>(0, 0) / dir.at<double>(2, 0);
-        double y = dir.at<double>(1, 0) / dir.at<double>(2, 0);
-
-        cv::Point3d vec3D(x, y, 1.0);
-
-        // 단위 벡터로 정규화
-        double norm = cv::norm(vec3D);
-        unitVec = vec3D * (1.0 / norm);
+        cv::Mat uv = (cv::Mat_<double>(3,1) << point2d.x, point2d.y, 1.0);
+        cv::Mat ray = cameraMatrix.inv() * uv;
+        
+        cv::Point3d vec3D(ray.at<double>(0), ray.at<double>(1), ray.at<double>(2));
+        
+        unitVec = vec3D / cv::norm(vec3D);  // 단위벡터화
     }
 
     point3d = unitVec;
