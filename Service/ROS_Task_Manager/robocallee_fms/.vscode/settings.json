@@ -76,6 +76,8 @@
         "typeinfo": "cpp",
         "variant": "cpp",
         "format": "cpp",
-        "stdfloat": "cpp"
+        "stdfloat": "cpp",
+        "any": "cpp",
+        "valarray": "cpp"
     }
 }

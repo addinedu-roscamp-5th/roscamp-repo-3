@@ -30,7 +30,7 @@ set(COMMON_INCLUDE_DIR          "${CMAKE_SOURCE_DIR}/../Utile/Common/include")
 
 # openCV path
 set(OPENCV_INCLUDE_DIR          "${CMAKE_SOURCE_DIR}/../Lib/opencv_r/include")
-set(OPENCV_LIB_DIR              "${CMAKE_SOURCE_DIR}/../Lib/opencv_r/lib")
+set(OPENCV_LIB_DIR              "${CMAKE_SOURCE_DIR}/../Lib/opencv_r/bin")
 
 
 find_package(ament_cmake REQUIRED)  # ament 빌드시스템 사용

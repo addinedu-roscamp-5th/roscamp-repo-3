@@ -21,9 +21,13 @@ set(REQUEST_INCLUDE_DIR     "${CMAKE_SOURCE_DIR}/Manager/include")
 set(INTERFACE_INCLUDE_DIR   "${CMAKE_SOURCE_DIR}/Interface/include")
 set(TASK_INCLUDE_DIR        "${CMAKE_SOURCE_DIR}/Task/include")
 set(TRAFFIC_INCLUDE_DIR     "${CMAKE_SOURCE_DIR}/Traffic/include")
-set(LOGGER_INCLUDE_DIR      "${CMAKE_SOURCE_DIR}/../Utile/Logger/include")
-set(UTILE_INCLUDE_DIR       "${CMAKE_SOURCE_DIR}/../Utile/include")
-set(COMMON_INCLUDE_DIR      "${CMAKE_SOURCE_DIR}/../Utile/Common/include")
+set(LOGGER_INCLUDE_DIR      "${CMAKE_SOURCE_DIR}/../../Utile/Logger/include")
+set(UTILE_INCLUDE_DIR       "${CMAKE_SOURCE_DIR}/../../Utile/include")
+set(COMMON_INCLUDE_DIR      "${CMAKE_SOURCE_DIR}/../../Utile/Common/include")
+set(YAML_INCLUDE_DIR        "${CMAKE_SOURCE_DIR}/../../Lib/YAML/include")
+set(YAML_LIB_DIR            "${CMAKE_SOURCE_DIR}/../../Lib/YAML/bin")
+set(OPENCV_INCLUDE_DIR      "${CMAKE_SOURCE_DIR}/../../Lib/opencv_r/include")
+set(OPENCV_LIB_DIR          "${CMAKE_SOURCE_DIR}/../../Lib/opencv_r/bin")
 
 find_package(ament_cmake REQUIRED)                  # ament 빌드시스템 사용
 find_package(rclcpp REQUIRED)                       # ROS2 C++ 클라이언트 라이브러리
@@ -42,6 +46,8 @@ include_directories(
   ${UTILE_INCLUDE_DIR}
   ${LOGGER_INCLUDE_DIR}
   ${COMMON_INCLUDE_DIR}
+  ${YAML_INCLUDE_DIR}
+  ${OPENCV_INCLUDE_DIR}
 	)
 
   # 서비스 메시지 생성
@@ -54,14 +60,15 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 
 add_executable(robocallee_fms_node
     main.cpp
-    ../Utile/Logger/src/Logger.cpp
+    ../../Utile/Logger/src/Logger.cpp
     Core/src/Core.cpp
     Task/src/Dispatcher.cpp
     Task/src/Executor.cpp
     Interface/src/RosInterface.cpp
     Adapters/src/AmrAdapter.cpp
     Adapters/src/RobotArmAdapter.cpp
-    Manager/src/RequestManager.cpp      
+    Manager/src/RequestManager.cpp
+    Traffic/src/OccupancyGrid.cpp
 )
 
 target_include_directories(robocallee_fms_node PUBLIC
@@ -75,8 +82,17 @@ ament_target_dependencies(robocallee_fms_node
 
 #필요한 OpenCV 모듈 수동 연결 (필요한 .a/.so 파일 이름만 작성)
 target_link_libraries(robocallee_fms_node
-    rclcpp::rclcpp 
+    rclcpp::rclcpp
     ${std_msgs_TARGETS}
+    ${YAML_LIB_DIR}/libyaml-cpp.so
+    ${OPENCV_LIB_DIR}/libopencv_world.so
+)
+
+#런타임시 동적라이브러리 경로 찾기
+set_target_properties(robocallee_fms_node PROPERTIES
+  BUILD_WITH_INSTALL_RPATH TRUE
+  INSTALL_RPATH ${OPENCV_LIB_DIR}
+  INSTALL_RPATH ${YAML_LIB_DIR}
 )
 
 install(TARGETS

@@ -10,8 +10,9 @@
                 "${workspaceFolder}/Task/include",
                 "${workspaceFolder}/Traffic/include",
                 "${workspaceFolder}/Interface/include",
-                "${workspaceFolder}/../Utile/Logger/include",
-                "${workspaceFolder}/../Utile/Common/include",
+                "${workspaceFolder}/../../Utile/Logger/include",
+                "${workspaceFolder}/../../Utile/Common/include",
+                "${workspaceFolder}/../../Lib/YAML/include",
                 "/opt/ros/jazzy/include",
                 "/opt/ros/jazzy/include/rclcpp"
                 
