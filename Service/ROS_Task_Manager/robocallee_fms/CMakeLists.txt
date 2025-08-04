@@ -55,7 +55,6 @@ rosidl_generate_interfaces(${PROJECT_NAME}
     "srv/ShoeRequest.srv"
     "srv/DoneMsg.srv"
     "srv/RobotArmRequest.srv"
-
     )
 
 add_executable(robocallee_fms_node
@@ -75,6 +74,11 @@ target_include_directories(robocallee_fms_node PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/rosidl_generator_cpp>
 )
 
+rosidl_get_typesupport_target(cpp_typesupport_target
+  ${PROJECT_NAME}
+  "rosidl_typesupport_cpp"
+  )
+
 #실행 파일(robocallee_fms_node)를 사용하는 ROS2 패키지들을 link 해줌
 ament_target_dependencies(robocallee_fms_node
     rclcpp  
@@ -82,35 +86,21 @@ ament_target_dependencies(robocallee_fms_node
 
 #필요한 OpenCV 모듈 수동 연결 (필요한 .a/.so 파일 이름만 작성)
 target_link_libraries(robocallee_fms_node
-    rclcpp::rclcpp
-    ${std_msgs_TARGETS}
-    ${YAML_LIB_DIR}/libyaml-cpp.so
-    ${OPENCV_LIB_DIR}/libopencv_world.so
+  ${OPENCV_LIB_DIR}/libopencv_world.so    
+  rclcpp::rclcpp
+  ${std_msgs_TARGETS}
+  ${cpp_typesupport_target}
+  ${YAML_LIB_DIR}/libyaml-cpp.so
 )
 
 #런타임시 동적라이브러리 경로 찾기
 set_target_properties(robocallee_fms_node PROPERTIES
   BUILD_WITH_INSTALL_RPATH TRUE
-  INSTALL_RPATH ${OPENCV_LIB_DIR}
-  INSTALL_RPATH ${YAML_LIB_DIR}
+  INSTALL_RPATH "${OPENCV_LIB_DIR};${YAML_LIB_DIR};${CMAKE_INSTALL_PREFIX}/lib;${CMAKE_INSTALL_PREFIX}/lib/robocallee_fms"
 )
 
 install(TARGETS
   robocallee_fms_node
   DESTINATION lib/${PROJECT_NAME})
-
-
-#메시지 타입이(자동 생성된 헤더)을 이 실행 파일(robocallee_fms_node)이 사용할 수 있도록 연결
-# rosidl_target_interfaces(robocallee_fms_node
-  # ${PROJECT_NAME} "rosidl_typesupport_cpp")
-
-
-rosidl_get_typesupport_target(cpp_typesupport_target 
-                             "${PROJECT_NAME}" "rosidl_typesupport_cpp")
-target_link_libraries(${PROJECT_NAME}_node "${cpp_typesupport_target}")
-
-
-
-
 
 ament_package()

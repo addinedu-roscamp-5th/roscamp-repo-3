@@ -5,11 +5,16 @@
             "name": "C/C++: g++ build and debug active file",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/install/robocallee_fms/lib/robocallee_fms/robocallee_fms",
+            "program": "${workspaceFolder}/install/robocallee_fms/lib/robocallee_fms/robocallee_fms_node",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
-            "environment": [],
+            "environment": 
+            [
+                { "name": "LD_LIBRARY_PATH", "value": "${workspaceFolder}/install/robocallee_fms/lib:${workspaceFolder}/../../Lib/opencv_r/bin:${workspaceFolder}/../../Lib/YAML/bin:/opt/ros/jazzy/lib" },
+                { "name": "AMENT_PREFIX_PATH", "value": "${workspaceFolder}/install" },
+                { "name": "RCLCPP_LOG_LEVEL", "value": "info" }
+            ],
             "externalConsole": false,
             "MIMode": "gdb",
             "setupCommands": [
