@@ -29,11 +29,11 @@ namespace geometry
 
             static bool composeTransform(const cv::Mat& rvec, const cv::Mat& tvec, cv::Mat& T_se3);
 
-            static bool decomposeTransform(const cv::Mat& T_se3 , cv::Mat& rvec , cv::Mat& tvec);
+            static bool decomposeTransform(const cv::Mat& T_se3 , cv::Mat& rvec , cv::Mat& tvec, bool rodrigues = false);
             
             static bool transformPoint(const cv::Mat& R, const cv::Mat& t, const cv::Point3d& p);
 
-            static bool transformCameraPose
+            static double transformCameraPose
             (
                 cv::Point point2d, // mm
                 cv::Point3d& point3d, // mm

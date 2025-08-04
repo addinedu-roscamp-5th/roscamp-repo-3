@@ -7,25 +7,19 @@
 
 namespace Calib
 {
-	template<typename T>
-	using vec = std::vector<T>;
+	using vvp3f = Integrated::vvec<cv::Point3f>;
+	using vvp3d = Integrated::vvec<cv::Point3d>;
 
-	template<typename T>
-	using vvec = std::vector<std::vector<T>>;
+	using vvp2f = Integrated::vvec<cv::Point2f>;
+	using vvp2d = Integrated::vvec<cv::Point2d>;
 
-	using vvp3f = vvec<cv::Point3f>;
-	using vvp3d = vvec<cv::Point3d>;
+	using vp3f = Integrated::vec<cv::Point3f>;
+	using vp3d = Integrated::vec<cv::Point3d>;
 
-	using vvp2f = vvec<cv::Point2f>;
-	using vvp2d = vvec<cv::Point2d>;
+	using vp2f = Integrated::vec<cv::Point2f>;
+	using vp2d = Integrated::vec<cv::Point2d>;
 
-	using vp3f = vec<cv::Point3f>;
-	using vp3d = vec<cv::Point3d>;
-
-	using vp2f = vec<cv::Point2f>;
-	using vp2d = vec<cv::Point2d>;
-
-	using vMat = vec<cv::Mat>;
+	using vMat = Integrated::vec<cv::Mat>;
 
 	class Calibrator
 	{

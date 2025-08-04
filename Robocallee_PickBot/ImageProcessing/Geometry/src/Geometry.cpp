@@ -6,7 +6,7 @@ using namespace cv;
 using namespace std;
 
 
-bool Geometry::transformCameraPose(
+double Geometry::transformCameraPose(
     cv::Point point2d, // mm
     cv::Point3d& point3d, // mm
     const cv::Mat& cameraMatrix,
@@ -14,11 +14,12 @@ bool Geometry::transformCameraPose(
     const bool useUnDist
 )
 {
-    if(cameraMatrix.empty() || distCoeffs.empty()) return false;
+    if(cameraMatrix.empty() || distCoeffs.empty()) return -1;
 	
+    cv::Point3d unitVec;
+
 	if(useUnDist)
 	{
-		// cv::Point2f point2f(point2d.x, point2d.y);
 		cv::Mat undistorted2f;
 
 		// 왜곡 보정 → 내부 파라미터까지 적용됨 → z=1 평면상의 좌표
@@ -31,9 +32,7 @@ bool Geometry::transformCameraPose(
 
         // 단위 벡터로 정규화
         double norm = cv::norm(vec3D);
-        cv::Point3d unitVec = vec3D * (1.0 / norm);
-
-        point3d = unitVec;
+        unitVec = vec3D * (1.0 / norm);
 	}
 	else
 	{
@@ -49,13 +48,12 @@ bool Geometry::transformCameraPose(
 
         // 단위 벡터로 정규화
         double norm = cv::norm(vec3D);
-        cv::Point3d unitVec = vec3D * (1.0 / norm);
-
-        point3d = unitVec;
+        unitVec = vec3D * (1.0 / norm);
     }
 
-    
-	return true;
+    point3d = unitVec;
+
+    return -1;
 };
 
 bool Geometry::estimateRigidTransformSVD(
@@ -141,7 +139,7 @@ bool Geometry::composeTransform(const cv::Mat& rvec, const cv::Mat& tvec, cv::Ma
     return true;
 }
 
-bool Geometry::decomposeTransform(const cv::Mat& T_se3 , cv::Mat& rvec , cv::Mat& tvec)
+bool Geometry::decomposeTransform(const cv::Mat& T_se3 , cv::Mat& rvec , cv::Mat& tvec , bool rodrigues)
 {
     if(T_se3.empty()|| T_se3.rows != 4 || T_se3.cols != 4) return false;
 
@@ -149,7 +147,10 @@ bool Geometry::decomposeTransform(const cv::Mat& T_se3 , cv::Mat& rvec , cv::Mat
 
     tvec = T_se3(cv::Range(0, 3), cv::Range(3, 4)).clone();
 
-    cv::Rodrigues(R, rvec);
+    if(rodrigues)
+        cv::Rodrigues(R, rvec);
+    else
+        rvec = R.clone();
 
     return true;
 }

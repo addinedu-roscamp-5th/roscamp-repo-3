@@ -23,6 +23,10 @@ namespace Commondefine
 
     #define DH_PARAM 4
 
+    #define DEPTH_MIN 0
+    #define DEPTH_MAX 10000
+
+
     const std::vector<std::array<double, 4>> mycobot280_dh_params =
     {
         //{   a,   alpha,            d, theta_offset }
