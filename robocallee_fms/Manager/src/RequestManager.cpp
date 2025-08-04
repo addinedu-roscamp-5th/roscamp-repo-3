@@ -76,7 +76,8 @@ void RequestManager::BestRobotSelector()
         PopRequest(req);
         core->SetTaskInfo(best_amr, req);
 
-
+        // addTask(MoveTo_dest1(dest1, pinky_id));
+        // addTask(로봇팔1_상차(신발정보, pinky_id));
 
         // typedef struct GUIRequest
         // {
