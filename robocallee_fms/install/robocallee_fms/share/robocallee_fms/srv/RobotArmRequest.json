@@ -118,6 +118,26 @@
               "nested_type_name": ""
             },
             "default_value": ""
+          },
+          {
+            "name": "action",
+            "type": {
+              "type_id": 17,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": ""
+            },
+            "default_value": ""
+          },
+          {
+            "name": "shoe_info",
+            "type": {
+              "type_id": 17,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": ""
+            },
+            "default_value": ""
           }
         ]
       },
@@ -125,7 +145,7 @@
         "type_name": "robocallee_fms/srv/RobotArmRequest_Response",
         "fields": [
           {
-            "name": "accepted",
+            "name": "success",
             "type": {
               "type_id": 15,
               "capacity": 0,
@@ -186,7 +206,7 @@
   "type_hashes": [
     {
       "type_name": "robocallee_fms/srv/RobotArmRequest",
-      "hash_string": "RIHS01_e9db6d599cd19fcb54bb3a02f47b710dd68d0b180b674308d6538b257a90a24a"
+      "hash_string": "RIHS01_d2acb14b0dd7f8c166f0e0417064c1e47d85c718862f4b67918d063d8bb59687"
     },
     {
       "type_name": "builtin_interfaces/msg/Time",
@@ -194,15 +214,15 @@
     },
     {
       "type_name": "robocallee_fms/srv/RobotArmRequest_Event",
-      "hash_string": "RIHS01_2105228c371d52997def87fcef2170473d66883e88f2297a2c91a781903238ff"
+      "hash_string": "RIHS01_49efcaa1db0f609ba468141aedd79cd713bda3c717432b71eab69c312f301642"
     },
     {
       "type_name": "robocallee_fms/srv/RobotArmRequest_Request",
-      "hash_string": "RIHS01_fe0069d4ee4d7e591a02630ea0fcbb04794b28ba78dab45e60e64129791cfc9b"
+      "hash_string": "RIHS01_9d8d76889eeb92a45e6f201dfef05da8e8f9d7583205c9148f8c48a10d084de2"
     },
     {
       "type_name": "robocallee_fms/srv/RobotArmRequest_Response",
-      "hash_string": "RIHS01_3285c8db1023c818776b8369833d612634545b5ba5a0eb0529f4b9ddd26d0db5"
+      "hash_string": "RIHS01_0c4246931df8ef6467ff5f40fb05396af3351a466fc6ab05d0538b383814ca17"
     },
     {
       "type_name": "service_msgs/msg/ServiceEventInfo",

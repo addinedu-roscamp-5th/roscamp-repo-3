@@ -51,16 +51,16 @@ void RosInterface::arm1_send_request(int shelf_num, int pinky_num )
 
 
 
-
-
 // 로봇팔한테 request 보내고 response 받는 부분
 void RosInterface::cbArmService(rclcpp::Client<ArmServiceType>::SharedFuture future)
 {
-        log_->Log(Log::INFO, "acbArmService 진입");
+        log_->Log(Log::INFO, "cbArmService 진입");
 
     auto res = future.get();
 
-    if(res->accepted)
+    // if(res->accepted)
+    if(res->success)
+
         RCLCPP_INFO(this->get_logger(), "팔 요청 성공 !\n");
     else
         RCLCPP_ERROR(this->get_logger(), "팔 요청 실패 ㅠㅠ \n");
@@ -100,11 +100,17 @@ void RosInterface::cbDoneService(const std::shared_ptr<DoneServiceType::Request>
     std::string requester = request->requester;
     int customer_id = request->customer_id;
     
+    log_->Log(Log::LogLevel::INFO, "cbDoneService() 진입");
 
     if (auto icore = Icore_.lock())
     {
+        log_->Log(Log::LogLevel::INFO, "DoneCallback() 호출 전");
+
         bool accepted = icore->DoneCallback(requester, customer_id);
         response->accepted = accepted;
+
+        log_->Log(Log::LogLevel::INFO, "DoneCallback() 호출 후");
+
     }
     else
     {

@@ -124,13 +124,15 @@ int Core::RequestCallback(const Commondefine::GUIRequest& request)
         int wait_list = pRequestManager_->EnqueueRequest(request);
         if (wait_list>0)
         {
+                    pRequestManager_->BestRobotSelector();
+
             return wait_list;
         }
         // {
             // auto core = core_.lock();
             // core->SetAmrNextStep(best_pinky_selector);
         // }
-        pRequestManager_->BestRobotSelector();
+                    pRequestManager_->BestRobotSelector();
 
 
         //대기자 0명
@@ -158,10 +160,11 @@ bool Core::DoneCallback(const std::string& requester, const int& customer_id)
                 pRequestManager_->BestRobotSelector();
                 return true;
             }
-            log_->Log(Log::LogLevel::INFO, "고객ID: " + to_string(customer_id) + "의 배달을 지정받은 핑키 없음");
+
+        }       
+                    log_->Log(Log::LogLevel::INFO, "고객ID: " + to_string(customer_id) + "의 배달을 지정받은 핑키 없음");
             //완료 버튼을 누른 고객의 작업을 지정받은 핑키가 없다
-            return false;
-        }        
+            return false ;
     }
 
     else if (requester == "employee")
@@ -170,7 +173,7 @@ bool Core::DoneCallback(const std::string& requester, const int& customer_id)
         return true;
     }
     
-    else return false;
+    else return false ;
 }
 
 

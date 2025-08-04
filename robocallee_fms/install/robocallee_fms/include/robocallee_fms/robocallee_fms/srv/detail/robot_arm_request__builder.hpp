@@ -24,16 +24,48 @@ namespace srv
 namespace builder
 {
 
+class Init_RobotArmRequest_Request_shoe_info
+{
+public:
+  explicit Init_RobotArmRequest_Request_shoe_info(::robocallee_fms::srv::RobotArmRequest_Request & msg)
+  : msg_(msg)
+  {}
+  ::robocallee_fms::srv::RobotArmRequest_Request shoe_info(::robocallee_fms::srv::RobotArmRequest_Request::_shoe_info_type arg)
+  {
+    msg_.shoe_info = std::move(arg);
+    return std::move(msg_);
+  }
+
+private:
+  ::robocallee_fms::srv::RobotArmRequest_Request msg_;
+};
+
+class Init_RobotArmRequest_Request_action
+{
+public:
+  explicit Init_RobotArmRequest_Request_action(::robocallee_fms::srv::RobotArmRequest_Request & msg)
+  : msg_(msg)
+  {}
+  Init_RobotArmRequest_Request_shoe_info action(::robocallee_fms::srv::RobotArmRequest_Request::_action_type arg)
+  {
+    msg_.action = std::move(arg);
+    return Init_RobotArmRequest_Request_shoe_info(msg_);
+  }
+
+private:
+  ::robocallee_fms::srv::RobotArmRequest_Request msg_;
+};
+
 class Init_RobotArmRequest_Request_pinky_num
 {
 public:
   explicit Init_RobotArmRequest_Request_pinky_num(::robocallee_fms::srv::RobotArmRequest_Request & msg)
   : msg_(msg)
   {}
-  ::robocallee_fms::srv::RobotArmRequest_Request pinky_num(::robocallee_fms::srv::RobotArmRequest_Request::_pinky_num_type arg)
+  Init_RobotArmRequest_Request_action pinky_num(::robocallee_fms::srv::RobotArmRequest_Request::_pinky_num_type arg)
   {
     msg_.pinky_num = std::move(arg);
-    return std::move(msg_);
+    return Init_RobotArmRequest_Request_action(msg_);
   }
 
 private:
@@ -82,15 +114,15 @@ namespace srv
 namespace builder
 {
 
-class Init_RobotArmRequest_Response_accepted
+class Init_RobotArmRequest_Response_success
 {
 public:
-  Init_RobotArmRequest_Response_accepted()
+  Init_RobotArmRequest_Response_success()
   : msg_(::rosidl_runtime_cpp::MessageInitialization::SKIP)
   {}
-  ::robocallee_fms::srv::RobotArmRequest_Response accepted(::robocallee_fms::srv::RobotArmRequest_Response::_accepted_type arg)
+  ::robocallee_fms::srv::RobotArmRequest_Response success(::robocallee_fms::srv::RobotArmRequest_Response::_success_type arg)
   {
-    msg_.accepted = std::move(arg);
+    msg_.success = std::move(arg);
     return std::move(msg_);
   }
 
@@ -109,7 +141,7 @@ template<>
 inline
 auto build<::robocallee_fms::srv::RobotArmRequest_Response>()
 {
-  return robocallee_fms::srv::builder::Init_RobotArmRequest_Response_accepted();
+  return robocallee_fms::srv::builder::Init_RobotArmRequest_Response_success();
 }
 
 }  // namespace robocallee_fms

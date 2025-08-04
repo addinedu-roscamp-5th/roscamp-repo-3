@@ -43,17 +43,22 @@ struct RobotArmRequest_Request_
     {
       this->shelf_num = 0l;
       this->pinky_num = 0l;
+      this->action = "";
+      this->shoe_info = "";
     }
   }
 
   explicit RobotArmRequest_Request_(const ContainerAllocator & _alloc, rosidl_runtime_cpp::MessageInitialization _init = rosidl_runtime_cpp::MessageInitialization::ALL)
+  : action(_alloc),
+    shoe_info(_alloc)
   {
-    (void)_alloc;
     if (rosidl_runtime_cpp::MessageInitialization::ALL == _init ||
       rosidl_runtime_cpp::MessageInitialization::ZERO == _init)
     {
       this->shelf_num = 0l;
       this->pinky_num = 0l;
+      this->action = "";
+      this->shoe_info = "";
     }
   }
 
@@ -64,6 +69,12 @@ struct RobotArmRequest_Request_
   using _pinky_num_type =
     int32_t;
   _pinky_num_type pinky_num;
+  using _action_type =
+    std::basic_string<char, std::char_traits<char>, typename std::allocator_traits<ContainerAllocator>::template rebind_alloc<char>>;
+  _action_type action;
+  using _shoe_info_type =
+    std::basic_string<char, std::char_traits<char>, typename std::allocator_traits<ContainerAllocator>::template rebind_alloc<char>>;
+  _shoe_info_type shoe_info;
 
   // setters for named parameter idiom
   Type & set__shelf_num(
@@ -76,6 +87,18 @@ struct RobotArmRequest_Request_
     const int32_t & _arg)
   {
     this->pinky_num = _arg;
+    return *this;
+  }
+  Type & set__action(
+    const std::basic_string<char, std::char_traits<char>, typename std::allocator_traits<ContainerAllocator>::template rebind_alloc<char>> & _arg)
+  {
+    this->action = _arg;
+    return *this;
+  }
+  Type & set__shoe_info(
+    const std::basic_string<char, std::char_traits<char>, typename std::allocator_traits<ContainerAllocator>::template rebind_alloc<char>> & _arg)
+  {
+    this->shoe_info = _arg;
     return *this;
   }
 
@@ -127,6 +150,12 @@ struct RobotArmRequest_Request_
     if (this->pinky_num != other.pinky_num) {
       return false;
     }
+    if (this->action != other.action) {
+      return false;
+    }
+    if (this->shoe_info != other.shoe_info) {
+      return false;
+    }
     return true;
   }
   bool operator!=(const RobotArmRequest_Request_ & other) const
@@ -169,7 +198,7 @@ struct RobotArmRequest_Response_
     if (rosidl_runtime_cpp::MessageInitialization::ALL == _init ||
       rosidl_runtime_cpp::MessageInitialization::ZERO == _init)
     {
-      this->accepted = false;
+      this->success = false;
     }
   }
 
@@ -179,20 +208,20 @@ struct RobotArmRequest_Response_
     if (rosidl_runtime_cpp::MessageInitialization::ALL == _init ||
       rosidl_runtime_cpp::MessageInitialization::ZERO == _init)
     {
-      this->accepted = false;
+      this->success = false;
     }
   }
 
   // field types and members
-  using _accepted_type =
+  using _success_type =
     bool;
-  _accepted_type accepted;
+  _success_type success;
 
   // setters for named parameter idiom
-  Type & set__accepted(
+  Type & set__success(
     const bool & _arg)
   {
-    this->accepted = _arg;
+    this->success = _arg;
     return *this;
   }
 
@@ -238,7 +267,7 @@ struct RobotArmRequest_Response_
   // comparison operators
   bool operator==(const RobotArmRequest_Response_ & other) const
   {
-    if (this->accepted != other.accepted) {
+    if (this->success != other.success) {
       return false;
     }
     return true;

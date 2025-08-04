@@ -20,11 +20,18 @@ extern "C"
 
 // Constants defined in the message
 
+// Include directives for member types
+// Member 'action'
+// Member 'shoe_info'
+#include "rosidl_runtime_c/string.h"
+
 /// Struct defined in srv/RobotArmRequest in the package robocallee_fms.
 typedef struct robocallee_fms__srv__RobotArmRequest_Request
 {
   int32_t shelf_num;
   int32_t pinky_num;
+  rosidl_runtime_c__String action;
+  rosidl_runtime_c__String shoe_info;
 } robocallee_fms__srv__RobotArmRequest_Request;
 
 // Struct for a sequence of robocallee_fms__srv__RobotArmRequest_Request.
@@ -42,7 +49,7 @@ typedef struct robocallee_fms__srv__RobotArmRequest_Request__Sequence
 /// Struct defined in srv/RobotArmRequest in the package robocallee_fms.
 typedef struct robocallee_fms__srv__RobotArmRequest_Response
 {
-  bool accepted;
+  bool success;
 } robocallee_fms__srv__RobotArmRequest_Response;
 
 // Struct for a sequence of robocallee_fms__srv__RobotArmRequest_Response.

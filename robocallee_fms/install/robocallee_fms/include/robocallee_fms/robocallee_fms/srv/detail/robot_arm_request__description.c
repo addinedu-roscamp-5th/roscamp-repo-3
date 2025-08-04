@@ -11,10 +11,10 @@ robocallee_fms__srv__RobotArmRequest__get_type_hash(
 {
   (void)type_support;
   static rosidl_type_hash_t hash = {1, {
-      0xe9, 0xdb, 0x6d, 0x59, 0x9c, 0xd1, 0x9f, 0xcb,
-      0x54, 0xbb, 0x3a, 0x02, 0xf4, 0x7b, 0x71, 0x0d,
-      0xd6, 0x8d, 0x0b, 0x18, 0x0b, 0x67, 0x43, 0x08,
-      0xd6, 0x53, 0x8b, 0x25, 0x7a, 0x90, 0xa2, 0x4a,
+      0xd2, 0xac, 0xb1, 0x4b, 0x0d, 0xd7, 0xf8, 0xc1,
+      0x66, 0xf0, 0xe0, 0x41, 0x70, 0x64, 0xc1, 0xe4,
+      0x7d, 0x85, 0xc7, 0x18, 0x86, 0x2f, 0x4b, 0x67,
+      0x91, 0x8d, 0x06, 0x3d, 0x8b, 0xb5, 0x96, 0x87,
     }};
   return &hash;
 }
@@ -26,10 +26,10 @@ robocallee_fms__srv__RobotArmRequest_Request__get_type_hash(
 {
   (void)type_support;
   static rosidl_type_hash_t hash = {1, {
-      0xfe, 0x00, 0x69, 0xd4, 0xee, 0x4d, 0x7e, 0x59,
-      0x1a, 0x02, 0x63, 0x0e, 0xa0, 0xfc, 0xbb, 0x04,
-      0x79, 0x4b, 0x28, 0xba, 0x78, 0xda, 0xb4, 0x5e,
-      0x60, 0xe6, 0x41, 0x29, 0x79, 0x1c, 0xfc, 0x9b,
+      0x9d, 0x8d, 0x76, 0x88, 0x9e, 0xeb, 0x92, 0xa4,
+      0x5e, 0x6f, 0x20, 0x1d, 0xfe, 0xf0, 0x5d, 0xa8,
+      0xe8, 0xf9, 0xd7, 0x58, 0x32, 0x05, 0xc9, 0x14,
+      0x8f, 0x8c, 0x48, 0xa1, 0x0d, 0x08, 0x4d, 0xe2,
     }};
   return &hash;
 }
@@ -41,10 +41,10 @@ robocallee_fms__srv__RobotArmRequest_Response__get_type_hash(
 {
   (void)type_support;
   static rosidl_type_hash_t hash = {1, {
-      0x32, 0x85, 0xc8, 0xdb, 0x10, 0x23, 0xc8, 0x18,
-      0x77, 0x6b, 0x83, 0x69, 0x83, 0x3d, 0x61, 0x26,
-      0x34, 0x54, 0x5b, 0x5b, 0xa5, 0xa0, 0xeb, 0x05,
-      0x29, 0xf4, 0xb9, 0xdd, 0xd2, 0x6d, 0x0d, 0xb5,
+      0x0c, 0x42, 0x46, 0x93, 0x1d, 0xf8, 0xef, 0x64,
+      0x67, 0xff, 0x5f, 0x40, 0xfb, 0x05, 0x39, 0x6a,
+      0xf3, 0x35, 0x1a, 0x46, 0x6f, 0xc6, 0xab, 0x05,
+      0xd0, 0x53, 0x8b, 0x38, 0x38, 0x14, 0xca, 0x17,
     }};
   return &hash;
 }
@@ -56,10 +56,10 @@ robocallee_fms__srv__RobotArmRequest_Event__get_type_hash(
 {
   (void)type_support;
   static rosidl_type_hash_t hash = {1, {
-      0x21, 0x05, 0x22, 0x8c, 0x37, 0x1d, 0x52, 0x99,
-      0x7d, 0xef, 0x87, 0xfc, 0xef, 0x21, 0x70, 0x47,
-      0x3d, 0x66, 0x88, 0x3e, 0x88, 0xf2, 0x29, 0x7a,
-      0x2c, 0x91, 0xa7, 0x81, 0x90, 0x32, 0x38, 0xff,
+      0x49, 0xef, 0xca, 0xa1, 0xdb, 0x0f, 0x60, 0x9b,
+      0xa4, 0x68, 0x14, 0x1a, 0xed, 0xd7, 0x9c, 0xd7,
+      0x13, 0xbd, 0xa3, 0xc7, 0x17, 0x43, 0x2b, 0x71,
+      0xea, 0xb6, 0x9c, 0x31, 0x2f, 0x30, 0x16, 0x42,
     }};
   return &hash;
 }
@@ -183,6 +183,8 @@ robocallee_fms__srv__RobotArmRequest__get_type_description(
 // Define type names, field names, and default values
 static char robocallee_fms__srv__RobotArmRequest_Request__FIELD_NAME__shelf_num[] = "shelf_num";
 static char robocallee_fms__srv__RobotArmRequest_Request__FIELD_NAME__pinky_num[] = "pinky_num";
+static char robocallee_fms__srv__RobotArmRequest_Request__FIELD_NAME__action[] = "action";
+static char robocallee_fms__srv__RobotArmRequest_Request__FIELD_NAME__shoe_info[] = "shoe_info";
 
 static rosidl_runtime_c__type_description__Field robocallee_fms__srv__RobotArmRequest_Request__FIELDS[] = {
   {
@@ -205,6 +207,26 @@ static rosidl_runtime_c__type_description__Field robocallee_fms__srv__RobotArmRe
     },
     {NULL, 0, 0},
   },
+  {
+    {robocallee_fms__srv__RobotArmRequest_Request__FIELD_NAME__action, 6, 6},
+    {
+      rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_STRING,
+      0,
+      0,
+      {NULL, 0, 0},
+    },
+    {NULL, 0, 0},
+  },
+  {
+    {robocallee_fms__srv__RobotArmRequest_Request__FIELD_NAME__shoe_info, 9, 9},
+    {
+      rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_STRING,
+      0,
+      0,
+      {NULL, 0, 0},
+    },
+    {NULL, 0, 0},
+  },
 };
 
 const rosidl_runtime_c__type_description__TypeDescription *
@@ -216,7 +238,7 @@ robocallee_fms__srv__RobotArmRequest_Request__get_type_description(
   static const rosidl_runtime_c__type_description__TypeDescription description = {
     {
       {robocallee_fms__srv__RobotArmRequest_Request__TYPE_NAME, 42, 42},
-      {robocallee_fms__srv__RobotArmRequest_Request__FIELDS, 2, 2},
+      {robocallee_fms__srv__RobotArmRequest_Request__FIELDS, 4, 4},
     },
     {NULL, 0, 0},
   };
@@ -226,11 +248,11 @@ robocallee_fms__srv__RobotArmRequest_Request__get_type_description(
   return &description;
 }
 // Define type names, field names, and default values
-static char robocallee_fms__srv__RobotArmRequest_Response__FIELD_NAME__accepted[] = "accepted";
+static char robocallee_fms__srv__RobotArmRequest_Response__FIELD_NAME__success[] = "success";
 
 static rosidl_runtime_c__type_description__Field robocallee_fms__srv__RobotArmRequest_Response__FIELDS[] = {
   {
-    {robocallee_fms__srv__RobotArmRequest_Response__FIELD_NAME__accepted, 8, 8},
+    {robocallee_fms__srv__RobotArmRequest_Response__FIELD_NAME__success, 7, 7},
     {
       rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_BOOLEAN,
       0,
@@ -344,8 +366,10 @@ robocallee_fms__srv__RobotArmRequest_Event__get_type_description(
 static char toplevel_type_raw_source[] =
   "int32 shelf_num\n"
   "int32 pinky_num\n"
+  "string action\n"
+  "string shoe_info\n"
   "---\n"
-  "bool accepted";
+  "bool success";
 
 static char srv_encoding[] = "srv";
 static char implicit_encoding[] = "implicit";
@@ -360,7 +384,7 @@ robocallee_fms__srv__RobotArmRequest__get_individual_type_description_source(
   static const rosidl_runtime_c__type_description__TypeSource source = {
     {robocallee_fms__srv__RobotArmRequest__TYPE_NAME, 34, 34},
     {srv_encoding, 3, 3},
-    {toplevel_type_raw_source, 49, 49},
+    {toplevel_type_raw_source, 79, 79},
   };
   return &source;
 }

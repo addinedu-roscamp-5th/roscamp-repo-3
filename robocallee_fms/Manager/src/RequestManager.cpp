@@ -90,6 +90,7 @@ void RequestManager::BestRobotSelector()
         //로봇팔1에게 버퍼로 상자 이동 명령
         Commondefine::shoesproperty shoe_info = req.shoes_property;
         core->SetRobotArmNextStep(Commondefine::RobotArmStep::shelf_to_buffer , shoe_info , best_amr );
+        log_->Log(Log::LogLevel::INFO, "로봇팔 작업 지정: " + shoe_info.model + ", " + shoe_info.color + ", " + std::to_string(shoe_info.size) + ", 핑키 번호: " + std::to_string(best_amr));
 
 
 

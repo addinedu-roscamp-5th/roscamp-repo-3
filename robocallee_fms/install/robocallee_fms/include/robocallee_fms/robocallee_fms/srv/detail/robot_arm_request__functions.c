@@ -10,6 +10,11 @@
 
 #include "rcutils/allocator.h"
 
+// Include directives for member types
+// Member `action`
+// Member `shoe_info`
+#include "rosidl_runtime_c/string_functions.h"
+
 bool
 robocallee_fms__srv__RobotArmRequest_Request__init(robocallee_fms__srv__RobotArmRequest_Request * msg)
 {
@@ -18,6 +23,16 @@ robocallee_fms__srv__RobotArmRequest_Request__init(robocallee_fms__srv__RobotArm
   }
   // shelf_num
   // pinky_num
+  // action
+  if (!rosidl_runtime_c__String__init(&msg->action)) {
+    robocallee_fms__srv__RobotArmRequest_Request__fini(msg);
+    return false;
+  }
+  // shoe_info
+  if (!rosidl_runtime_c__String__init(&msg->shoe_info)) {
+    robocallee_fms__srv__RobotArmRequest_Request__fini(msg);
+    return false;
+  }
   return true;
 }
 
@@ -29,6 +44,10 @@ robocallee_fms__srv__RobotArmRequest_Request__fini(robocallee_fms__srv__RobotArm
   }
   // shelf_num
   // pinky_num
+  // action
+  rosidl_runtime_c__String__fini(&msg->action);
+  // shoe_info
+  rosidl_runtime_c__String__fini(&msg->shoe_info);
 }
 
 bool
@@ -43,6 +62,18 @@ robocallee_fms__srv__RobotArmRequest_Request__are_equal(const robocallee_fms__sr
   }
   // pinky_num
   if (lhs->pinky_num != rhs->pinky_num) {
+    return false;
+  }
+  // action
+  if (!rosidl_runtime_c__String__are_equal(
+      &(lhs->action), &(rhs->action)))
+  {
+    return false;
+  }
+  // shoe_info
+  if (!rosidl_runtime_c__String__are_equal(
+      &(lhs->shoe_info), &(rhs->shoe_info)))
+  {
     return false;
   }
   return true;
@@ -60,6 +91,18 @@ robocallee_fms__srv__RobotArmRequest_Request__copy(
   output->shelf_num = input->shelf_num;
   // pinky_num
   output->pinky_num = input->pinky_num;
+  // action
+  if (!rosidl_runtime_c__String__copy(
+      &(input->action), &(output->action)))
+  {
+    return false;
+  }
+  // shoe_info
+  if (!rosidl_runtime_c__String__copy(
+      &(input->shoe_info), &(output->shoe_info)))
+  {
+    return false;
+  }
   return true;
 }
 
@@ -249,7 +292,7 @@ robocallee_fms__srv__RobotArmRequest_Response__init(robocallee_fms__srv__RobotAr
   if (!msg) {
     return false;
   }
-  // accepted
+  // success
   return true;
 }
 
@@ -259,7 +302,7 @@ robocallee_fms__srv__RobotArmRequest_Response__fini(robocallee_fms__srv__RobotAr
   if (!msg) {
     return;
   }
-  // accepted
+  // success
 }
 
 bool
@@ -268,8 +311,8 @@ robocallee_fms__srv__RobotArmRequest_Response__are_equal(const robocallee_fms__s
   if (!lhs || !rhs) {
     return false;
   }
-  // accepted
-  if (lhs->accepted != rhs->accepted) {
+  // success
+  if (lhs->success != rhs->success) {
     return false;
   }
   return true;
@@ -283,8 +326,8 @@ robocallee_fms__srv__RobotArmRequest_Response__copy(
   if (!input || !output) {
     return false;
   }
-  // accepted
-  output->accepted = input->accepted;
+  // success
+  output->success = input->success;
   return true;
 }
 

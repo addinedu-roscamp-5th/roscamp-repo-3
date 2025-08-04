@@ -9,9 +9,13 @@ module robocallee_fms {
       int32 shelf_num;
 
       int32 pinky_num;
+
+      string action;
+
+      string shoe_info;
     };
     struct RobotArmRequest_Response {
-      boolean accepted;
+      boolean success;
     };
   };
 };

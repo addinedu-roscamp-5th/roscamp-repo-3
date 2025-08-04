@@ -39,6 +39,20 @@ inline void to_flow_style_yaml(
   {
     out << "pinky_num: ";
     rosidl_generator_traits::value_to_yaml(msg.pinky_num, out);
+    out << ", ";
+  }
+
+  // member: action
+  {
+    out << "action: ";
+    rosidl_generator_traits::value_to_yaml(msg.action, out);
+    out << ", ";
+  }
+
+  // member: shoe_info
+  {
+    out << "shoe_info: ";
+    rosidl_generator_traits::value_to_yaml(msg.shoe_info, out);
   }
   out << "}";
 }  // NOLINT(readability/fn_size)
@@ -64,6 +78,26 @@ inline void to_block_style_yaml(
     }
     out << "pinky_num: ";
     rosidl_generator_traits::value_to_yaml(msg.pinky_num, out);
+    out << "\n";
+  }
+
+  // member: action
+  {
+    if (indentation > 0) {
+      out << std::string(indentation, ' ');
+    }
+    out << "action: ";
+    rosidl_generator_traits::value_to_yaml(msg.action, out);
+    out << "\n";
+  }
+
+  // member: shoe_info
+  {
+    if (indentation > 0) {
+      out << std::string(indentation, ' ');
+    }
+    out << "shoe_info: ";
+    rosidl_generator_traits::value_to_yaml(msg.shoe_info, out);
     out << "\n";
   }
 }  // NOLINT(readability/fn_size)
@@ -114,11 +148,11 @@ inline const char * name<robocallee_fms::srv::RobotArmRequest_Request>()
 
 template<>
 struct has_fixed_size<robocallee_fms::srv::RobotArmRequest_Request>
-  : std::integral_constant<bool, true> {};
+  : std::integral_constant<bool, false> {};
 
 template<>
 struct has_bounded_size<robocallee_fms::srv::RobotArmRequest_Request>
-  : std::integral_constant<bool, true> {};
+  : std::integral_constant<bool, false> {};
 
 template<>
 struct is_message<robocallee_fms::srv::RobotArmRequest_Request>
@@ -137,10 +171,10 @@ inline void to_flow_style_yaml(
   std::ostream & out)
 {
   out << "{";
-  // member: accepted
+  // member: success
   {
-    out << "accepted: ";
-    rosidl_generator_traits::value_to_yaml(msg.accepted, out);
+    out << "success: ";
+    rosidl_generator_traits::value_to_yaml(msg.success, out);
   }
   out << "}";
 }  // NOLINT(readability/fn_size)
@@ -149,13 +183,13 @@ inline void to_block_style_yaml(
   const RobotArmRequest_Response & msg,
   std::ostream & out, size_t indentation = 0)
 {
-  // member: accepted
+  // member: success
   {
     if (indentation > 0) {
       out << std::string(indentation, ' ');
     }
-    out << "accepted: ";
-    rosidl_generator_traits::value_to_yaml(msg.accepted, out);
+    out << "success: ";
+    rosidl_generator_traits::value_to_yaml(msg.success, out);
     out << "\n";
   }
 }  // NOLINT(readability/fn_size)
