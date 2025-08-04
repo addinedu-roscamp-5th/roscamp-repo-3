@@ -33,8 +33,8 @@ typedef struct robocallee_fms__srv__ShoeRequest_Request
   rosidl_runtime_c__String model;
   int32_t size;
   rosidl_runtime_c__String color;
-  int32_t x;
-  int32_t y;
+  float x;
+  float y;
   int32_t customer_id;
 } robocallee_fms__srv__ShoeRequest_Request;
 
@@ -53,7 +53,7 @@ typedef struct robocallee_fms__srv__ShoeRequest_Request__Sequence
 /// Struct defined in srv/ShoeRequest in the package robocallee_fms.
 typedef struct robocallee_fms__srv__ShoeRequest_Response
 {
-  bool accepted;
+  int32_t wait_list;
 } robocallee_fms__srv__ShoeRequest_Response;
 
 // Struct for a sequence of robocallee_fms__srv__ShoeRequest_Response.

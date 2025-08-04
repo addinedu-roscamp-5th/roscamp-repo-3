@@ -162,15 +162,15 @@ namespace srv
 namespace builder
 {
 
-class Init_ShoeRequest_Response_accepted
+class Init_ShoeRequest_Response_wait_list
 {
 public:
-  Init_ShoeRequest_Response_accepted()
+  Init_ShoeRequest_Response_wait_list()
   : msg_(::rosidl_runtime_cpp::MessageInitialization::SKIP)
   {}
-  ::robocallee_fms::srv::ShoeRequest_Response accepted(::robocallee_fms::srv::ShoeRequest_Response::_accepted_type arg)
+  ::robocallee_fms::srv::ShoeRequest_Response wait_list(::robocallee_fms::srv::ShoeRequest_Response::_wait_list_type arg)
   {
-    msg_.accepted = std::move(arg);
+    msg_.wait_list = std::move(arg);
     return std::move(msg_);
   }
 
@@ -189,7 +189,7 @@ template<>
 inline
 auto build<::robocallee_fms::srv::ShoeRequest_Response>()
 {
-  return robocallee_fms::srv::builder::Init_ShoeRequest_Response_accepted();
+  return robocallee_fms::srv::builder::Init_ShoeRequest_Response_wait_list();
 }
 
 }  // namespace robocallee_fms

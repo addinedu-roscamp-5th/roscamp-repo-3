@@ -142,7 +142,7 @@
           {
             "name": "x",
             "type": {
-              "type_id": 6,
+              "type_id": 10,
               "capacity": 0,
               "string_capacity": 0,
               "nested_type_name": ""
@@ -152,7 +152,7 @@
           {
             "name": "y",
             "type": {
-              "type_id": 6,
+              "type_id": 10,
               "capacity": 0,
               "string_capacity": 0,
               "nested_type_name": ""
@@ -175,9 +175,9 @@
         "type_name": "robocallee_fms/srv/ShoeRequest_Response",
         "fields": [
           {
-            "name": "accepted",
+            "name": "wait_list",
             "type": {
-              "type_id": 15,
+              "type_id": 6,
               "capacity": 0,
               "string_capacity": 0,
               "nested_type_name": ""
@@ -236,7 +236,7 @@
   "type_hashes": [
     {
       "type_name": "robocallee_fms/srv/ShoeRequest",
-      "hash_string": "RIHS01_0dd501cac90d5b0fca918ae389f46050f206bf81b5653f957d5d44c0b5a97073"
+      "hash_string": "RIHS01_e1a4b2ed0b58d6fd812334480fc12eecee6174e5cd1e7047bf1302befddbf463"
     },
     {
       "type_name": "builtin_interfaces/msg/Time",
@@ -244,15 +244,15 @@
     },
     {
       "type_name": "robocallee_fms/srv/ShoeRequest_Event",
-      "hash_string": "RIHS01_d676e161db60cdf7b6e3318c59edf6d083b47ae825081e2ac2d303e5ffbefa18"
+      "hash_string": "RIHS01_498665c1207a5db3a48e45677e4ff59ab943f432168e013a9cc4c516758ffe3b"
     },
     {
       "type_name": "robocallee_fms/srv/ShoeRequest_Request",
-      "hash_string": "RIHS01_160e30a8195e425ae83f511a54bbc10fed44276c9f6f7020e0b26aee221f118f"
+      "hash_string": "RIHS01_5fd51b92f63e781ad768eb40448e569af47fe43598dc7d883c2feba02ce54d0d"
     },
     {
       "type_name": "robocallee_fms/srv/ShoeRequest_Response",
-      "hash_string": "RIHS01_05d6dd95e1149c5a2b2b6418b70f2019c3dcf68613e89fb5d04d039d519c5dab"
+      "hash_string": "RIHS01_452067c052bfb34049cdfa2bd3e438ea11ee071785fbb4e942426658154c0a20"
     },
     {
       "type_name": "service_msgs/msg/ServiceEventInfo",

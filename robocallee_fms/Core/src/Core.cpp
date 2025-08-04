@@ -37,7 +37,7 @@ bool Core::Initialize()
     // arm adapter 객체 생성 및 vector에 추가
     for(int i = 0; i < _AMR_NUM_ ; ++i)
     {
-        std::string name = "AMR" + std::to_string(i+1);
+        std::string name = "AMR" + std::to_string(i);
         amr_adapters_.emplace_back(make_uptr<Adapter::AmrAdapter>(self, log_ , name));   
     }
 
@@ -115,13 +115,17 @@ bool Core::ArmRequestMakeCall(int arm_num, int shelf_num, int pinky_num){
 
 
 
-bool Core::RequestCallback(const Commondefine::GUIRequest& request)
+int Core::RequestCallback(const Commondefine::GUIRequest& request)
 {
     log_->Log(Log::LogLevel::INFO, "Request received: " + request.shoes_property.model);
 
     if (pRequestManager_)
     {
-        pRequestManager_->EnqueueRequest(request);
+        int wait_list = pRequestManager_->EnqueueRequest(request);
+        if (wait_list>0)
+        {
+            return wait_list;
+        }
         // {
             // auto core = core_.lock();
             // core->SetAmrNextStep(best_pinky_selector);
@@ -129,12 +133,12 @@ bool Core::RequestCallback(const Commondefine::GUIRequest& request)
         pRequestManager_->BestRobotSelector();
 
 
-
-        return true;
+        //대기자 0명
+        return 0;
     }
     else
-    {
-        return false;
+    {   //error
+        return -1;
     }
 }
    

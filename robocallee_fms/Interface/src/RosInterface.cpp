@@ -68,12 +68,6 @@ void RosInterface::cbArmService(rclcpp::Client<ArmServiceType>::SharedFuture fut
 }
 
 
-
-
-
-
-
-
 void RosInterface::cbRequestService(const std::shared_ptr<ReqServiceType::Request> request, std::shared_ptr<ReqServiceType::Response> response)
 {
     Commondefine::GUIRequest r;
@@ -89,13 +83,16 @@ void RosInterface::cbRequestService(const std::shared_ptr<ReqServiceType::Reques
     if(icore == nullptr)
     {
         log_->Log(Log::LogLevel::INFO, "ICore expired");
-        response->accepted = false;
+
+        //error
+        response->wait_list = -1;
 
         return;
     }
 
-    bool accepted = icore->RequestCallback(r);
-    response->accepted = accepted;
+    // bool wait_list = icore->RequestCallback(r);
+    int wait_list = icore->RequestCallback(r);
+    response->wait_list = wait_list;
 }
 
 void RosInterface::cbDoneService(const std::shared_ptr<DoneServiceType::Request> request,std::shared_ptr<DoneServiceType::Response> response)

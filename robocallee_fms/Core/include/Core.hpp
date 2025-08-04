@@ -51,10 +51,7 @@ namespace core
         
         bool ArmRequestMakeCall(int arm_num, int shelf_num, int pinky_num) override ;
 
-
-
-        
-        bool RequestCallback(const Commondefine::GUIRequest& request) override;
+        int RequestCallback(const Commondefine::GUIRequest& request) override;
         
         bool DoneCallback(const std::string& requester, const int& customer_id) override;
 

@@ -222,10 +222,10 @@ inline void to_flow_style_yaml(
   std::ostream & out)
 {
   out << "{";
-  // member: accepted
+  // member: wait_list
   {
-    out << "accepted: ";
-    rosidl_generator_traits::value_to_yaml(msg.accepted, out);
+    out << "wait_list: ";
+    rosidl_generator_traits::value_to_yaml(msg.wait_list, out);
   }
   out << "}";
 }  // NOLINT(readability/fn_size)
@@ -234,13 +234,13 @@ inline void to_block_style_yaml(
   const ShoeRequest_Response & msg,
   std::ostream & out, size_t indentation = 0)
 {
-  // member: accepted
+  // member: wait_list
   {
     if (indentation > 0) {
       out << std::string(indentation, ' ');
     }
-    out << "accepted: ";
-    rosidl_generator_traits::value_to_yaml(msg.accepted, out);
+    out << "wait_list: ";
+    rosidl_generator_traits::value_to_yaml(msg.wait_list, out);
     out << "\n";
   }
 }  // NOLINT(readability/fn_size)

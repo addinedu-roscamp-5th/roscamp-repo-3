@@ -43,6 +43,13 @@ void AmrAdapter::SetTaskInfo(const Commondefine::GUIRequest& request)
         robot_task_info_.requester = request.requester;
         robot_task_info_.customer_id = request.customer_id;
 
+        std::ostringstream oss;
+        oss << ",color=" << robot_task_info_.shoes_property.color
+            << ", model=" << robot_task_info_.shoes_property.model
+            << ", size=" << robot_task_info_.shoes_property.size
+            << ",pinky_id=" << robot_task_info_.robot_id;
+
+        log_->Log(Log::LogLevel::INFO, oss.str());
         log_->Log(Log::LogLevel::INFO,"SetTaskInfo 완료");
 
     }

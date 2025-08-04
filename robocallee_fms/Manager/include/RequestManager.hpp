@@ -19,7 +19,7 @@ namespace Manager
         RequestManager(Integrated::w_ptr<core::ICore> Icore, Logger::s_ptr log);
         ~RequestManager();
 
-        void EnqueueRequest(const Commondefine::GUIRequest& r);
+        int EnqueueRequest(const Commondefine::GUIRequest& r);
 
         void PopRequest(Commondefine::GUIRequest& r);
 

@@ -113,7 +113,7 @@ static const ::rosidl_typesupport_introspection_cpp::MessageMember ShoeRequest_R
   },
   {
     "x",  // name
-    ::rosidl_typesupport_introspection_cpp::ROS_TYPE_INT32,  // type
+    ::rosidl_typesupport_introspection_cpp::ROS_TYPE_FLOAT,  // type
     0,  // upper bound of string
     nullptr,  // members of sub message
     false,  // is key
@@ -131,7 +131,7 @@ static const ::rosidl_typesupport_introspection_cpp::MessageMember ShoeRequest_R
   },
   {
     "y",  // name
-    ::rosidl_typesupport_introspection_cpp::ROS_TYPE_INT32,  // type
+    ::rosidl_typesupport_introspection_cpp::ROS_TYPE_FLOAT,  // type
     0,  // upper bound of string
     nullptr,  // members of sub message
     false,  // is key
@@ -274,15 +274,15 @@ void ShoeRequest_Response_fini_function(void * message_memory)
 
 static const ::rosidl_typesupport_introspection_cpp::MessageMember ShoeRequest_Response_message_member_array[1] = {
   {
-    "accepted",  // name
-    ::rosidl_typesupport_introspection_cpp::ROS_TYPE_BOOLEAN,  // type
+    "wait_list",  // name
+    ::rosidl_typesupport_introspection_cpp::ROS_TYPE_INT32,  // type
     0,  // upper bound of string
     nullptr,  // members of sub message
     false,  // is key
     false,  // is array
     0,  // array size
     false,  // is upper bound
-    offsetof(robocallee_fms::srv::ShoeRequest_Response, accepted),  // bytes offset in struct
+    offsetof(robocallee_fms::srv::ShoeRequest_Response, wait_list),  // bytes offset in struct
     nullptr,  // default value
     nullptr,  // size() function pointer
     nullptr,  // get_const(index) function pointer

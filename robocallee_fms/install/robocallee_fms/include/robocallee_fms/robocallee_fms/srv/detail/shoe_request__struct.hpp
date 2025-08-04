@@ -45,8 +45,8 @@ struct ShoeRequest_Request_
       this->model = "";
       this->size = 0l;
       this->color = "";
-      this->x = 0l;
-      this->y = 0l;
+      this->x = 0.0f;
+      this->y = 0.0f;
       this->customer_id = 0l;
     }
   }
@@ -63,8 +63,8 @@ struct ShoeRequest_Request_
       this->model = "";
       this->size = 0l;
       this->color = "";
-      this->x = 0l;
-      this->y = 0l;
+      this->x = 0.0f;
+      this->y = 0.0f;
       this->customer_id = 0l;
     }
   }
@@ -83,10 +83,10 @@ struct ShoeRequest_Request_
     std::basic_string<char, std::char_traits<char>, typename std::allocator_traits<ContainerAllocator>::template rebind_alloc<char>>;
   _color_type color;
   using _x_type =
-    int32_t;
+    float;
   _x_type x;
   using _y_type =
-    int32_t;
+    float;
   _y_type y;
   using _customer_id_type =
     int32_t;
@@ -118,13 +118,13 @@ struct ShoeRequest_Request_
     return *this;
   }
   Type & set__x(
-    const int32_t & _arg)
+    const float & _arg)
   {
     this->x = _arg;
     return *this;
   }
   Type & set__y(
-    const int32_t & _arg)
+    const float & _arg)
   {
     this->y = _arg;
     return *this;
@@ -241,7 +241,7 @@ struct ShoeRequest_Response_
     if (rosidl_runtime_cpp::MessageInitialization::ALL == _init ||
       rosidl_runtime_cpp::MessageInitialization::ZERO == _init)
     {
-      this->accepted = false;
+      this->wait_list = 0l;
     }
   }
 
@@ -251,20 +251,20 @@ struct ShoeRequest_Response_
     if (rosidl_runtime_cpp::MessageInitialization::ALL == _init ||
       rosidl_runtime_cpp::MessageInitialization::ZERO == _init)
     {
-      this->accepted = false;
+      this->wait_list = 0l;
     }
   }
 
   // field types and members
-  using _accepted_type =
-    bool;
-  _accepted_type accepted;
+  using _wait_list_type =
+    int32_t;
+  _wait_list_type wait_list;
 
   // setters for named parameter idiom
-  Type & set__accepted(
-    const bool & _arg)
+  Type & set__wait_list(
+    const int32_t & _arg)
   {
-    this->accepted = _arg;
+    this->wait_list = _arg;
     return *this;
   }
 
@@ -310,7 +310,7 @@ struct ShoeRequest_Response_
   // comparison operators
   bool operator==(const ShoeRequest_Response_ & other) const
   {
-    if (this->accepted != other.accepted) {
+    if (this->wait_list != other.wait_list) {
       return false;
     }
     return true;

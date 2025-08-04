@@ -328,7 +328,7 @@ robocallee_fms__srv__ShoeRequest_Response__init(robocallee_fms__srv__ShoeRequest
   if (!msg) {
     return false;
   }
-  // accepted
+  // wait_list
   return true;
 }
 
@@ -338,7 +338,7 @@ robocallee_fms__srv__ShoeRequest_Response__fini(robocallee_fms__srv__ShoeRequest
   if (!msg) {
     return;
   }
-  // accepted
+  // wait_list
 }
 
 bool
@@ -347,8 +347,8 @@ robocallee_fms__srv__ShoeRequest_Response__are_equal(const robocallee_fms__srv__
   if (!lhs || !rhs) {
     return false;
   }
-  // accepted
-  if (lhs->accepted != rhs->accepted) {
+  // wait_list
+  if (lhs->wait_list != rhs->wait_list) {
     return false;
   }
   return true;
@@ -362,8 +362,8 @@ robocallee_fms__srv__ShoeRequest_Response__copy(
   if (!input || !output) {
     return false;
   }
-  // accepted
-  output->accepted = input->accepted;
+  // wait_list
+  output->wait_list = input->wait_list;
   return true;
 }
 

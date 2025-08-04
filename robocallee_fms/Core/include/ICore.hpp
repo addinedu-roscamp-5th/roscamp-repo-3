@@ -20,9 +20,7 @@ namespace core
 
         virtual bool ArmRequestMakeCall(int arm_num, int shelf_num, int pinky_num) = 0;
 
-
-
-        virtual bool RequestCallback(const Commondefine::GUIRequest& request) = 0;
+        virtual int RequestCallback(const Commondefine::GUIRequest& request) = 0;
 
         virtual bool DoneCallback(const std::string& requester, const int& customer_id) = 0;
 

@@ -56,7 +56,7 @@ namespace Commondefine
     {
         std::string            requester;
         shoesproperty          shoes_property;
-        pose2d                 dest2;
+        pose2f                 dest2;
         int                    customer_id;
     }GUIRequest; 
 
@@ -66,10 +66,10 @@ namespace Commondefine
         RobotState                          robot_state         = RobotState::IDLE;
         int                                 battery             = 100;
         shoesproperty                       shoes_property;
-        pose2d                              current_position;
-        pose2d                              dest1;
-        pose2d                              dest2;
-        pose2d                              dest3               = {1.0,0.4};
+        pose2f                              current_position;
+        pose2f                              dest1;
+        pose2f                              dest2;
+        pose2f                              dest3               = {1.0,0.4};
         std::string                         requester;
         int                                 customer_id;
         

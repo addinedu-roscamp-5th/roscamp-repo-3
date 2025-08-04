@@ -14,14 +14,14 @@ module robocallee_fms {
 
       string color;
 
-      int32 x;
+      float x;
 
-      int32 y;
+      float y;
 
       int32 customer_id;
     };
     struct ShoeRequest_Response {
-      boolean accepted;
+      int32 wait_list;
     };
   };
 };

@@ -112,7 +112,7 @@ static rosidl_typesupport_introspection_c__MessageMember robocallee_fms__srv__Sh
   },
   {
     "x",  // name
-    rosidl_typesupport_introspection_c__ROS_TYPE_INT32,  // type
+    rosidl_typesupport_introspection_c__ROS_TYPE_FLOAT,  // type
     0,  // upper bound of string
     NULL,  // members of sub message
     false,  // is key
@@ -130,7 +130,7 @@ static rosidl_typesupport_introspection_c__MessageMember robocallee_fms__srv__Sh
   },
   {
     "y",  // name
-    rosidl_typesupport_introspection_c__ROS_TYPE_INT32,  // type
+    rosidl_typesupport_introspection_c__ROS_TYPE_FLOAT,  // type
     0,  // upper bound of string
     NULL,  // members of sub message
     false,  // is key
@@ -240,15 +240,15 @@ void robocallee_fms__srv__ShoeRequest_Response__rosidl_typesupport_introspection
 
 static rosidl_typesupport_introspection_c__MessageMember robocallee_fms__srv__ShoeRequest_Response__rosidl_typesupport_introspection_c__ShoeRequest_Response_message_member_array[1] = {
   {
-    "accepted",  // name
-    rosidl_typesupport_introspection_c__ROS_TYPE_BOOLEAN,  // type
+    "wait_list",  // name
+    rosidl_typesupport_introspection_c__ROS_TYPE_INT32,  // type
     0,  // upper bound of string
     NULL,  // members of sub message
     false,  // is key
     false,  // is array
     0,  // array size
     false,  // is upper bound
-    offsetof(robocallee_fms__srv__ShoeRequest_Response, accepted),  // bytes offset in struct
+    offsetof(robocallee_fms__srv__ShoeRequest_Response, wait_list),  // bytes offset in struct
     NULL,  // default value
     NULL,  // size() function pointer
     NULL,  // get_const(index) function pointer
