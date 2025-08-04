@@ -17,6 +17,9 @@ namespace Integrated
 {
     template<typename T>
     using vec = std::vector<T>;
+    
+    template<typename T>
+    using vvec = std::vector<std::vector<T>>;
 
     using Task = std::function<void()>;
 

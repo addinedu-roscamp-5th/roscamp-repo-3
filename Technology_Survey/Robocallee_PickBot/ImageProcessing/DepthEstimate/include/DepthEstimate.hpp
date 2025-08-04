@@ -24,13 +24,19 @@ namespace depth
         );
         ~DepthEstimate();
 
-        double MonoDepthEstimate(
-            cv::Mat& left,
-            cv::Mat& right,
-            cv::Mat& DepthMap,
-            double baseline);
+        // double MonoDepthEstimate(
+        //     cv::Mat& left,
+        //     cv::Mat& right,
+        //     cv::Mat& DepthMap,
+        //     double baseline);
 
-
+        double MonoDepthEstimate
+        (
+            Integrated::vec<cv::Point>& left,
+            Integrated::vec<cv::Point>& right,
+            Integrated::vec<cv::Point3d>& pointcloud,
+            double baseline
+        );
 
         double computeBaseLine(cv::Mat& T_base_grip1 , cv::Mat& T_base_grip2);
     };

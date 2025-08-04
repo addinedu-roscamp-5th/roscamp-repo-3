@@ -6,6 +6,7 @@
 #include "Calibrator.hpp"
 #include "DepthEstimate.hpp"
 #include "objectDetector.hpp"
+#include "ImageProcDetector.hpp"
 #include "Geometry.hpp"
 #include "RosInterface.hpp"
 

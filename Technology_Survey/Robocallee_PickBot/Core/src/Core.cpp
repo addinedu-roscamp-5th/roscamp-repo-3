@@ -44,7 +44,7 @@ bool Core::initialize()
 
     calib_ = make_sptr<Calibrator>(_CALIB_FILE_DIR_);
 
-    detector_ = make_sptr<ArUcoMakerDetector>();
+    detector_ = make_sptr<ImageProcDetector>();
     detector_->initDetector();
 
     depth_ = make_uptr<depth::DepthEstimate>(detector_, calib_);
@@ -64,10 +64,15 @@ bool Core::computeDepth()
 
     double baseline = depth_->computeBaseLine(lT, rT);
 
+    vec<OB::object2d> leftob,rightob;
     cv::Mat left = cv::imread("calib_file/img_pos1.bmp");
     cv::Mat right = cv::imread("calib_file/img_pos2.bmp");
-    cv::Mat depthmap;
-    depth_->MonoDepthEstimate(left,right,depthmap,baseline);
+    
+    detector_->FindObject(left,leftob);
+    detector_->FindObject(right,rightob);
+
+    vec<cv::Point3d> pointcloud;
+    depth_->MonoDepthEstimate(leftob[0].points, rightob[0].points, pointcloud, baseline);
 
     return true;
 
