@@ -118,16 +118,10 @@ bool Core::PoseCallback(const Commondefine::pose2f& pos, int pinky_id)
 
 void Core::handleWaypointArrival(int pink_id) 
 {
-
-    if (GetAmrState(pinky_id) != Commondefine::RobotState::BUSY) 
-    {
-        return;
-    }
+    if (GetAmrState(pinky_id) != Commondefine::RobotState::BUSY) return;
     
     TrafficSolver solver(map, starts, goals);
     auto paths = solver.findSolution(true);
-
-
 
     paths[pink_id][index]
     const auto &wps = amr_adapters_[pink_id]->paths();
@@ -173,24 +167,27 @@ int Core::RequestCallback(const Commondefine::GUIRequest& request)
     }
 }
 
-bool Core::DoneCallback(const std::string& requester,
-                        const int& customer_id)
+bool Core::DoneCallback(const std::string& requester, const int& customer_id)
 {
     log_->Log(Log::LogLevel::INFO,
               string("Done received from: ") + requester);
-    if (requester == "customer") {
-        for (int i = 0; i < _AMR_NUM_; ++i) {
-            if (GetAmrState(i) == customer_id) {
+    if (requester == "customer")
+    {
+        for (int i = 0; i < _AMR_NUM_; ++i)
+        {
+            if (GetAmrCustID(i) == customer_id)
+            {
                 amr_adapters_[i]->SetAmrState(RobotState::IDLE);
-                log_->Log(Log::LogLevel::INFO,
-                          string("핑키가 고객ID: ") + to_string(customer_id) +
-                          "에게 배달 완료");
+                log_->Log(Log::LogLevel::INFO, string("핑키가 고객ID: ") + to_string(customer_id) + "에게 배달 완료");
+
                 pRequestManager_->BestRobotSelector();
+                
                 log_->Log(Log::LogLevel::INFO, "DoneCallback true");
+        
                 return true;
             }
+        }
 
-        }       
         log_->Log(Log::LogLevel::INFO, "고객ID: " + to_string(customer_id) + "의 배달을 지정받은 핑키 없음");
         //완료 버튼을 누른 고객의 작업을 지정받은 핑키가 없다
         return false;
@@ -207,22 +204,22 @@ bool Core::DoneCallback(const std::string& requester,
 
 Commondefine::RobotState Core::GetAmrState(int idx)
 {
-    if (idx < 0 || idx >= static_cast<int>(amr_adapters_.size()))
-        return RobotState::INVALID;
+    if (idx < 0 || idx >= amr_adapters_.size()) return RobotState::INVALID;
+
     return amr_adapters_[idx]->GetTaskInfo().robot_state;
 }
 
 int Core::GetAmrBattery(int idx)
 {
-    if (idx < 0 || idx >= static_cast<int>(amr_adapters_.size()))
-        return -1;
+    if (idx < 0 || idx >= amr_adapters_.size()) return -1;
+
     return amr_adapters_[idx]->GetTaskInfo().battery;
 }
 
 int Core::GetAmrCustID(int idx)
 {
-    if (idx < 0 || idx >= static_cast<int>(amr_adapters_.size()))
-        return -1;
+    if (idx < 0 || idx >= amr_adapters_.size()) return -1;
+        
     return amr_adapters_[idx]->GetTaskInfo().customer_id;
 }
 
@@ -233,6 +230,7 @@ int Core::GetAmrVecSize()
 
 void Core::SetTaskInfo(int idx, const Commondefine::GUIRequest& request)
 {
-    if (idx < 0 || idx >= static_cast<int>(amr_adapters_.size())) return;
+    if (idx < 0 || idx >= amr_adapters_.size()) return;
+
     amr_adapters_[idx]->SetTaskInfo(request);
 }

@@ -6,9 +6,7 @@ using namespace interface;
 RosInterface::RosInterface(Logger::s_ptr log)
 : Node(_ROS_NODE_NAME_), log_(log)
 {
-  pose_subs_.resize(NUM_PINKY);
-  aruco_subs_.resize(NUM_PINKY);
-  last_poses_.resize(NUM_PINKY);
+
 }
 
 RosInterface::~RosInterface() {}
@@ -17,32 +15,20 @@ bool RosInterface::Initialize(Integrated::w_ptr<core::ICore> Icore)
 {
   Icore_ = Icore;
 
-  // 1) Float32MultiArray 구독 (/lm_poseN)
-  for (int i = 0; i < NUM_PINKY; ++i) {
-    auto topic = "/lm_pose" + std::to_string(i+1);
-    pose_subs_[i] = create_subscription<LmPoseMsg>(
-      topic, 10,
-      [this, i](const LmPoseMsg::ConstSharedPtr & msg) {
-        lmArrayCallback(msg, i);
-      }
-    );
-    RCLCPP_INFO(get_logger(), "Subscribed to %s", topic.c_str());
-  }
+  req_service_ = create_service<ReqServiceType>("request_service", std::bind(&RosInterface::cbRequestService, this, std::placeholders::_1, std::placeholders::_2));
+  done_service_ = create_service<DoneServiceType>("done_service", std::bind(&RosInterface::cbDoneService, this, std::placeholders::_1, std::placeholders::_2));
+  
+  arm1_client_ = create_client<ArmServiceType>("arm1_service");
 
-  // 2) Aruco PoseStamped 구독 (/aruco_poseN)
-  for (int i = 0; i < NUM_PINKY; ++i) {
+  for (int i = 0; i < _AMR_NUM_; ++i)
+  {
     auto topic = "/aruco_pose" + std::to_string(i+1);
-    aruco_subs_[i] = create_subscription<geometry_msgs::msg::PoseStamped>(
-      topic, 10,
-      [this, i](const geometry_msgs::msg::PoseStamped::ConstSharedPtr & msg) {
-        arucoPoseCallback(msg, i);
-      }
-    );
-    RCLCPP_INFO(get_logger(), "Subscribed to %s", topic.c_str());
+    aruco_subs_.push_back(create_subscription<geometry_msgs::msg::PoseStamped>(topic, 10, std::bind(&RosInterface::arucoPoseCallback, this, std::placeholders::_1, std::placeholders::_2));
+    log_->Log(INFO, "Subscribed to " + topic.c_str());
   }
-    return true;
+  
+  return true;
 }
-
 
 // int32 shelf_num
 // int32 pinky_num
@@ -59,23 +45,16 @@ void RosInterface::arm1_send_request(int shelf_num, int pinky_num )
         std::bind(&RosInterface::cbArmService, this, std::placeholders::_1));
 }
 
-
-
-
 // 로봇팔한테 request 보내고 response 받는 부분
 void RosInterface::cbArmService(rclcpp::Client<ArmServiceType>::SharedFuture future)
 {
-        log_->Log(Log::INFO, "cbArmService 진입");
+  log_->Log(Log::INFO, "cbArmService 진입");
 
-    auto res = future.get();
+  auto res = future.get();
+  
+  if(res->success) log_->Log(Log::INFO, "Arm 요청 성공 !");
 
-    // if(res->accepted)
-    if(res->success)
-
-        RCLCPP_INFO(this->get_logger(), "팔 요청 성공 !\n");
-    else
-        RCLCPP_ERROR(this->get_logger(), "팔 요청 실패 ㅠㅠ \n");
-
+  else log_->Log(Log::INFO, "Arm 요청 실패 !");
 }
 
 
@@ -123,28 +102,16 @@ void RosInterface::lmArrayCallback(
 }
 
 void RosInterface::arucoPoseCallback(
-  const geometry_msgs::msg::PoseStamped::ConstSharedPtr & msg,
-  int pinky_id)
+  const geometry_msgs::msg::PoseStamped::ConstSharedPtr & msg, int pinky_id)
 {
+  std::lock_guard<std::mutex> lk(pose_mutex_);
+  
   Commondefine::pose2f p;
   p.x = static_cast<float>(msg->pose.position.x);
   p.y = static_cast<float>(msg->pose.position.y);
 
-  // (2) 바로 onArucoPose() 로 전달
-  onArucoPose(pinky_id, p);
-}
-
-void RosInterface::onArucoPose(
-  int pinky_id,
-  const Commondefine::pose2f &p)
-{
+  if (auto icore = Icore_.lock())
   {
-    // (3) last_poses_ 에 안전하게 저장
-    std::lock_guard<std::mutex> lk(pose_mutex_);
-    last_poses_[pinky_id] = p;
-  }
-  // (4) Core 로 전달
-  if (auto icore = Icore_.lock()) {
     icore->PoseCallback(p, pinky_id);
   }
 }
@@ -160,15 +127,6 @@ void RosInterface::cbDoneService(
   else 
   {
     log_->Log(Log::LogLevel::INFO, "ICore expired");
-    
     response->accepted = false;
-  }
-}
-
-void RosInterface::arm1_send_request(int shelf_num, int pinky_num)
-{
-  if (auto icore = Icore_.lock())
-  {
-    icore->ArmRequestMakeCall(1, shelf_num, pinky_num);
   }
 }

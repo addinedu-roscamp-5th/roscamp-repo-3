@@ -45,8 +45,8 @@ void AmrAdapter::SetTaskInfo(const Commondefine::GUIRequest& request)
 
         std::ostringstream oss;
         oss << ",color=" << robot_task_info_.shoes_property.color
-            << ", model=" << robot_task_info_.shoes_property.model
-            << ", size=" << robot_task_info_.shoes_property.size
+            << ",model=" << robot_task_info_.shoes_property.model
+            << ",size=" << robot_task_info_.shoes_property.size
             << ",pinky_id=" << robot_task_info_.robot_id;
 
         log_->Log(Log::LogLevel::INFO, oss.str());
@@ -67,10 +67,10 @@ void AmrAdapter::SetAmrState(const Commondefine::RobotState& state)
 
 void AmrAdapter::onWaypointReached(int pinky_id)
 {
-    if (current_waypoint_idx_ <static_cast<int>(waypoints_.size()) -1
-    {
+    // if (current_waypoint_idx_ <static_cast<int>(waypoints_.size()) -1
+    // {
 
-    }
+    // }
 }
 
 

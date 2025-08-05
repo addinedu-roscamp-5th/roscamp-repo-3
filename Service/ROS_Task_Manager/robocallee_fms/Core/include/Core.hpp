@@ -28,7 +28,7 @@ namespace core
         interface::RosInterface::w_ptr                              Interface_;
         
         Integrated::vec<Integrated::u_ptr<Adapter::AmrAdapter>>     amr_adapters_;
-        Integrated::s_ptr<traffic::TrafficPlanner>                     traffic_Planner_;
+        Integrated::s_ptr<traffic::TrafficPlanner>                  traffic_Planner_;
 
     public:
         using s_ptr = std::shared_ptr<Core>;
