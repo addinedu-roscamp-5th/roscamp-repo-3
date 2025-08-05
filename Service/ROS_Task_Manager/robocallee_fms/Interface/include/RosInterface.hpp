@@ -3,6 +3,7 @@
 #include "ICore.hpp"
 #include "Integrated.hpp"
 #include "Commondefine.hpp"
+#include "ClientWrapper.hpp"
 
 // ROS2 기본
 #include "rclcpp/rclcpp.hpp"
@@ -41,15 +42,24 @@ namespace interface
         rclcpp::Service<DoneServiceType>::SharedPtr                     done_service_;
         
         // Arm 클라이언트
-        rclcpp::Client<ArmServiceType>::SharedPtr                       arm1_client_;
+        std::vector<rclcpp::Client<ArmServiceType>::SharedPtr>          arm_clients_;
 
         // Aruco Pose 구독
-        std::vector< rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr > aruco_subs_;
+        std::vector< rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr> aruco_subs_;
 
         // 받은 좌표 저장
         std::mutex                                                      pose_mutex_;
 
-        std::vector<Commondefine::pose2f>                               last_poses_;
+        //서버와 연결될때 까지 대기
+        std::mutex                                                      client_mutex_;
+        std::condition_variable                                         client_cv_;
+        std::map<std::string , CW::ClientWrapperBase::s_ptr>            wait_clients_;
+        std::thread                                                     server_wait_thread_;
+        bool                                                            server_wait_is_Running;
+        void async_server_wait();
+
+        template<typename ServiceT>
+        void AddWaitClient(const std::string& name, std::shared_ptr<rclcpp::Client<ServiceT>> client);
 
     public:
         using s_ptr = std::shared_ptr<RosInterface>;
@@ -64,12 +74,8 @@ namespace interface
         void arm1_send_request(int shelf_num, int pinky_num);
 
         void cbArmService(rclcpp::Client<ArmServiceType>::SharedFuture future);
-        
-        void lmArrayCallback(const LmPoseMsg::ConstSharedPtr & msg, int pinky_id);
 
-        void arucoPoseCallback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr & msg, int pinky_id);
-
-        void onArucoPose(int pinky_id, const Commondefine::pose2f &p);
+        void arucoPoseCallback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr & msg);
 
         // 요청·완료 서비스 콜백
         void cbRequestService(const std::shared_ptr<ReqServiceType::Request>  request,
@@ -77,4 +83,17 @@ namespace interface
         void cbDoneService(const std::shared_ptr<DoneServiceType::Request> request,
                         std::shared_ptr<DoneServiceType::Response>      response);
     };
+
+    template<typename ServiceT>
+    void RosInterface::AddWaitClient(const std::string& name, std::shared_ptr<rclcpp::Client<ServiceT>> client)
+    {
+        auto wrapper = std::make_shared<CW::ClientWrapper<ServiceT>>(name, client);
+
+        {
+            std::lock_guard<std::mutex> lock(client_mutex_);
+            wait_clients_.insert(std::make_pair(name, std::static_pointer_cast<CW::ClientWrapperBase>(wrapper)));
+        }
+
+        client_cv_.notify_one();
+    }
 }

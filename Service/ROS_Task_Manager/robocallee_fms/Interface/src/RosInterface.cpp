@@ -2,14 +2,26 @@
 #include "RosInterface.hpp"
 
 using namespace interface;
+using namespace Integrated;
+using namespace Commondefine;
 
 RosInterface::RosInterface(Logger::s_ptr log)
-: Node(_ROS_NODE_NAME_), log_(log)
+: Node(_ROS_NODE_NAME_), log_(log) , server_wait_is_Running(true)
 {
-
+  server_wait_thread_ = std::thread(&RosInterface::async_server_wait, this);
 }
 
-RosInterface::~RosInterface() {}
+RosInterface::~RosInterface() 
+{
+  server_wait_is_Running = false;
+  client_cv_.notify_all();
+
+  if(server_wait_thread_.joinable())
+  {
+    server_wait_thread_.join();
+    log_->Log(INFO, "async_server_wait thread 정상 종료");
+  }
+}
 
 bool RosInterface::Initialize(Integrated::w_ptr<core::ICore> Icore)
 {
@@ -18,16 +30,65 @@ bool RosInterface::Initialize(Integrated::w_ptr<core::ICore> Icore)
   req_service_ = create_service<ReqServiceType>("request_service", std::bind(&RosInterface::cbRequestService, this, std::placeholders::_1, std::placeholders::_2));
   done_service_ = create_service<DoneServiceType>("done_service", std::bind(&RosInterface::cbDoneService, this, std::placeholders::_1, std::placeholders::_2));
   
-  arm1_client_ = create_client<ArmServiceType>("arm1_service");
-
   for (int i = 0; i < _AMR_NUM_; ++i)
   {
     auto topic = "/aruco_pose" + std::to_string(i+1);
-    aruco_subs_.push_back(create_subscription<geometry_msgs::msg::PoseStamped>(topic, 10, std::bind(&RosInterface::arucoPoseCallback, this, std::placeholders::_1, std::placeholders::_2));
-    log_->Log(INFO, "Subscribed to " + topic.c_str());
+    auto p = create_subscription<geometry_msgs::msg::PoseStamped>(topic, 10, std::bind(&RosInterface::arucoPoseCallback, this, std::placeholders::_1));
+    aruco_subs_.push_back(p);
+
+    log_->Log(INFO, "Subscribed to " + topic);
+  }
+
+  for(int i = 0 ; i < RobotArm::RobotArmNum; ++i)
+  {
+    auto client_name = "arm" + std::to_string(i+1) + "_service";
+    auto client = create_client<ArmServiceType>(client_name);
+    arm_clients_.push_back(client);
+
+    //모든 클라이언트는 서버 연결을 기다려야 하기 때문에 생성 후에 AddWaitClient함수를 통해 대기 Map에 넣어두고 thread 에서 각각 client가 서버에 연결되길 기다린다.
+    AddWaitClient(client_name, client);
   }
   
   return true;
+}
+
+void RosInterface::async_server_wait()
+{
+  log_->Log(INFO, "async_server_wait thread init");
+
+  while (server_wait_is_Running)
+  {
+      std::unique_lock<std::mutex> lock(client_mutex_);
+
+      // 대기중인 client 가 없거나 종료 요청 받으면 대기 풀림
+      client_cv_.wait(lock, [this]() { return !wait_clients_.empty() || !server_wait_is_Running;});
+
+      // 대기 중 종료 요청 받았으면 종료
+      if (!server_wait_is_Running)
+          break;
+
+      for (auto it = wait_clients_.begin(); it != wait_clients_.end();)
+      {
+        if (it->second->wait_for_service(std::chrono::seconds(1)))
+        {
+          log_->Log(INFO, "클라이언트 [" + it->first + "] 연결 성공");
+          it = wait_clients_.erase(it);
+        }
+        else
+        {
+          log_->Log(INFO, "클라이언트 [" + it->first  + "] 연결 대기 중...");
+          ++it;
+        }
+      }
+
+      // 락 해제 후 주기 대기 (optional)
+      lock.unlock();
+      std::this_thread::sleep_for(std::chrono::seconds(1));
+  }
+
+  log_->Log(INFO, "async_server_wait thread return");
+  
+  return;
 }
 
 // int32 shelf_num
@@ -41,7 +102,7 @@ void RosInterface::arm1_send_request(int shelf_num, int pinky_num )
     request->pinky_num = pinky_num;
 
     // 응답 도착 시, 아래 콜백이 자동 호출됨
-    arm1_client_->async_send_request(request,
+    arm_clients_[Commondefine::RobotArm1]->async_send_request(request,
         std::bind(&RosInterface::cbArmService, this, std::placeholders::_1));
 }
 
@@ -67,12 +128,12 @@ void RosInterface::cbRequestService(const std::shared_ptr<ReqServiceType::Reques
   r.shoes_property.color = request->color;
   r.dest2.x = request->x;
   r.dest2.y = request->y;
-  r.customer_id = request->customer_i
+  r.customer_id = request->customer_id;
   
   auto icore = Icore_.lock();
   if(icore == nullptr)
   {
-    log_->Log(Log::LogLevel::INFO, "ICore expire")
+    log_->Log(Log::LogLevel::INFO, "ICore expire");
     response->wait_list = -1;
     
     return;
@@ -84,31 +145,16 @@ void RosInterface::cbRequestService(const std::shared_ptr<ReqServiceType::Reques
   return;
 }
 
-void RosInterface::lmArrayCallback(
-  const LmPoseMsg::ConstSharedPtr & msg,
-  int pinky_id)
-{
-  if (msg->data.size() < 2) {
-    RCLCPP_WARN(get_logger(), "lmArrayCallback: data size < 2");
-    return;
-  }
-
-  // (1) pose2f 로 통일
-  Commondefine::pose2f p;
-  p.x = static_cast<float>(msg->data[0]);
-  p.y = static_cast<float>(msg->data[1]);
-
-  onArucoPose(pinky_id, p);
-}
-
 void RosInterface::arucoPoseCallback(
-  const geometry_msgs::msg::PoseStamped::ConstSharedPtr & msg, int pinky_id)
+  const geometry_msgs::msg::PoseStamped::ConstSharedPtr & msg)
 {
   std::lock_guard<std::mutex> lk(pose_mutex_);
   
   Commondefine::pose2f p;
   p.x = static_cast<float>(msg->pose.position.x);
   p.y = static_cast<float>(msg->pose.position.y);
+
+  int pinky_id = 0;
 
   if (auto icore = Icore_.lock())
   {

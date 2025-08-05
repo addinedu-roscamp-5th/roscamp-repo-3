@@ -4,6 +4,8 @@ using namespace std;
 using namespace cv;
 using namespace YAML;
 using namespace OG;
+using namespace Commondefine;
+using namespace Integrated;
 
 
 OccupancyGrid::OccupancyGrid()
@@ -76,3 +78,41 @@ bool OccupancyGrid::LoadOccupancyGrid(const std::string path , const std::string
     return true;
 }
 
+Integrated::vec<Integrated::vec<bool>> OccupancyGrid::GetBoolMap()
+{
+    vector<vector<bool>> result;
+
+    // 행렬이 비었는지 확인
+    if(Map_.empty()) return {};
+
+    int rows = Map_.rows;
+    int cols = Map_.cols;
+
+    result.resize(rows, vector<bool>(cols, false));
+
+    for (int i = 0; i < rows; ++i)
+    {
+        for (int j = 0; j < cols; ++j)
+        {
+            // IMREAD_UNCHANGED 이므로 채널 수 확인 필요
+            uchar value;
+            if (Map_.channels() == 1)
+                value = Map_.at<uchar>(i, j); // 그레이스케일 또는 8bit 단일 채널
+            else if (Map_.channels() == 3)
+            {
+                // RGB 이미지일 경우, 각 채널의 합이 0보다 크면 true
+                Vec3b pixel = Map_.at<Vec3b>(i, j);
+                value = (pixel[0] + pixel[1] + pixel[2]) > 0 ? 1 : 0;
+            }
+            else
+            {
+                // 다른 포맷은 사용자 정의 처리 필요
+                value = 0;
+            }
+
+            result[i][j] = (value != 0);
+        }
+    }
+
+    return result;
+}

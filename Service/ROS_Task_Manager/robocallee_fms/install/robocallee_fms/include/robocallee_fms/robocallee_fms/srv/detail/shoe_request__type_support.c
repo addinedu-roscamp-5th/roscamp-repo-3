@@ -1,98 +1,42 @@
-// generated from rosidl_generator_c/resource/idl__type_support.c.em
+// generated from rosidl_typesupport_introspection_c/resource/idl__type_support.c.em
 // with input from robocallee_fms:srv/ShoeRequest.idl
 // generated code does not contain a copyright notice
 
-#include <string.h>
-
-#include "robocallee_fms/srv/detail/shoe_request__struct.h"
-#include "robocallee_fms/srv/detail/shoe_request__type_support.h"
+#include <stddef.h>
+#include "robocallee_fms/srv/detail/shoe_request__rosidl_typesupport_introspection_c.h"
+#include "robocallee_fms/msg/rosidl_typesupport_introspection_c__visibility_control.h"
+#include "rosidl_typesupport_introspection_c/field_types.h"
+#include "rosidl_typesupport_introspection_c/identifier.h"
+#include "rosidl_typesupport_introspection_c/message_introspection.h"
 #include "robocallee_fms/srv/detail/shoe_request__functions.h"
-#include "rosidl_typesupport_interface/macros.h"
+#include "robocallee_fms/srv/detail/shoe_request__struct.h"
+
+
+// Include directives for member types
+// Member `requester`
+// Member `model`
+// Member `color`
+#include "rosidl_runtime_c/string_functions.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-
-void *
-ROSIDL_TYPESUPPORT_INTERFACE__SERVICE_CREATE_EVENT_MESSAGE_SYMBOL_NAME(
-  rosidl_typesupport_c,
-  robocallee_fms,
-  srv,
-  ShoeRequest
-)(
-  const rosidl_service_introspection_info_t * info,
-  rcutils_allocator_t * allocator,
-  const void * request_message,
-  const void * response_message)
+void robocallee_fms__srv__ShoeRequest_Request__rosidl_typesupport_introspection_c__ShoeRequest_Request_init_function(
+  void * message_memory, enum rosidl_runtime_c__message_initialization _init)
 {
-  if (!allocator || !info) {
-    return NULL;
-  }
-  robocallee_fms__srv__ShoeRequest_Event * event_msg = (robocallee_fms__srv__ShoeRequest_Event *)(allocator->allocate(sizeof(robocallee_fms__srv__ShoeRequest_Event), allocator->state));
-  if (!robocallee_fms__srv__ShoeRequest_Event__init(event_msg)) {
-    allocator->deallocate(event_msg, allocator->state);
-    return NULL;
-  }
-
-  event_msg->info.event_type = info->event_type;
-  event_msg->info.sequence_number = info->sequence_number;
-  event_msg->info.stamp.sec = info->stamp_sec;
-  event_msg->info.stamp.nanosec = info->stamp_nanosec;
-  memcpy(event_msg->info.client_gid, info->client_gid, 16);
-  if (request_message) {
-    robocallee_fms__srv__ShoeRequest_Request__Sequence__init(
-      &event_msg->request,
-      1);
-    if (!robocallee_fms__srv__ShoeRequest_Request__copy((const robocallee_fms__srv__ShoeRequest_Request *)(request_message), event_msg->request.data)) {
-      allocator->deallocate(event_msg, allocator->state);
-      return NULL;
-    }
-  }
-  if (response_message) {
-    robocallee_fms__srv__ShoeRequest_Response__Sequence__init(
-      &event_msg->response,
-      1);
-    if (!robocallee_fms__srv__ShoeRequest_Response__copy((const robocallee_fms__srv__ShoeRequest_Response *)(response_message), event_msg->response.data)) {
-      allocator->deallocate(event_msg, allocator->state);
-      return NULL;
-    }
-  }
-  return event_msg;
+  // TODO(karsten1987): initializers are not yet implemented for typesupport c
+  // see https://github.com/ros2/ros2/issues/397
+  (void) _init;
+  robocallee_fms__srv__ShoeRequest_Request__init(message_memory);
 }
 
-// Forward declare the get type support functions for this type.
-bool
-ROSIDL_TYPESUPPORT_INTERFACE__SERVICE_DESTROY_EVENT_MESSAGE_SYMBOL_NAME(
-  rosidl_typesupport_c,
-  robocallee_fms,
-  srv,
-  ShoeRequest
-)(
-  void * event_msg,
-  rcutils_allocator_t * allocator)
+void robocallee_fms__srv__ShoeRequest_Request__rosidl_typesupport_introspection_c__ShoeRequest_Request_fini_function(void * message_memory)
 {
-  if (!allocator) {
-    return false;
-  }
-  if (NULL == event_msg) {
-    return false;
-  }
-  robocallee_fms__srv__ShoeRequest_Event * _event_msg = (robocallee_fms__srv__ShoeRequest_Event *)(event_msg);
-
-  robocallee_fms__srv__ShoeRequest_Event__fini((robocallee_fms__srv__ShoeRequest_Event *)(_event_msg));
-  if (_event_msg->request.data) {
-    allocator->deallocate(_event_msg->request.data, allocator->state);
-  }
-  if (_event_msg->response.data) {
-    allocator->deallocate(_event_msg->response.data, allocator->state);
-  }
-  allocator->deallocate(_event_msg, allocator->state);
-  return true;
+  robocallee_fms__srv__ShoeRequest_Request__fini(message_memory);
 }
 
-<<<<<<< Updated upstream:Service/ROS_Task_Manager/robocallee_fms/install/robocallee_fms/include/robocallee_fms/robocallee_fms/srv/detail/shoe_request__type_support.c
 static rosidl_typesupport_introspection_c__MessageMember robocallee_fms__srv__ShoeRequest_Request__rosidl_typesupport_introspection_c__ShoeRequest_Request_message_member_array[7] = {
   {
     "requester",  // name
@@ -693,8 +637,3 @@ ROSIDL_TYPESUPPORT_INTERFACE__SERVICE_SYMBOL_NAME(rosidl_typesupport_introspecti
 
   return &robocallee_fms__srv__detail__shoe_request__rosidl_typesupport_introspection_c__ShoeRequest_service_type_support_handle;
 }
-=======
-#ifdef __cplusplus
-}
-#endif
->>>>>>> Stashed changes:robocallee_fms/install/robocallee_fms/include/robocallee_fms/robocallee_fms/srv/detail/shoe_request__type_support.c

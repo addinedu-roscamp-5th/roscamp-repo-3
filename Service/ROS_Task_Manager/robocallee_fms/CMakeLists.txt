@@ -69,18 +69,6 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/RobotArmRequest.srv"
 )
 
-# 노드 빌드
-add_executable(robocallee_fms_node
-  main.cpp
-  ../Utile/Logger/src/Logger.cpp
-  Core/src/Core.cpp
-  Task/src/Dispatcher.cpp
-  Task/src/Executor.cpp
-  Interface/src/RosInterface.cpp
-  Adapters/src/AmrAdapter.cpp
-  Adapters/src/RobotArmAdapter.cpp
-  Manager/src/RequestManager.cpp      
-)
 
 # 자동 생성된 메시지 헤더 포함
 target_include_directories(robocallee_fms_node PUBLIC
@@ -116,11 +104,6 @@ set_target_properties(robocallee_fms_node PROPERTIES
   BUILD_WITH_INSTALL_RPATH TRUE
   INSTALL_RPATH "${OPENCV_LIB_DIR};${YAML_LIB_DIR};${CMAKE_INSTALL_PREFIX}/lib;${CMAKE_INSTALL_PREFIX}/lib/robocallee_fms"
 )
-
-# rosidl 타입 지원 링크
-rosidl_get_typesupport_target(cpp_typesupport_target 
-  "${PROJECT_NAME}" "rosidl_typesupport_cpp")
-target_link_libraries(robocallee_fms_node "${cpp_typesupport_target}")
 
 install(TARGETS
   robocallee_fms_node

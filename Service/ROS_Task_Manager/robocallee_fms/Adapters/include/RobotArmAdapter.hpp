@@ -24,8 +24,6 @@ namespace Adapter
 
 
         void arm1_shelf_to_buffer(Commondefine::shoesproperty shoe, int pinky_num);
-
-
-
+        
     };
 };

@@ -4,13 +4,14 @@
 #include <type_traits>
 #include <memory>
 #include <mutex>
+#include "Commondefine.hpp"
 #include "ICore.hpp"
 #include "Dispatcher.hpp"
-#include "Commondefine.hpp"
+#include "RosInterface.hpp"
 #include "AmrAdapter.hpp"
 #include "RobotArmAdapter.hpp"
 #include "RequestManager.hpp"
-#include "RosInterface.hpp"
+#include "OccupancyGrid.hpp"
 #include "TrafficPlanner.hpp"
 
 namespace core
@@ -20,7 +21,6 @@ namespace core
     private:
         task::Dispatcher::u_ptr                                     pdispatcher_;
         Logger::s_ptr                                               log_;
-        Adapter::AmrAdapter::u_ptr                                  pAmrAdapter_;
         Adapter::RobotArmAdapter::u_ptr                             pRobotArmAdapter_;
         Manager::RequestManager::u_ptr                              pRequestManager_;
 
@@ -29,6 +29,8 @@ namespace core
         
         Integrated::vec<Integrated::u_ptr<Adapter::AmrAdapter>>     amr_adapters_;
         Integrated::s_ptr<traffic::TrafficPlanner>                  traffic_Planner_;
+        Integrated::u_ptr<OG::OccupancyGrid>                        occupancyGrid_;
+
 
     public:
         using s_ptr = std::shared_ptr<Core>;
@@ -55,6 +57,8 @@ namespace core
         
         bool DoneCallback(const std::string& requester, const int& customer_id) override;
 
+        bool PoseCallback(const Commondefine::pose2f &pos, int pinky_id) override;
+
         Commondefine::RobotState GetAmrState(int idx) override;
         
         int GetAmrBattery(int idx) override;
@@ -64,6 +68,8 @@ namespace core
         int GetAmrVecSize();
 
         void SetTaskInfo(int idx, const Commondefine::GUIRequest& request) override;
+
+        void handleWaypointArrival(int pinky_id);
 
         // void SetAmrState(int idx) override;
     

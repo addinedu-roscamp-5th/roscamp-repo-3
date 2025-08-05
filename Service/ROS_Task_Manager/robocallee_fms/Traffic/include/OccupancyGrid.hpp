@@ -24,11 +24,13 @@ namespace OG
         bool CaliWorldToGrid(double wx, double wy, int& mx, int& my);
 
         bool LoadOccupancyGrid(const std::string path , const std::string filename);
+
+        Integrated::vec<Integrated::vec<bool>> GetBoolMap();
         
         cv::Mat GetMap(){return Map_;}
 
         cv::Mat GetDeepCopyMap(){return Map_.clone();}
         
-        YAMLInfo GetYAMLInfo(){return yamlinfo_;}
+        Commondefine::YAMLFile  GetYAMLInfo(){return yamlinfo_;}
     };
 }

@@ -42,8 +42,6 @@ RobotArmAdapter::~RobotArmAdapter()
 
 
 */
-
-
 void RobotArmAdapter::arm1_shelf_to_buffer(Commondefine::shoesproperty shoe, int pinky_num){
 
     log_->Log(Log::LogLevel::INFO, "arm1_shelf_to_buffer 호출");

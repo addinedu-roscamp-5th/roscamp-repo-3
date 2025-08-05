@@ -16,10 +16,6 @@ namespace Adapter
 
         std::vector<Commondefine::pose2f>         waypoints_;
         int                                       current_wp_idx_{0};
-    
-        std::vector<std::vector<bool>>            map_;
-        TrafficSolver                             traffic_solver_;
-        core::Core::w_ptr core_;           
 
     public:
         using u_ptr = Integrated::u_ptr<AmrAdapter>;
@@ -39,13 +35,7 @@ namespace Adapter
         int GetCurrentWaypointIndex() const                           { return current_wp_idx_; }
         void incrementWaypointIndex()                                 { ++current_wp_idx_; }
 
-        std::vector<std::vector<Position>>
         void planpath(const Commondefine::pose2f& start, const Commondefine::pose2f& goal);
-
-        void onWaypointReached(int pinky_id);
-
-
-
 
         void MoveTo_dest1();
         void MoveTo_dest2();

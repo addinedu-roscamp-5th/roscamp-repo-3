@@ -11,12 +11,18 @@ namespace Commondefine
 
     #define _AMR_NUM_ 3
 
-    enum AmrStep {AmrStep_num = 0, MoveTo_dest1, Load, MoveTo_dest2, Unload, MoveTo_dest3};
+    #define _YAML_PATH_ "Map"
+
+    #define _YAML_FILE_ "test_map.yaml"
+
+    enum AmrStep {AmrStep_num = 0, MoveTo_dest1, arm2_buffer_to_pinky, MoveTo_dest2, arm2_pinky_to_buffer, MoveTo_dest3};
 
     // enum RobotArmStep {RobotArmStep_num = 0};
     enum RobotArmStep {shelf_to_buffer=1, buffer_to_pinky, pinky_to_buffer, buffer_to_shelf };
 
     enum RobotState {IDLE = 0 , BUSY, STOP , INVALID};
+
+    enum RobotArm { RobotArm1 = 0 ,RobotArm2 , RobotArmNum};
 
     // enum Requester {CUSTOMER = 0, EMPLOYEE};
 

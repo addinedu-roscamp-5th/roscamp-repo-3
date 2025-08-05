@@ -9,6 +9,7 @@ using namespace Adapter;
 using namespace std;
 using namespace Manager;
 using namespace traffic;
+using namespace OG;
 
 Core::Core(Logger::s_ptr log, interface::RosInterface::s_ptr Interface)
     : log_(log), Interface_(Interface)
@@ -29,7 +30,11 @@ bool Core::Initialize()
     pdispatcher_ = make_uptr<Dispatcher>(_MAX_EXECUTOR_NUM_, log_);
     pRobotArmAdapter_ = make_uptr<RobotArmAdapter>(self, log_);
     pRequestManager_ = make_uptr<RequestManager>(self, log_);
-    traffic_Planner_ = make_sptr<traffic_Planner_>(self, log_);
+    
+    occupancyGrid_ = make_uptr<OccupancyGrid>();
+    occupancyGrid_->LoadOccupancyGrid(_YAML_PATH_,_YAML_FILE_);
+
+    traffic_Planner_ = make_sptr<TrafficPlanner>(occupancyGrid_->GetBoolMap(), log_);
     
     // AMR 어댑터 생성
     for (int i = 0; i < _AMR_NUM_; ++i)
@@ -45,50 +50,43 @@ bool Core::Initialize()
 
 bool Core::SetAmrNextStep(int idx, Commondefine::AmrStep step)
 {
-    switch (step)
-    {
-    case Commondefine::MoveTo_dest1:
-        assignTask(std::bind(&Adapter::AmrAdapter::MoveTo_dest1,
-                             pAmrAdapters_[pinky_id].get()));
-    case Commondefine::arm2_buffer_to_pinky:
-        assignTask(std::bind(&Adapter::AmrAdapter::arm2_buffer_to_pinky,
-                             pAmrAdapters_[pinky_id].get()));
-    case Commondefine::MoveTo_dest2:
-        assignTask(std::bind(&Adapter::AmrAdapter::MoveTo_dest2,
-                             pAmrAdapters_[pinky_id].get()));
-    case Commondefine::amr2_pinky_to_buffer:
-        assignTask(std::bind(&Adapter::AmrAdapter::amr2_pinky_to_buffer,
-                             pAmrAdapters_[pinky_id].get()));
-    case Commondefine::MoveTo_dest3:
-        assignTask(std::bind(&Adapter::AmrAdapter::MoveTo_dest3,
-                             pAmrAdapters_[pinky_id].get()));
+    // switch (step)
+    // {
+    // case Commondefine::MoveTo_dest1:
+    //     assignTask(std::bind(&Adapter::AmrAdapter::MoveTo_dest1,
+    //                          amr_adapters_[idx].get()));
+    // case Commondefine::arm2_buffer_to_pinky:
+    //     assignTask(std::bind(&Adapter::AmrAdapter::arm2_buffer_to_pinky,
+    //                          amr_adapters_[idx].get()));
+    // case Commondefine::MoveTo_dest2:
+    //     assignTask(std::bind(&Adapter::AmrAdapter::MoveTo_dest2,
+    //                          amr_adapters_[idx].get()));
+    // case Commondefine::arm2_pinky_to_buffer:
+    //     assignTask(std::bind(&Adapter::AmrAdapter::arm2_pinky_to_buffer,
+    //                          amr_adapters_[idx].get()));
+    // case Commondefine::MoveTo_dest3:
+    //     assignTask(std::bind(&Adapter::AmrAdapter::MoveTo_dest3,
+    //                          amr_adapters_[idx].get()));
     return true;
 }
 
-bool Core::SetRobotArmNextStep(Commondefine::RobotArmStep step,
-                               Commondefine::shoesproperty shoe_info,
-                               int pinky_num)
+bool Core::SetRobotArmNextStep(Commondefine::RobotArmStep step , Commondefine::shoesproperty shoe_info , int pinky_num )
 {
-    // enum 출력을 위한 스트림 사용
+    log_->Log(Log::LogLevel::INFO, "assignTask 직전 step은" + std::to_string(step));
+
+    switch (step) 
     {
-        ostringstream oss;
-        oss << "assignTask 직전 step은 " << static_cast<int>(step);
-        log_->Log(Log::LogLevel::INFO, oss.str());
+        case RobotArmStep::shelf_to_buffer:
+            log_->Log(Log::LogLevel::INFO, "assignTask shelf_to_buffer");
+            assignTask(std::bind(&Adapter::RobotArmAdapter::arm1_shelf_to_buffer, pRobotArmAdapter_.get(), shoe_info, pinky_num));
+            break;
+        // case RobotArmStep::buffer_to_pinky:
+        // case RobotArmStep::pinky_to_buffer:
+        // case RobotArmStep::buffer_to_shelf:
+        default:
+            break;
     }
 
-    switch (step) {
-    case RobotArmStep::shelf_to_buffer:
-        log_->Log(Log::LogLevel::INFO, "assignTask shelf_to_buffer");
-        assignTask([this, shoe_info, pinky_num]() {
-            pRobotArmAdapter_->arm1_shelf_to_buffer(shoe_info, pinky_num);
-        });
-        break;
-    // case RobotArmStep::buffer_to_pinky:
-    // case RobotArmStep::pinky_to_buffer:
-    // case RobotArmStep::buffer_to_shelf:
-    default:
-        break;
-    }
     return true;
 }
 
@@ -116,29 +114,29 @@ bool Core::PoseCallback(const Commondefine::pose2f& pos, int pinky_id)
 }
 
 
-void Core::handleWaypointArrival(int pink_id) 
+void Core::handleWaypointArrival(int pinky_id) 
 {
-    if (GetAmrState(pinky_id) != Commondefine::RobotState::BUSY) return;
+    // if (GetAmrState(pinky_id) != Commondefine::RobotState::BUSY) return;
     
-    TrafficSolver solver(map, starts, goals);
-    auto paths = solver.findSolution(true);
+    // TrafficSolver solver(map, starts, goals);
+    // auto paths = solver.findSolution(true);
 
-    paths[pink_id][index]
-    const auto &wps = amr_adapters_[pink_id]->paths();
-    int idx         = amr_adapters_[pink_id]->GetCurrentWaypointIndex();
+    // paths[pinky_id][index]
+    // const auto &wps = amr_adapters_[pinky_id]->paths();
+    // int idx         = amr_adapters_[pinky_id]->GetCurrentWaypointIndex();
     
-    if (idx >= int(wps.size())) return;
+    // if (idx >= int(wps.size())) return;
     
-    const auto &cur = amr_adapters_[pink_id]->GetTaskInfo().current_position;
-    float dx = float(cur.x -wps[idx].x);
-    float dy = float(cur.y -wps[idx].y);
+    // const auto &cur = amr_adapters_[pinky_id]->GetTaskInfo().current_position;
+    // float dx = float(cur.x -wps[idx].x);
+    // float dy = float(cur.y -wps[idx].y);
     
-    float dist = std::hypot(dx, dy);
-    if (dist <=0.05f)
-    {
-        amr_adapters_[pinky_id]->incrementWaypointIndex();
-        amr_adapters_[pinky_id]->onWaypointReached(pinky_id);
-    }
+    // float dist = std::hypot(dx, dy);
+    // if (dist <=0.05f)
+    // {
+    //     amr_adapters_[pinky_id]->incrementWaypointIndex();
+    //     amr_adapters_[pinky_id]->onWaypointReached(pinky_id);
+    // }
 }
 
 
