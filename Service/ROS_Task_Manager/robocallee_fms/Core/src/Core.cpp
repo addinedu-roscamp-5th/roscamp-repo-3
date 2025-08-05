@@ -122,21 +122,17 @@ int Core::RequestCallback(const Commondefine::GUIRequest& request)
     if (pRequestManager_)
     {
         int wait_list = pRequestManager_->EnqueueRequest(request);
-        if (wait_list>0)
-        {
-                    pRequestManager_->BestRobotSelector();
-
-            return wait_list;
-        }
+        // if (wait_list>0)
         // {
-            // auto core = core_.lock();
-            // core->SetAmrNextStep(best_pinky_selector);
+        //     pRequestManager_->BestRobotSelector();
+
+        //     return wait_list;
         // }
-                    pRequestManager_->BestRobotSelector();
 
+        pRequestManager_->BestRobotSelector();
 
-        //대기자 0명
-        return 0;
+        //대기자
+        return wait_list;
     }
     else
     {   //error
@@ -158,13 +154,14 @@ bool Core::DoneCallback(const std::string& requester, const int& customer_id)
                 amr_adapters_[i]->SetAmrState(Commondefine::RobotState::IDLE);
                 log_->Log(Log::LogLevel::INFO, "핑키가 고객ID: " + to_string(customer_id) + "에게 배달 완료");
                 pRequestManager_->BestRobotSelector();
+                log_->Log(Log::LogLevel::INFO, "DoneCallback true");
                 return true;
             }
 
         }       
-                    log_->Log(Log::LogLevel::INFO, "고객ID: " + to_string(customer_id) + "의 배달을 지정받은 핑키 없음");
-            //완료 버튼을 누른 고객의 작업을 지정받은 핑키가 없다
-            return false ;
+        log_->Log(Log::LogLevel::INFO, "고객ID: " + to_string(customer_id) + "의 배달을 지정받은 핑키 없음");
+        //완료 버튼을 누른 고객의 작업을 지정받은 핑키가 없다
+        return false;
     }
 
     else if (requester == "employee")

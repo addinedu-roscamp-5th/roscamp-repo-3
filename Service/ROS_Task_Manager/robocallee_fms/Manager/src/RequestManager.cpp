@@ -77,6 +77,7 @@ void RequestManager::BestRobotSelector()
         //밀린 작업 없음
         if (request_queue_.empty()){
             core->SetAmrNextStep(best_amr, Commondefine::AmrStep::MoveTo_dest3);
+            log_->Log(Log::INFO, "밀린 작업 없음, MoveTo_dest3 호출");
             return;
         }
 
