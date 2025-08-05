@@ -177,6 +177,9 @@ double DepthEstimate::MonoDepthEstimate
         Geometry::transformCameraPose(left[i],  unit_left,  calib->GetCameraMatrix(), calib->GetdistCoeffs());
         Geometry::transformCameraPose(right[i], unit_right, calib->GetCameraMatrix(), calib->GetdistCoeffs());
 
+        std::cout << "left Norm: " << norm(unit_left) << std::endl;
+        std::cout << "right Norm: " << norm(unit_right) << std::endl;
+
         unit_lefts.push_back(unit_left);
         unit_rights.push_back(unit_right);
     }
@@ -195,7 +198,13 @@ double DepthEstimate::MonoDepthEstimate
     }
     std::cout << "Transform residual: " << err_sum / size << std::endl;
 
+    std::cout << "Transform Norm: " << norm(tvec) << std::endl;
+
+    cv::Mat t_dir = tvec / cv::norm(tvec);    
+    double scale = baseline;
+
     double residual_error = 0.0;
+
     for (size_t i = 0; i < size; ++i)
     {
         cv::Mat v1 = (Mat_<double>(3,1) << unit_lefts[i].x, unit_lefts[i].y, unit_lefts[i].z);
@@ -215,12 +224,14 @@ double DepthEstimate::MonoDepthEstimate
 
         Mat lambda;
         solve(A, b, lambda, DECOMP_SVD);
-        double depth = lambda.at<double>(0) * baseline;
+        double lambda_l = lambda.at<double>(0);
 
-        if(depth < DEPTH_MIN || depth > DEPTH_MAX) continue;
+        // if(lambda_l < DEPTH_MIN || lambda_l > DEPTH_MAX) continue;
 
-        cv::Point3d point3D = depth * unit_lefts[i];
+        cv::Point3d point3D = lambda_l * scale * unit_lefts[i];
         pointcloud.push_back(point3D);
+
+        std::cout << "X : " << point3D.x << " Y : " << point3D.y << " Z : " << point3D.z << std::endl;
 
         Mat P1 = (Mat_<double>(3,1) << point3D.x, point3D.y, point3D.z);
         Mat P2 = rvec * P1 + tvec;
