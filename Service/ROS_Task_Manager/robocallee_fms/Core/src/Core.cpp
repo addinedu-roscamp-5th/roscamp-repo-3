@@ -1,4 +1,5 @@
 #include "Core.hpp"
+#include <sstream>  // for ostringstream
 
 using namespace core;
 using namespace task;
@@ -9,114 +10,151 @@ using namespace std;
 using namespace Manager;
 
 Core::Core(Logger::s_ptr log, interface::RosInterface::s_ptr Interface)
-    :log_(log) , Interface_(Interface)
+    : log_(log), Interface_(Interface)
 {
-    log_->Log(Log::LogLevel::INFO,"Core 객체 생성");
-
-  
-
-    log_->Log(Log::LogLevel::INFO,"Adapter 3개 객체 생성");
+    log_->Log(Log::LogLevel::INFO, "Core 객체 생성");
+    log_->Log(Log::LogLevel::INFO, "Adapter 3개 객체 생성");
 }
 
 Core::~Core()
 {
-    log_->Log(Log::LogLevel::INFO,"Core 정상 종료");
+    log_->Log(Log::LogLevel::INFO, "Core 정상 종료");
 }
 
 bool Core::Initialize()
 {
-    //this 객체 shared_ptr 선언
     auto self = shared_from_this();
 
     pdispatcher_ = make_uptr<Dispatcher>(_MAX_EXECUTOR_NUM_, log_);
-    
     pRobotArmAdapter_ = make_uptr<RobotArmAdapter>(self, log_);
-
     pRequestManager_ = make_uptr<RequestManager>(self, log_);
+    traffic_solver_ = make_uptr<RequestManager>(self, log_);
+    // AMR 어댑터 생성
+    for (int i = 0; i < _AMR_NUM_; ++i) {
+        string name = "AMR" + to_string(i+1);
+        amr_adapters_.emplace_back(
+            make_uptr<Adapter::AmrAdapter>(self, log_, name)
+        );
+    }\
 
-    // arm adapter 객체 생성 및 vector에 추가
-    for(int i = 0; i < _AMR_NUM_ ; ++i)
+    monitor_running_ = ture;
+    assignTask([this]()) 
     {
+<<<<<<< Updated upstream:Service/ROS_Task_Manager/robocallee_fms/Core/src/Core.cpp
         std::string name = "AMR" + std::to_string(i);
         amr_adapters_.emplace_back(make_uptr<Adapter::AmrAdapter>(self, log_ , name));   
+=======
+        using namespace std::chorono_literals;
+        while (monitor_running_)
+        {
+            for (int i = 0; i < _AMR_NUM_; ++i)
+            {
+                handleWaypointArrival(i);
+
+            }
+            std::this_thread::sleep_for(100ms);
+        }
+
+
+>>>>>>> Stashed changes:robocallee_fms/Core/src/Core.cpp
     }
 
-    log_->Log(Log::LogLevel::INFO,"Core Initialize Done");
-    
+    log_->Log(Log::LogLevel::INFO, "Core Initialize Done");
     return true;
 }
-
 
 bool Core::SetAmrNextStep(int idx, Commondefine::AmrStep step)
 {
-    switch (step)
-    {
-    case AmrStep_num:
-        break;
-    
-    default:
-        break;
-    }
-
+    // TODO: 구현
     return true;
 }
 
-
-// auto Core::assignTask(F&& f, Args&&... args)-> std::future<typename std::invoke_result<F, Args...>::type>
-bool Core::SetRobotArmNextStep(Commondefine::RobotArmStep step , Commondefine::shoesproperty shoe_info , int pinky_num )
-
+bool Core::SetRobotArmNextStep(Commondefine::RobotArmStep step,
+                               Commondefine::shoesproperty shoe_info,
+                               int pinky_num)
 {
-    log_->Log(Log::LogLevel::INFO, "assignTask 직전 step은 " + step);
-
-    switch (step)
+    // enum 출력을 위한 스트림 사용
     {
-    case 1: //shelf_to_buffer
-        // assignTask(pRobotArmAdapter_-> arm1_shelf_to_buffer, shoe_info, pinky_num);
-        log_->Log(Log::LogLevel::INFO, "assignTask shelf_to_buffer" );
-        assignTask( [this, shoe_info, pinky_num]() {pRobotArmAdapter_->arm1_shelf_to_buffer(shoe_info, pinky_num); } );
-        // assignTask(Adapter::RobotArmAdapter::arm1_shelf_to_buffer);
-        
+        ostringstream oss;
+        oss << "assignTask 직전 step은 " << static_cast<int>(step);
+        log_->Log(Log::LogLevel::INFO, oss.str());
+    }
+
+    switch (step) {
+    case RobotArmStep::shelf_to_buffer:
+        log_->Log(Log::LogLevel::INFO, "assignTask shelf_to_buffer");
+        assignTask([this, shoe_info, pinky_num]() {
+            pRobotArmAdapter_->arm1_shelf_to_buffer(shoe_info, pinky_num);
+        });
         break;
-
-    case 2: //buffer_to_pinky
-        break;
-
-    case 3: //pinky_to_buffer
-        break;
-
-
-    case 4: //buffer_to_shelf
-        break;
-    
-
+    // case RobotArmStep::buffer_to_pinky:
+    // case RobotArmStep::pinky_to_buffer:
+    // case RobotArmStep::buffer_to_shelf:
     default:
         break;
     }
-
     return true;
 }
 
-
-bool Core::ArmRequestMakeCall(int arm_num, int shelf_num, int pinky_num){
-
-    if(arm_num==1){
+bool Core::ArmRequestMakeCall(int arm_num, int shelf_num, int pinky_num)
+{
+    if (arm_num == 1) {
         if (auto iface = Interface_.lock()) {
             iface->arm1_send_request(shelf_num, pinky_num);
         } else {
-            log_->Log(Log::LogLevel::ERROR, "RosInterface가 유효하지 않습니다!" );
-
+            log_->Log(Log::LogLevel::ERROR,
+                      "RosInterface가 유효하지 않습니다!");
         }
     }
-
-    // else // arm_num == 2
-        // Interface_.arm2_send_request(shelf_num, pinky_num );
     return true;
 }
 
+bool Core::PoseCallback(const Commondefine::pose2f& pos, int pinky_id)
+{
+    auto& task_info = amr_adapters_[pinky_id]->GetTaskInfo();
+    task_info.current_position = pos;
+
+    handleWaypointArrival(pinky_id);
+
+    return true;
+}
+
+
+void Core::handleWaypointArrival(int pink_id) 
+{
+
+    if (GetAmrState(pinky_id) != Commondefine::RobotState::BUSY) 
+    {
+        return;
+    }
+    
+    TrafficSolver solver(map, starts, goals);
+    auto paths = solver.findSolution(true);
+
+
+
+    paths[pink_id][index]
+    const auto &wps = amr_adapters_[pink_id]->paths();
+    int idx         = amr_adapters_[pink_id]->GetCurrentWaypointIndex();
+    
+    if (idx >= int(wps.size())) return;
+    
+    const auto &cur = amr_adapters_[pink_id]->GetTaskInfo().current_position;
+    float dx = float(cur.x -wps[idx].x);
+    float dy = float(cur.y -wps[idx].y);
+    
+    float dist = std::hypot(dx, dy);
+    if (dist <=0.05f)
+    {
+        amr_adapters_[pinky_id]->incrementWaypointIndex();
+        amr_adapters_[pinky_id]->onWaypointReached(pinky_id);
+    }
+}
 
 
 int Core::RequestCallback(const Commondefine::GUIRequest& request)
 {
+<<<<<<< Updated upstream:Service/ROS_Task_Manager/robocallee_fms/Core/src/Core.cpp
     log_->Log(Log::LogLevel::INFO, "Request received: " + request.shoes_property.model);
 
     if (pRequestManager_)
@@ -138,25 +176,35 @@ int Core::RequestCallback(const Commondefine::GUIRequest& request)
     {   //error
         return -1;
     }
+=======
+    log_->Log(Log::LogLevel::INFO,
+              string("Request received: ") + request.shoes_property.model);
+    if (pRequestManager_) {
+        pRequestManager_->EnqueueRequest(request);
+        pRequestManager_->BestRobotSelector();
+        return true;
+    }
+    return false;
+>>>>>>> Stashed changes:robocallee_fms/Core/src/Core.cpp
 }
-   
 
-bool Core::DoneCallback(const std::string& requester, const int& customer_id)
+bool Core::DoneCallback(const std::string& requester,
+                        const int& customer_id)
 {
-    log_->Log(Log::LogLevel::INFO, "Done received from: " + requester);
-
-    if (requester == "customer")
-    {
-        for (int i = 0; i < _AMR_NUM_; i++)
-        {
-            if (GetAmrState(i) == customer_id)
-            {
-                amr_adapters_[i]->SetAmrState(Commondefine::RobotState::IDLE);
-                log_->Log(Log::LogLevel::INFO, "핑키가 고객ID: " + to_string(customer_id) + "에게 배달 완료");
+    log_->Log(Log::LogLevel::INFO,
+              string("Done received from: ") + requester);
+    if (requester == "customer") {
+        for (int i = 0; i < _AMR_NUM_; ++i) {
+            if (GetAmrState(i) == customer_id) {
+                amr_adapters_[i]->SetAmrState(RobotState::IDLE);
+                log_->Log(Log::LogLevel::INFO,
+                          string("핑키가 고객ID: ") + to_string(customer_id) +
+                          "에게 배달 완료");
                 pRequestManager_->BestRobotSelector();
                 log_->Log(Log::LogLevel::INFO, "DoneCallback true");
                 return true;
             }
+<<<<<<< Updated upstream:Service/ROS_Task_Manager/robocallee_fms/Core/src/Core.cpp
 
         }       
         log_->Log(Log::LogLevel::INFO, "고객ID: " + to_string(customer_id) + "의 배달을 지정받은 핑키 없음");
@@ -171,43 +219,47 @@ bool Core::DoneCallback(const std::string& requester, const int& customer_id)
     }
     
     else return false ;
+=======
+        }
+        log_->Log(Log::LogLevel::INFO,
+                  string("고객ID: ") + to_string(customer_id) +
+                  "의 배달을 지정받은 핑키 없음");
+        return false;
+    } else if (requester == "employee") {
+        return true;
+    }
+    return false;
+>>>>>>> Stashed changes:robocallee_fms/Core/src/Core.cpp
 }
 
-
-Commondefine::RobotState Core::GetAmrState(int idx) 
+Commondefine::RobotState Core::GetAmrState(int idx)
 {
-    if (idx < 0 || idx >= static_cast<int>(amr_adapters_.size())) return Commondefine::RobotState::INVALID;
-    
+    if (idx < 0 || idx >= static_cast<int>(amr_adapters_.size()))
+        return RobotState::INVALID;
     return amr_adapters_[idx]->GetTaskInfo().robot_state;
 }
 
-
-int Core::GetAmrBattery(int idx) 
+int Core::GetAmrBattery(int idx)
 {
-    if (idx < 0 || idx >= static_cast<int>(amr_adapters_.size())) return -1;
-    
+    if (idx < 0 || idx >= static_cast<int>(amr_adapters_.size()))
+        return -1;
     return amr_adapters_[idx]->GetTaskInfo().battery;
 }
 
 int Core::GetAmrCustID(int idx)
 {
-    if (idx < 0 || idx >= static_cast<int>(amr_adapters_.size())) return -1;
-    
+    if (idx < 0 || idx >= static_cast<int>(amr_adapters_.size()))
+        return -1;
     return amr_adapters_[idx]->GetTaskInfo().customer_id;
 }
-
 
 int Core::GetAmrVecSize()
 {
     return amr_adapters_.size();
 }
 
-
 void Core::SetTaskInfo(int idx, const Commondefine::GUIRequest& request)
 {
-    if(idx < 0 || idx >= static_cast<int>(amr_adapters_.size())) return;
-
+    if (idx < 0 || idx >= static_cast<int>(amr_adapters_.size())) return;
     amr_adapters_[idx]->SetTaskInfo(request);
-
 }
-

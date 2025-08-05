@@ -7,7 +7,11 @@
 # since a plain shell script can't determine its own path when being sourced
 # either use the provided COLCON_CURRENT_PREFIX
 # or fall back to the build time prefix (if it exists)
+<<<<<<< Updated upstream:Service/ROS_Task_Manager/robocallee_fms/install/setup.sh
 _colcon_prefix_chain_sh_COLCON_CURRENT_PREFIX=/home/addinedu/dev_ws/roscamp-repo-3/Service/ROS_Task_Manager/robocallee_fms/install
+=======
+_colcon_prefix_chain_sh_COLCON_CURRENT_PREFIX=/home/addinedu/rotusC/roscamp-repo-3/robocallee_fms/install
+>>>>>>> Stashed changes:robocallee_fms/install/setup.sh
 if [ ! -z "$COLCON_CURRENT_PREFIX" ]; then
   _colcon_prefix_chain_sh_COLCON_CURRENT_PREFIX="$COLCON_CURRENT_PREFIX"
 elif [ ! -d "$_colcon_prefix_chain_sh_COLCON_CURRENT_PREFIX" ]; then

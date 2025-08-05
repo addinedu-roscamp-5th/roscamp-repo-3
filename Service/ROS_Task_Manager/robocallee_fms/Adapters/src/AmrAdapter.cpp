@@ -64,3 +64,62 @@ void AmrAdapter::SetAmrState(const Commondefine::RobotState& state)
         robot_task_info_.robot_state = state;
     }
 }
+
+void AmrAdapter::onWaypointReached(int pinky_id)
+{
+    if (current_waypoint_idx_ <static_cast<int>(waypoints_.size()) -1
+    {
+
+    }
+}
+
+
+
+
+
+void AmrAdapter::MoveTo_dest1()
+{
+    auto core = core_.lock();
+    if (!core) return;
+
+    int pink_id = robots_info_.robot_id;
+
+    Commondefine::pose2d start = robots_info_.current_position;
+    Commondefine::pose2d goal  = robots_info_.dest1;
+
+// how to go from start to goal ? To core 
+    auto path = core->requestPath(pink_id, start, goal);
+
+    log_->Log(Log::LogLevel::INFO,
+              "AMR[%d] MoveTo_dest1: 경로 생성 후 Core에 퍼블리시 요청 (%zu 포인트)",
+              robotId, path.size())
+
+    core->SetAmrNextStep(pink_id, Commondefine::AmrStep::Load);
+
+
+}
+
+void AmrAdapter::MoveTo_dest2()
+{
+    auto core = core_.lock();
+    if (!core) return;
+
+    int pink_id = robots_info_.robot_id;
+
+    auto path = core->requestPath(pink_id, start, goal);
+
+    core->SetAmrNextStep(pink_id, Commondefine::AmrStep::Unload);
+    
+}
+
+void AmrAdpater::MoveTo_dest3()
+{
+    auto core = core_.lock();
+    if(!core) retun;
+
+    int pinky_id = robots_info_.robot_id;
+
+    auto path = core->requestPath(pink_id, start, goal);
+
+    core->SetAmrNextStep(pinky_id, Commondefine::AmrStep::Tocharge);
+}
