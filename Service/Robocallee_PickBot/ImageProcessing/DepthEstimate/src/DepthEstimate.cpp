@@ -253,17 +253,17 @@ double DepthEstimate::computeBaseLine(cv::Mat& T_base_grip1 , cv::Mat& T_base_gr
     Mat G2C; 
     Geometry::homogeneousInverse(calib->Getcam2gripper(), G2C);
 
-    Mat T_cam1 = (T_base_grip1) * G2C;
-    Mat T_cam2 = (T_base_grip2) * G2C;
+    Mat T_base2cam1 = (T_base_grip1) * G2C;
+    Mat T_base2cam2 = (T_base_grip2) * G2C;
 
         // Translation 벡터 추출
-    cv::Vec3d p1(T_cam1.at<double>(0,3),
-                 T_cam1.at<double>(1,3),
-                 T_cam1.at<double>(2,3));
+    cv::Vec3d p1(T_base2cam1.at<double>(0,3),
+                 T_base2cam1.at<double>(1,3),
+                 T_base2cam1.at<double>(2,3));
 
-    cv::Vec3d p2(T_cam2.at<double>(0,3),
-                 T_cam2.at<double>(1,3),
-                 T_cam2.at<double>(2,3));
+    cv::Vec3d p2(T_base2cam2.at<double>(0,3),
+                 T_base2cam2.at<double>(1,3),
+                 T_base2cam2.at<double>(2,3));
 
 
     cv::Vec3d delta = p2 - p1;

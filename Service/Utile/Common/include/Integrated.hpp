@@ -8,6 +8,7 @@
 #include <chrono>
 #include <future>
 #include <map>
+#include <algorithm>
 #include <condition_variable>
 
 #include "Logger.hpp"

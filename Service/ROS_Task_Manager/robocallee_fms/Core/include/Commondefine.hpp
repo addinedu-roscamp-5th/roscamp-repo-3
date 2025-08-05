@@ -1,4 +1,5 @@
 #pragma once
+#include "Integrated.hpp"
 
 namespace Commondefine
 {
@@ -93,22 +94,33 @@ namespace Commondefine
         }
     }RobotTaskInfo;
 
+    typedef struct Position
+    {
+        int x;
+        int y;
+        bool operator==(const Position& other) const { return x == other.x && y == other.y;}
 
-    using Position = std::pair<int, int>;
+    }Position;
 
-    struct Constraint {
+    typedef struct Constraint
+    {
         int agent;
         int timestep;
         std::vector<Position> loc;  // size=1이면 vertex constraint, size=2이면 edge constraint
-    };
+    
+    }Constraint;
 
-    struct Conflict {
-        int agent1, agent2;
+    typedef struct Conflict
+    {
+        int agent1;
+        int agent2;
         int timestep;
         std::vector<Position> loc;  // 충돌 위치 (vertex 또는 edge)
-    };
 
-    struct Node {
+    }Conflict;
+
+    typedef struct Node
+    {
         Position pos;
         int g_val;
         int h_val;
@@ -116,7 +128,30 @@ namespace Commondefine
         Node* parent;
 
         int f_val() const { return g_val + h_val; }
-    };
+    }Node;
+
+    typedef struct CBSNode
+    {
+        std::vector<std::vector<Position>> paths;
+        std::vector<Constraint> constraints;
+        int cost;
+        std::vector<Conflict> conflicts;
+        int id;
+
+        bool operator>(const CBSNode& other) const { return cost > other.cost;}
+    }CBSNode;
+
+    typedef struct YAMLFile
+    {
+        std::string         Image_path_;
+        double              resolution_;
+        std::vector<double> origin_;
+        bool                negate_;
+        double              occ_thresh_;
+        double              free_thresh_;
+
+    } YAMLFile;
+
 };
 
 

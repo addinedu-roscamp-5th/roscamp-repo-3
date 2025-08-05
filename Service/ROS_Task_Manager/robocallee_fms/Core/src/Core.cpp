@@ -8,6 +8,7 @@ using namespace Commondefine;
 using namespace Adapter;
 using namespace std;
 using namespace Manager;
+using namespace traffic;
 
 Core::Core(Logger::s_ptr log, interface::RosInterface::s_ptr Interface)
     : log_(log), Interface_(Interface)
@@ -28,7 +29,8 @@ bool Core::Initialize()
     pdispatcher_ = make_uptr<Dispatcher>(_MAX_EXECUTOR_NUM_, log_);
     pRobotArmAdapter_ = make_uptr<RobotArmAdapter>(self, log_);
     pRequestManager_ = make_uptr<RequestManager>(self, log_);
-    traffic_solver_ = make_uptr<RequestManager>(self, log_);
+    traffic_solver_ = make_uptr<TrafficSolver>(self, log_);
+    
     // AMR 어댑터 생성
     for (int i = 0; i < _AMR_NUM_; ++i) {
         string name = "AMR" + to_string(i+1);
@@ -40,10 +42,6 @@ bool Core::Initialize()
     monitor_running_ = ture;
     assignTask([this]()) 
     {
-<<<<<<< Updated upstream:Service/ROS_Task_Manager/robocallee_fms/Core/src/Core.cpp
-        std::string name = "AMR" + std::to_string(i);
-        amr_adapters_.emplace_back(make_uptr<Adapter::AmrAdapter>(self, log_ , name));   
-=======
         using namespace std::chorono_literals;
         while (monitor_running_)
         {
@@ -54,9 +52,6 @@ bool Core::Initialize()
             }
             std::this_thread::sleep_for(100ms);
         }
-
-
->>>>>>> Stashed changes:robocallee_fms/Core/src/Core.cpp
     }
 
     log_->Log(Log::LogLevel::INFO, "Core Initialize Done");
@@ -154,7 +149,6 @@ void Core::handleWaypointArrival(int pink_id)
 
 int Core::RequestCallback(const Commondefine::GUIRequest& request)
 {
-<<<<<<< Updated upstream:Service/ROS_Task_Manager/robocallee_fms/Core/src/Core.cpp
     log_->Log(Log::LogLevel::INFO, "Request received: " + request.shoes_property.model);
 
     if (pRequestManager_)
@@ -176,16 +170,6 @@ int Core::RequestCallback(const Commondefine::GUIRequest& request)
     {   //error
         return -1;
     }
-=======
-    log_->Log(Log::LogLevel::INFO,
-              string("Request received: ") + request.shoes_property.model);
-    if (pRequestManager_) {
-        pRequestManager_->EnqueueRequest(request);
-        pRequestManager_->BestRobotSelector();
-        return true;
-    }
-    return false;
->>>>>>> Stashed changes:robocallee_fms/Core/src/Core.cpp
 }
 
 bool Core::DoneCallback(const std::string& requester,
@@ -204,7 +188,6 @@ bool Core::DoneCallback(const std::string& requester,
                 log_->Log(Log::LogLevel::INFO, "DoneCallback true");
                 return true;
             }
-<<<<<<< Updated upstream:Service/ROS_Task_Manager/robocallee_fms/Core/src/Core.cpp
 
         }       
         log_->Log(Log::LogLevel::INFO, "고객ID: " + to_string(customer_id) + "의 배달을 지정받은 핑키 없음");
@@ -219,17 +202,6 @@ bool Core::DoneCallback(const std::string& requester,
     }
     
     else return false ;
-=======
-        }
-        log_->Log(Log::LogLevel::INFO,
-                  string("고객ID: ") + to_string(customer_id) +
-                  "의 배달을 지정받은 핑키 없음");
-        return false;
-    } else if (requester == "employee") {
-        return true;
-    }
-    return false;
->>>>>>> Stashed changes:robocallee_fms/Core/src/Core.cpp
 }
 
 Commondefine::RobotState Core::GetAmrState(int idx)

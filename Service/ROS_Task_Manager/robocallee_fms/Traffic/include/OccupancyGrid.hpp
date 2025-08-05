@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Commondefine.hpp"
 #include "Integrated.hpp"
 #include <opencv2/opencv.hpp>
 
@@ -7,25 +8,13 @@
 
 namespace OG
 {
-    typedef struct YAMLInfo
-    {
-        std::string         Image_path_;
-        double              resolution_;
-        std::vector<double> origin_;
-        bool                negate_;
-        double              occ_thresh_;
-        double              free_thresh_;
-
-    } YAMLFile;
-
     class OccupancyGrid
     {
     private:
-        YAML::Node          Config_;
-        YAMLInfo            yamlinfo_;
+        YAML::Node                        Config_;
+        Commondefine::YAMLFile            yamlinfo_;
         
-        cv::Mat             Map_;
-
+        cv::Mat                           Map_;
     public:
         OccupancyGrid();
         ~OccupancyGrid();

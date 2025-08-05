@@ -34,17 +34,19 @@ include_directories(
   ${UTILE_INCLUDE_DIR}
   ${LOGGER_INCLUDE_DIR}
   ${COMMON_INCLUDE_DIR}
-<<<<<<< Updated upstream:Service/ROS_Task_Manager/robocallee_fms/CMakeLists.txt
   ${YAML_INCLUDE_DIR}
   ${OPENCV_INCLUDE_DIR}
 	)
 
-  # 서비스 메시지 생성
-rosidl_generate_interfaces(${PROJECT_NAME}
-    "srv/ShoeRequest.srv"
-    "srv/DoneMsg.srv"
-    "srv/RobotArmRequest.srv"
-    )
+  # ROS2 & 메시지 의존성
+  find_package(ament_cmake REQUIRED)
+  find_package(rclcpp REQUIRED)
+  find_package(std_msgs REQUIRED)
+  find_package(geometry_msgs REQUIRED)         # ← 추가
+  find_package(tf2 REQUIRED)                   # ← 추가
+  find_package(tf2_ros REQUIRED)               # ← 추가
+  find_package(tf2_geometry_msgs REQUIRED)     # ← 추가
+  find_package(rosidl_default_generators REQUIRED)
 
 add_executable(robocallee_fms_node
     main.cpp
@@ -57,19 +59,8 @@ add_executable(robocallee_fms_node
     Adapters/src/RobotArmAdapter.cpp
     Manager/src/RequestManager.cpp
     Traffic/src/OccupancyGrid.cpp
-=======
->>>>>>> Stashed changes:robocallee_fms/CMakeLists.txt
+    Traffic/src/TrafficPlanner.cpp
 )
-
-# ROS2 & 메시지 의존성
-find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(std_msgs REQUIRED)
-find_package(geometry_msgs REQUIRED)         # ← 추가
-find_package(tf2 REQUIRED)                   # ← 추가
-find_package(tf2_ros REQUIRED)               # ← 추가
-find_package(tf2_geometry_msgs REQUIRED)     # ← 추가
-find_package(rosidl_default_generators REQUIRED)
 
 # 서비스 메시지 생성
 rosidl_generate_interfaces(${PROJECT_NAME}
@@ -96,16 +87,12 @@ target_include_directories(robocallee_fms_node PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/rosidl_generator_cpp>
 )
 
-<<<<<<< Updated upstream:Service/ROS_Task_Manager/robocallee_fms/CMakeLists.txt
 rosidl_get_typesupport_target(cpp_typesupport_target
   ${PROJECT_NAME}
   "rosidl_typesupport_cpp"
   )
 
 #실행 파일(robocallee_fms_node)를 사용하는 ROS2 패키지들을 link 해줌
-=======
-# ROS2 패키지 의존성 연결
->>>>>>> Stashed changes:robocallee_fms/CMakeLists.txt
 ament_target_dependencies(robocallee_fms_node
   rclcpp  
   std_msgs
@@ -117,7 +104,6 @@ ament_target_dependencies(robocallee_fms_node
 
 # 링크 라이브러리
 target_link_libraries(robocallee_fms_node
-<<<<<<< Updated upstream:Service/ROS_Task_Manager/robocallee_fms/CMakeLists.txt
   ${OPENCV_LIB_DIR}/libopencv_world.so    
   rclcpp::rclcpp
   ${std_msgs_TARGETS}
@@ -129,9 +115,6 @@ target_link_libraries(robocallee_fms_node
 set_target_properties(robocallee_fms_node PROPERTIES
   BUILD_WITH_INSTALL_RPATH TRUE
   INSTALL_RPATH "${OPENCV_LIB_DIR};${YAML_LIB_DIR};${CMAKE_INSTALL_PREFIX}/lib;${CMAKE_INSTALL_PREFIX}/lib/robocallee_fms"
-=======
-  rclcpp::rclcpp
->>>>>>> Stashed changes:robocallee_fms/CMakeLists.txt
 )
 
 # rosidl 타입 지원 링크
@@ -144,8 +127,4 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
-<<<<<<< Updated upstream:Service/ROS_Task_Manager/robocallee_fms/CMakeLists.txt
 ament_package()
-=======
-ament_package()
->>>>>>> Stashed changes:robocallee_fms/CMakeLists.txt
