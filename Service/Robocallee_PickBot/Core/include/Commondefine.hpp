@@ -5,7 +5,7 @@ namespace Commondefine
 {
     #define _ROS_NODE_NAME_ "robocallee_pickbot"
 
-    #define _LOG_FILE_DIR_ "robocallee_pickbot_Log_file"
+    #define _LOG_FILE_DIR_ "robocallee_pickbot_Log"
 
     #define _CALIB_FILE_DIR_ "calib_file/Calib.XML"
 

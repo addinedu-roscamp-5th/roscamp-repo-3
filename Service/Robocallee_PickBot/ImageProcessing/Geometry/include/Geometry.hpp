@@ -58,7 +58,7 @@ namespace geometry
     {
         // 2D Point
         if constexpr (std::is_same<PointT, cv::Point2f>::value || std::is_same<PointT, cv::Point2d>::value ||
-                    std::is_same<PointT, cv::Point2i>::value)
+                    std::is_same<PointT, cv::Point2i>::value || std::is_same<PointT, cv::Point>::value)
                     {
             using ScalarT = decltype(pt.x);
             return (cv::Mat_<ScalarT>(2, 1) << pt.x, pt.y);
@@ -81,39 +81,61 @@ namespace geometry
     // -------------------------
     // Mat -> Point 변환
     // -------------------------
-    template<typename PointT>
-    PointT Geometry::matToPoint(const cv::Mat& mat)
-    {
-        // Mat 크기 검증
-        CV_Assert(mat.total() == 2 || mat.total() == 3);
-        CV_Assert(mat.channels() == 1);
+   template<typename PointT>
+PointT Geometry::matToPoint(const cv::Mat& mat)
+{
+    using ValueT = typename PointT::value_type;
 
-        // 2D Point
+    // 1. 다채널 Vec 기반: (1×1) 행렬 + 2채널 or 3채널
+    if (mat.rows == 1 && mat.cols == 1)
+    {
         if constexpr (
             std::is_same_v<PointT, cv::Point2f> || std::is_same_v<PointT, cv::Point2d> ||
             std::is_same_v<PointT, cv::Point2i>)
-            {
-            CV_Assert(mat.total() == 2);
-            return PointT(
-                mat.at<typename PointT::value_type>(0, 0),
-                mat.at<typename PointT::value_type>(1, 0)
-            );
+        {
+            CV_Assert(mat.channels() == 2);
+            cv::Vec<ValueT, 2> vec = mat.at<cv::Vec<ValueT, 2>>(0, 0);
+            return PointT(vec[0], vec[1]);
         }
-        // 3D Point
         else if constexpr (
             std::is_same_v<PointT, cv::Point3f> || std::is_same_v<PointT, cv::Point3d> ||
             std::is_same_v<PointT, cv::Point3i>)
-            {
-            CV_Assert(mat.total() == 3);
-            return PointT(
-                mat.at<typename PointT::value_type>(0, 0),
-                mat.at<typename PointT::value_type>(1, 0),
-                mat.at<typename PointT::value_type>(2, 0)
-            );
-        }
-        else {
-            static_assert(!std::is_same<PointT, PointT>::value,
-                          "지원하지 않는 Point 타입입니다.");
+        {
+            CV_Assert(mat.channels() == 3);
+            cv::Vec<ValueT, 3> vec = mat.at<cv::Vec<ValueT, 3>>(0, 0);
+            return PointT(vec[0], vec[1], vec[2]);
         }
     }
+
+    // 2. 단채널 일반 행렬: (2×1) 또는 (3×1)
+    CV_Assert(mat.channels() == 1);
+    CV_Assert(mat.cols == 1);  // 열이 반드시 1개
+
+    if constexpr (
+        std::is_same_v<PointT, cv::Point2f> || std::is_same_v<PointT, cv::Point2d> ||
+        std::is_same_v<PointT, cv::Point2i>)
+    {
+        CV_Assert(mat.rows == 2);
+        return PointT(
+            mat.at<ValueT>(0, 0),
+            mat.at<ValueT>(1, 0)
+        );
+    }
+    else if constexpr (
+        std::is_same_v<PointT, cv::Point3f> || std::is_same_v<PointT, cv::Point3d> ||
+        std::is_same_v<PointT, cv::Point3i>)
+    {
+        CV_Assert(mat.rows == 3);
+        return PointT(
+            mat.at<ValueT>(0, 0),
+            mat.at<ValueT>(1, 0),
+            mat.at<ValueT>(2, 0)
+        );
+    }
+    else
+    {
+        static_assert(!std::is_same<PointT, PointT>::value,
+                      "지원하지 않는 Point 타입입니다.");
+    }
+}
 }
