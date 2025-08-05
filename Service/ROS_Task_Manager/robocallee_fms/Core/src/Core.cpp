@@ -60,7 +60,23 @@ bool Core::Initialize()
 
 bool Core::SetAmrNextStep(int idx, Commondefine::AmrStep step)
 {
-    // TODO: 구현
+    switch (step)
+    {
+    case Commondefine::MoveTo_dest1:
+        assignTask(std::bind(&Adapter::AmrAdapter::MoveTo_dest1,
+                             pAmrAdapters_[pinky_id].get()));
+    case Commondefine::arm2_buffer_to_pinky:
+        assignTask(std::bind(&Adapter::AmrAdapter::arm2_buffer_to_pinky,
+                             pAmrAdapters_[pinky_id].get()));
+    case Commondefine::MoveTo_dest2:
+        assignTask(std::bind(&Adapter::AmrAdapter::MoveTo_dest2,
+                             pAmrAdapters_[pinky_id].get()));
+    case Commondefine::amr2_pinky_to_buffer:
+        assignTask(std::bind(&Adapter::AmrAdapter::amr2_pinky_to_buffer,
+                             pAmrAdapters_[pinky_id].get()));
+    case Commondefine::MoveTo_dest3:
+        assignTask(std::bind(&Adapter::AmrAdapter::MoveTo_dest3,
+                             pAmrAdapters_[pinky_id].get()));
     return true;
 }
 
