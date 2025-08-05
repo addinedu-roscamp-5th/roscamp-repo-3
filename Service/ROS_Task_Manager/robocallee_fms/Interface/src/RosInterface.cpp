@@ -40,17 +40,12 @@ bool RosInterface::Initialize(Integrated::w_ptr<core::ICore> Icore)
     );
     RCLCPP_INFO(get_logger(), "Subscribed to %s", topic.c_str());
   }
-
-<<<<<<< Updated upstream:Service/ROS_Task_Manager/robocallee_fms/Interface/src/RosInterface.cpp
-
-
     return true;
 }
 
 
 // int32 shelf_num
 // int32 pinky_num
-
 void RosInterface::arm1_send_request(int shelf_num, int pinky_num )
 {
     log_->Log(Log::INFO, "arm1_send_request 진입");
@@ -86,82 +81,34 @@ void RosInterface::cbArmService(rclcpp::Client<ArmServiceType>::SharedFuture fut
 
 void RosInterface::cbRequestService(const std::shared_ptr<ReqServiceType::Request> request, std::shared_ptr<ReqServiceType::Response> response)
 {
-    Commondefine::GUIRequest r;
-    r.requester = request->requester;
-    r.shoes_property.size = request->size;
-    r.shoes_property.model = request->model;
-    r.shoes_property.color = request->color;
-    r.dest2.x = request->x;
-    r.dest2.y = request->y;
-    r.customer_id = request->customer_id;
+  Commondefine::GUIRequest r;
+  r.requester = request->requester;
+  r.shoes_property.size = request->size;
+  r.shoes_property.model = request->model;
+  r.shoes_property.color = request->color;
+  r.dest2.x = request->x;
+  r.dest2.y = request->y;
+  r.customer_id = request->customer_i
+  
+  auto icore = Icore_.lock();
+  if(icore == nullptr)
+  {
+    log_->Log(Log::LogLevel::INFO, "ICore expire")
+    response->wait_list = -1;
+    
+    return;
+  }
+    
+  int wait_list = icore->RequestCallback(r);
+  response->wait_list = wait_list;
 
-    auto icore = Icore_.lock();
-    if(icore == nullptr)
-    {
-        log_->Log(Log::LogLevel::INFO, "ICore expired");
-
-        //error
-        response->wait_list = -1;
-
-        return;
-=======
-  // 3) 서비스 초기화
-  req_service_ = create_service<ReqServiceType>(
-    "process_request",
-    [this](const std::shared_ptr<ReqServiceType::Request>  req,
-           std::shared_ptr<ReqServiceType::Response>       res)
-    {
-      cbRequestService(req, res);
->>>>>>> Stashed changes:robocallee_fms/Interface/src/RosInterface.cpp
-    }
-  );
-  done_service_ = create_service<DoneServiceType>(
-    "process_done",
-    [this](const std::shared_ptr<DoneServiceType::Request>  req,
-           std::shared_ptr<DoneServiceType::Response>       res)
-    {
-      cbDoneService(req, res);
-    }
-  );
-
-<<<<<<< Updated upstream:Service/ROS_Task_Manager/robocallee_fms/Interface/src/RosInterface.cpp
-    // bool wait_list = icore->RequestCallback(r);
-    int wait_list = icore->RequestCallback(r);
-    response->wait_list = wait_list;
-=======
-  arm1_client_ = create_client<ArmServiceType>("robot_arm_request");
-
-  return true;
->>>>>>> Stashed changes:robocallee_fms/Interface/src/RosInterface.cpp
+  return;
 }
 
 void RosInterface::lmArrayCallback(
   const LmPoseMsg::ConstSharedPtr & msg,
   int pinky_id)
 {
-<<<<<<< Updated upstream:Service/ROS_Task_Manager/robocallee_fms/Interface/src/RosInterface.cpp
-    std::string requester = request->requester;
-    int customer_id = request->customer_id;
-    
-    log_->Log(Log::LogLevel::INFO, "cbDoneService() 진입");
-
-    if (auto icore = Icore_.lock())
-    {
-        log_->Log(Log::LogLevel::INFO, "DoneCallback() 호출 전");
-
-        bool accepted = icore->DoneCallback(requester, customer_id);
-        response->accepted = accepted;
-
-        log_->Log(Log::LogLevel::INFO, "DoneCallback() 호출 후");
-
-    }
-    else
-    {
-        log_->Log(Log::LogLevel::INFO, "ICore expired");
-        response->accepted = false;
-    }
-}
-=======
   if (msg->data.size() < 2) {
     RCLCPP_WARN(get_logger(), "lmArrayCallback: data size < 2");
     return;
@@ -202,44 +149,26 @@ void RosInterface::onArucoPose(
   }
 }
 
-void RosInterface::cbRequestService(
-  const std::shared_ptr<ReqServiceType::Request>  request,
-  std::shared_ptr<ReqServiceType::Response>       response)
-{
-  Commondefine::GUIRequest r;
-  r.requester            = request->requester;
-  r.shoes_property.size  = request->size;
-  r.shoes_property.model = request->model;
-  r.shoes_property.color = request->color;
-  r.dest2.x              = request->x;
-  r.dest2.y              = request->y;
-  r.customer_id          = request->customer_id;
-
-  if (auto icore = Icore_.lock()) {
-    response->accepted = icore->RequestCallback(r);
-  } else {
-    log_->Log(Log::LogLevel::INFO, "ICore expired");
-    response->accepted = false;
-  }
-}
-
 void RosInterface::cbDoneService(
   const std::shared_ptr<DoneServiceType::Request>  request,
   std::shared_ptr<DoneServiceType::Response>       response)
 {
-  if (auto icore = Icore_.lock()) {
-    response->accepted = icore->DoneCallback(request->requester,
-                                             request->customer_id);
-  } else {
+  if (auto icore = Icore_.lock())
+  {
+    response->accepted = icore->DoneCallback(request->requester,request->customer_id);
+  }
+  else 
+  {
     log_->Log(Log::LogLevel::INFO, "ICore expired");
+    
     response->accepted = false;
   }
 }
 
 void RosInterface::arm1_send_request(int shelf_num, int pinky_num)
 {
-  if (auto icore = Icore_.lock()) {
+  if (auto icore = Icore_.lock())
+  {
     icore->ArmRequestMakeCall(1, shelf_num, pinky_num);
   }
 }
->>>>>>> Stashed changes:robocallee_fms/Interface/src/RosInterface.cpp

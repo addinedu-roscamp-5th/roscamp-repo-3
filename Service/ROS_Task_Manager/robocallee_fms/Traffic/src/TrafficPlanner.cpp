@@ -2,6 +2,7 @@
 
 using namespace Commondefine;
 using namespace Integrated;
+using namespace traffic;
 
 // AStarPlanner 구현
 AStarPlanner::AStarPlanner(const std::vector<std::vector<bool>>& map) : map_(map)
@@ -51,7 +52,8 @@ std::vector<Position> AStarPlanner::findPath(
     Node* root = new Node{start, 0, heuristics[start.x][start.y], 0, nullptr};
     open_list.push(root);
 
-    while (!open_list.empty()) {
+    while (!open_list.empty())
+    {
         Node* curr = open_list.top(); 
         open_list.pop();
         

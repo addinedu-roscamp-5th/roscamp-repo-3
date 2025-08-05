@@ -29,32 +29,17 @@ bool Core::Initialize()
     pdispatcher_ = make_uptr<Dispatcher>(_MAX_EXECUTOR_NUM_, log_);
     pRobotArmAdapter_ = make_uptr<RobotArmAdapter>(self, log_);
     pRequestManager_ = make_uptr<RequestManager>(self, log_);
-    traffic_solver_ = make_uptr<TrafficSolver>(self, log_);
+    traffic_Planner_ = make_sptr<traffic_Planner_>(self, log_);
     
     // AMR 어댑터 생성
-    for (int i = 0; i < _AMR_NUM_; ++i) {
-        string name = "AMR" + to_string(i+1);
-        amr_adapters_.emplace_back(
-            make_uptr<Adapter::AmrAdapter>(self, log_, name)
-        );
-    }\
-
-    monitor_running_ = ture;
-    assignTask([this]()) 
+    for (int i = 0; i < _AMR_NUM_; ++i)
     {
-        using namespace std::chorono_literals;
-        while (monitor_running_)
-        {
-            for (int i = 0; i < _AMR_NUM_; ++i)
-            {
-                handleWaypointArrival(i);
-
-            }
-            std::this_thread::sleep_for(100ms);
-        }
+        string name = "AMR" + to_string(i+1);
+        amr_adapters_.emplace_back(make_uptr<Adapter::AmrAdapter>(self, log_, name));
     }
 
     log_->Log(Log::LogLevel::INFO, "Core Initialize Done");
+    
     return true;
 }
 

@@ -11,7 +11,7 @@
 #include "RobotArmAdapter.hpp"
 #include "RequestManager.hpp"
 #include "RosInterface.hpp"
-#include "TrafficAdapter.hpp"
+#include "TrafficPlanner.hpp"
 
 namespace core
 {
@@ -28,7 +28,7 @@ namespace core
         interface::RosInterface::w_ptr                              Interface_;
         
         Integrated::vec<Integrated::u_ptr<Adapter::AmrAdapter>>     amr_adapters_;
-        std::shared_ptr<traffic::TrafficSolver>                     traffic_solver_;
+        Integrated::s_ptr<traffic::TrafficPlanner>                     traffic_Planner_;
 
     public:
         using s_ptr = std::shared_ptr<Core>;
