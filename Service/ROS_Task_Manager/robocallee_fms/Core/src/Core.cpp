@@ -194,7 +194,7 @@ bool Core::DoneCallback(const std::string& requester, const int& customer_id)
 
     else if (requester == "employee")
     {
-        SetAmrNextStep(best_amr, Commondefine::AmrStep::MoveTo_dest2);
+        // SetAmrNextStep(best_amr, Commondefine::AmrStep::MoveTo_dest2);
         return true;
     }
     

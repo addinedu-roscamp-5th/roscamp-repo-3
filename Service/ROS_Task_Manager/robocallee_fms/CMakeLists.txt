@@ -48,6 +48,17 @@ include_directories(
   find_package(tf2_geometry_msgs REQUIRED)     # ← 추가
   find_package(rosidl_default_generators REQUIRED)
 
+
+# 서비스 메시지 생성
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "srv/ShoeRequest.srv"
+  "srv/DoneMsg.srv"
+  "srv/RobotArmRequest.srv"
+    "srv/CustomerRequest.srv"
+  "srv/EmployeeRequest.srv"
+)
+
+
 add_executable(robocallee_fms_node
     main.cpp
     ../../Utile/Logger/src/Logger.cpp
@@ -62,14 +73,6 @@ add_executable(robocallee_fms_node
     Traffic/src/TrafficPlanner.cpp
 )
 
-# 서비스 메시지 생성
-rosidl_generate_interfaces(${PROJECT_NAME}
-  "srv/ShoeRequest.srv"
-  "srv/DoneMsg.srv"
-  "srv/RobotArmRequest.srv"
-  "srv/CustomerRequest.srv"
-  "srv/EmployeeRequest.srv"
-)
 
 
 # 자동 생성된 메시지 헤더 포함

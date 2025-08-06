@@ -195,3 +195,9 @@ cython_debug/
 .cursorindexingignore
 
 Log_file/
+
+
+
+/Service/ROS_Task_Manager/robocallee_fms/install/
+/Service/ROS_Task_Manager/robocallee_fms/build/
+/Service/ROS_Task_Manager/robocallee_fms/log/
