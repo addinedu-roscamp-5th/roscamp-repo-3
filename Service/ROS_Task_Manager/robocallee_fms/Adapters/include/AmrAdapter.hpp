@@ -15,12 +15,11 @@ namespace Adapter
         std::mutex                                mtx_;
 
         std::vector<Commondefine::pose2f>         waypoints_;
-        int                                       current_wp_idx_{0};
+        std::atomic<int>                          current_wp_idx_{0};
 
     public:
         using u_ptr = Integrated::u_ptr<AmrAdapter>;
 
-        
         AmrAdapter(Integrated::w_ptr<core::ICore> Icore, Logger::s_ptr log, const std::string& name);
         ~AmrAdapter();
 
@@ -34,8 +33,6 @@ namespace Adapter
         const std::vector<Commondefine::pose2f>& getWaypoints() const { return waypoints_; }
         int GetCurrentWaypointIndex() const                           { return current_wp_idx_; }
         void incrementWaypointIndex()                                 { ++current_wp_idx_; }
-
-        void planpath(const Commondefine::pose2f& start, const Commondefine::pose2f& goal);
 
         void MoveTo_dest1();
         void MoveTo_dest2();

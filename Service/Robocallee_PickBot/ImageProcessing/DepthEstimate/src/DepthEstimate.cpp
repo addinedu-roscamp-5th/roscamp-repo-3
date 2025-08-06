@@ -22,132 +22,6 @@ DepthEstimate::~DepthEstimate()
 
 }
 
-// double DepthEstimate::MonoDepthEstimate(
-//             cv::Mat& left,
-//             cv::Mat& right,
-//             cv::Mat& DepthMap,
-//             double baseline)
-// {
-//     const double err = -1;
-//     if(left.empty() || right.empty()) return err;
-
-//     auto detector = detector_.lock();
-//     if(detector == nullptr) return err;
-
-//     auto calib = calib_.lock();
-//     if(calib == nullptr) return err;
-
-//     Mat g_left , g_right;
-//     cvtColor(left, g_left, COLOR_BGR2GRAY);
-//     cvtColor(right, g_right, COLOR_BGR2GRAY);
-
-//     threshold(g_left, g_left, 50, 255, THRESH_BINARY_INV);
-//     threshold(g_right, g_right, 50, 255, THRESH_BINARY_INV);
-//     cv::imwrite("g_left.png", g_left);
-//     cv::imwrite("g_right.png", g_right);
-
-
-//     //1. ORB 특징점 추출 및 매칭
-//     Ptr<ORB> orb = ORB::create(2000);
-//     vector<KeyPoint> kp1, kp2;
-//     Mat desc1, desc2;
-//     orb->detectAndCompute(g_left, noArray(), kp1, desc1);
-//     orb->detectAndCompute(g_right, noArray(), kp2, desc2);
-
-//     BFMatcher matcher(NORM_HAMMING);
-//     vector<DMatch> matches;
-//     matcher.match(desc1, desc2, matches);
-
-//     std::sort(matches.begin(), matches.end(), [](const DMatch& a, const DMatch& b)
-//     {
-//         return a.distance < b.distance;
-//     });
-
-//     // 4. 상위 10개만 추출
-//     int top_k = 10;
-//     vector<DMatch> top_matches(matches.begin(), matches.begin() + min(top_k, (int)matches.size()));
-
-//     Mat match_img;
-//     drawMatches(g_left, kp1, g_right, kp2, top_matches, match_img);
-//     cv::imwrite("orb_matches_raw.png", match_img);
-
-//     vector<Point3d> ptsls, ptsrs;
-//     for (auto& m : top_matches) 
-//     {
-//         //if (m.distance < 0.2 * max_dist) 
-//         {
-//             Point3d ptsl , ptsr;
-
-//             Geometry::transformCameraPose(kp1[m.queryIdx].pt, ptsl, calib->GetCameraMatrix(), calib->GetdistCoeffs());
-//             Geometry::transformCameraPose(kp2[m.trainIdx].pt, ptsr, calib->GetCameraMatrix(), calib->GetdistCoeffs());
-
-//             ptsls.push_back(ptsl);
-//             ptsrs.push_back(ptsr);
-//         }
-//     }
-
-//     if (ptsls.size() < 8)
-//     {
-//         cerr << "매칭된 점이 너무 적습니다." << endl;
-//         return err;
-//     }
-
-//     // 3. 단위 벡터를 사용해 카메라 간의 변환 행렬 계산 l -> r
-//     Mat T_se3, invT_se3, rvec, tvec, invrvec, invtvec;
-//     Geometry::estimateRigidTransformSVD(ptsls, ptsrs, rvec, tvec);
-
-//     //변환 행렬을 mm 단위로 변경
-//     tvec *= (baseline / norm(tvec));
-
-//     Geometry::composeTransform(rvec, tvec, T_se3);
-//     Geometry::homogeneousInverse(T_se3, invT_se3);
-//     Geometry::decomposeTransform(invT_se3, invrvec, invtvec);
-
-//     double residual_error = 0.0;
-//     for (size_t i = 0; i < ptsls.size(); ++i)
-//     {
-//         cv::Mat v1 = (Mat_<double>(3,1) << ptsls[i].x, ptsls[i].y, ptsls[i].z);
-//         cv::Mat v2 = (Mat_<double>(3,1) << ptsrs[i].x, ptsrs[i].y, ptsrs[i].z);
-
-//         // R, t 적용
-//         Mat v2p = invrvec * v2;
-//         Mat tp = invrvec * invtvec;
-
-//         Mat A(3, 2, CV_64F), b(3, 1, CV_64F);
-//         for (int j = 0; j < 3; ++j)
-//         {
-//             A.at<double>(j,0) = v1.at<double>(j);
-//             A.at<double>(j,1) = -v2p.at<double>(j);
-//             b.at<double>(j,0) = -tp.at<double>(j);
-//         }
-
-//         Mat lambda;
-//         solve(A, b, lambda, DECOMP_SVD);
-
-//         double depth = lambda.at<double>(0);
-
-//         if (depth > 0 && depth < 10000) // 합리적인 범위 필터링
-//         {
-//             int x = (int)kp1[matches[i].queryIdx].pt.x;
-//             int y = (int)kp1[matches[i].queryIdx].pt.y;
-
-//             cout << "X : " << x <<" Y : " << y << " Z : " << depth << endl;
-
-//             if (x >= 0 && x < DepthMap.cols && y >= 0 && y < DepthMap.rows)
-//                 DepthMap.at<double>(y, x) = depth;
-//         }
-
-//         Mat P1 = lambda.at<double>(0) * (Mat_<double>(3,1) << ptsls[i].x, ptsls[i].y, ptsls[i].z);
-//         Mat P2 = rvec * P1 + tvec;
-//         Mat diff = P2 - (Mat_<double>(3,1) << ptsrs[i].x, ptsrs[i].y, ptsrs[i].z);
-//         residual_error += norm(diff);
-//     }
-
-//     residual_error /= ptsls.size();
-
-//     return residual_error;
-// }
-
 double DepthEstimate::MonoDepthEstimate
 (
     vec<cv::Point>& left,
@@ -241,6 +115,152 @@ double DepthEstimate::MonoDepthEstimate
     }
 
     return residual_error /= size;
+}
+
+// double DepthEstimate::MonoDepthEstimate(
+//     vec<cv::Point>& left,
+//     vec<cv::Point>& right,
+//     vec<cv::Point3d>& pointcloud,
+//     double baseline_mm
+// )
+// {
+//     const double Err = -1.0;
+
+//     // 1. 입력 검증
+//     if(left.empty() || right.empty()) return Err;
+//     if(left.size() != right.size()) return Err;
+
+//     auto calib = calib_.lock();
+//     if(calib == nullptr) return Err;
+
+//     // 2. 픽셀 → 카메라 좌표계 → 단위 벡터
+//     vec<cv::Point3d> unit_lefts, unit_rights;
+//     for(size_t i = 0; i < left.size(); ++i)
+//     {
+//         cv::Point3d uL, uR;
+//         Geometry::transformCameraPose(left[i],  uL, calib->GetCameraMatrix(), calib->GetdistCoeffs());
+//         Geometry::transformCameraPose(right[i], uR, calib->GetCameraMatrix(), calib->GetdistCoeffs());
+
+//         // 정규화하여 단위벡터로
+//         unit_lefts.push_back(uL / cv::norm(uL));
+//         unit_rights.push_back(uR / cv::norm(uR));
+//     }
+
+//     // 3. SE(3) 추정: R, t 구하기 (단위벡터 기반)
+//     cv::Mat rvec, tvec;
+//     Geometry::estimateRigidTransformSVD(unit_lefts, unit_rights, rvec, tvec);
+
+//     std::cout << "[Info] 추정된 이동 벡터 norm (단위 없음): " << cv::norm(tvec) << std::endl;
+
+//     // 4. 스케일 보정: 방향만 유지하고 baseline으로 스케일 고정
+//     cv::Mat t_dir = tvec / cv::norm(tvec);
+//     tvec = t_dir * baseline_mm;  // 단위: mm
+
+//     double residual_error = 0.0;
+
+//     // 5. 삼각측량: λ 계산 후 λ * 단위벡터 = 3D 포인트
+//     for(size_t i = 0; i < unit_lefts.size(); ++i)
+//     {
+//         cv::Mat v1 = (cv::Mat_<double>(3,1) << unit_lefts[i].x, unit_lefts[i].y, unit_lefts[i].z);
+//         cv::Mat v2 = (cv::Mat_<double>(3,1) << unit_rights[i].x, unit_rights[i].y, unit_rights[i].z);
+
+//         // 우측 기준으로 좌측 벡터 정렬
+//         cv::Mat v2p = rvec.t() * v2;
+//         cv::Mat tp = rvec.t() * tvec;
+
+//         // 선형 방정식 구성: Aλ = b
+//         cv::Mat A(3, 2, CV_64F), b(3, 1, CV_64F);
+//         for(int j = 0; j < 3; ++j)
+//         {
+//             A.at<double>(j,0) = v1.at<double>(j);
+//             A.at<double>(j,1) = -v2p.at<double>(j);
+//             b.at<double>(j,0) = -tp.at<double>(j);
+//         }
+
+//         cv::Mat lambda;
+//         solve(A, b, lambda, cv::DECOMP_SVD);
+
+//         double lambda1 = lambda.at<double>(0);  // 좌측 단위벡터의 람다
+
+//         // mm 단위 3D 포인트 계산
+//         cv::Point3d point3D = lambda1 * unit_lefts[i];
+//         pointcloud.push_back(point3D);
+
+//         // 재투영 오차 계산 (R, t 기반 양쪽 포인트 비교)
+//         cv::Mat P1 = (cv::Mat_<double>(3,1) << point3D.x, point3D.y, point3D.z);
+//         cv::Mat P2 = rvec * P1 + tvec;
+//         cv::Mat diff = P2 - P1;
+//         residual_error += norm(diff);
+
+//         std::cout << "[3D Point] X: " << point3D.x << " Y: " << point3D.y << " Z: " << point3D.z << std::endl;
+//     }
+
+//     return residual_error / static_cast<double>(unit_lefts.size());
+// }
+
+double DepthEstimate::MonoDepthEstimate(
+    vec<cv::Point>& left,
+    vec<cv::Point>& right,
+    vec<cv::Point3d>& pointcloud,
+    double baseline_mm
+)
+{
+    const double Err = -1.0;
+
+    if(left.empty() || right.empty()) return Err;
+    if(left.size() != right.size()) return Err;
+
+    auto calib = calib_.lock();
+    if(calib == nullptr) return Err;
+
+    // 1. 내부 파라미터
+    cv::Mat K = calib->GetCameraMatrix();     // 3x3
+    cv::Mat D = calib->GetdistCoeffs();       // 왜곡 계수 (사용 안함 가정)
+    
+    // 2. 좌/우 카메라 포즈 정의 (기준: 좌측 카메라 원점 기준)
+    // P1 = K * [I | 0], P2 = K * [R | t]
+    cv::Mat R = cv::Mat::eye(3,3,CV_64F);
+    cv::Mat t = (cv::Mat_<double>(3,1) << -baseline_mm, 0, 0);  // X축 기준 baseline (mm)
+
+    cv::Mat Rt1, Rt2;
+    cv::hconcat(R, cv::Mat::zeros(3,1,CV_64F), Rt1);  // [I | 0]
+    cv::hconcat(R, t, Rt2);                           // [I | t]
+
+    cv::Mat P1 = K * Rt1;
+    cv::Mat P2 = K * Rt2;
+
+    // 3. 좌/우 픽셀 좌표 → Point2f로 변환
+    std::vector<cv::Point2f> pts1, pts2;
+    for (size_t i = 0; i < left.size(); ++i)
+    {
+        pts1.push_back(cv::Point2f(left[i]));
+        pts2.push_back(cv::Point2f(right[i]));
+    }
+
+    // 4. 삼각측량
+    cv::Mat points4D;  // 4xN (동차좌표)
+    cv::triangulatePoints(P1, P2, pts1, pts2, points4D);
+
+    // 5. 동차좌표 → 3D (정규화) → mm 단위 보존
+    pointcloud.clear();
+    double total_z = 0.0;
+
+    for (int i = 0; i < points4D.cols; ++i)
+    {
+        cv::Mat col = points4D.col(i);
+        cv::Point3d pt;
+
+        pt.x = col.at<float>(0) / col.at<float>(3);
+        pt.y = col.at<float>(1) / col.at<float>(3);
+        pt.z = col.at<float>(2) / col.at<float>(3);  // 단위: mm (baseline을 mm로 설정했기 때문)
+
+        pointcloud.push_back(pt);
+        total_z += pt.z;
+
+        std::cout << "[3D Point] X: " << pt.x << " Y: " << pt.y << " Z: " << pt.z << std::endl;
+    }
+
+    return total_z / static_cast<double>(points4D.cols);  // 평균 Z값 반환 (평균 깊이)
 }
 
 double DepthEstimate::computeBaseLine(cv::Mat& T_base_grip1 , cv::Mat& T_base_grip2)

@@ -74,6 +74,8 @@ bool Core::computeDepth()
     vec<cv::Point3d> pointcloud;
     depth_->MonoDepthEstimate(leftob[0].points, rightob[0].points, pointcloud, baseline);
 
+    
+
     return true;
 
 }

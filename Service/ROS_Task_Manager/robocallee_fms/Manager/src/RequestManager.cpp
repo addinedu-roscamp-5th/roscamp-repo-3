@@ -18,40 +18,39 @@ int RequestManager::EnqueueRequest(const Commondefine::GUIRequest& r)
 {
     std::lock_guard<std::mutex> lock(mtx_);
     request_queue_.push(r);
-    // request_queue_.push(r);
-    // request_queue_.push(r);
-    // request_queue_.push(r);
-    // request_queue_.push(r);
+    
     log_->Log(Log::LogLevel::INFO, "EnqueueRequest 완료");
-
+    
     //대기번호(본인을 제외한 다른 요청자의 수)
     int wait_list = static_cast<int>(request_queue_.size()) - 1;
     log_->Log(Log::LogLevel::INFO, "wait_list: " + std::to_string(wait_list));
+
     return wait_list;
 }
 
 void RequestManager::PopRequest(Commondefine::GUIRequest& r)
 {
-    std::lock_guard<std::mutex> lock(mtx_);
     if (request_queue_.empty()) return;
     
-    r = request_queue_.front();
-    request_queue_.pop();
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        r = request_queue_.front();
+        request_queue_.pop();
+    }
 
-        log_->Log(Log::LogLevel::INFO, "PopRequest 완료");
-
-
+    log_->Log(Log::LogLevel::INFO, "PopRequest 완료");
 }
 
 void RequestManager::BestRobotSelector()
 {
-    if (auto core = Icore_.lock()){
-
+    const int err = -1;
+    if (auto core = Icore_.lock())
+    {
         Commondefine::GUIRequest req;
 
         int amrs_num = core->GetAmrVecSize();
-        int best_amr = -1;
-        int max_battery = -1;
+        int best_amr = err;
+        int max_battery = err;
 
         for (int i=0; i<amrs_num; i++)
         {
@@ -60,14 +59,16 @@ void RequestManager::BestRobotSelector()
 
             if (status == Commondefine::RobotState::IDLE)
             {
-                if (battery>max_battery){
+                if (battery > max_battery)
+                {
                     max_battery = battery;
                     best_amr = i;
                 }
             }
         }
 
-        if (best_amr == -1){
+        if (best_amr == err)
+        {
             log_->Log(Log::LogLevel::INFO, "IDLE인 AMR 없음");
             return;
         }
@@ -76,7 +77,8 @@ void RequestManager::BestRobotSelector()
         // core->SetAssgignNewAmr(true);
 
         //밀린 작업 없음
-        if (request_queue_.empty()){
+        if (request_queue_.empty())
+        {
             core->SetAmrNextStep(best_amr, Commondefine::AmrStep::MoveTo_dest3);
             log_->Log(Log::INFO, "밀린 작업 없음, MoveTo_dest3 호출");
             return;
@@ -90,6 +92,7 @@ void RequestManager::BestRobotSelector()
         core->SetAmrNextStep(best_amr, Commondefine::AmrStep::MoveTo_dest1);
 
         //로봇팔1에게 버퍼로 상자 이동 명령
+<<<<<<< Updated upstream
         if (req.requester == "customer")
         {
             Commondefine::shoesproperty shoe_info = req.shoes_property;
@@ -118,6 +121,13 @@ void RequestManager::BestRobotSelector()
             
         return;
         
+=======
+        Commondefine::shoesproperty shoe_info = req.shoes_property;
+        core->SetRobotArmNextStep(Commondefine::RobotArmStep::shelf_to_buffer , shoe_info , best_amr);
+        log_->Log(Log::LogLevel::INFO, "로봇팔 작업 지정: " + shoe_info.model + ", " + shoe_info.color + ", " + std::to_string(shoe_info.size) + ", 핑키 번호: " + std::to_string(best_amr));
+
+        return;        
+>>>>>>> Stashed changes
     }
 
 }
