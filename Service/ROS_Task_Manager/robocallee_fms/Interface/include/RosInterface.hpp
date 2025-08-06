@@ -70,7 +70,9 @@ namespace interface
         bool Initialize(Integrated::w_ptr<core::ICore> Icore);
 
         // 외부(Core)에서 호출될 때
-        void arm1_send_request(int shelf_num, int pinky_num);
+        void arm1_send_request(int shelf_num, int pinky_num , std::string action );
+        void arm2_send_request(int pinky_num, std::string action );
+
 
         void cbArmService(rclcpp::Client<ArmServiceType>::SharedFuture future);
 

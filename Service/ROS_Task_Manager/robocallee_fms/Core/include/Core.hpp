@@ -51,7 +51,7 @@ namespace core
         bool SetRobotArmNextStep(Commondefine::RobotArmStep step , Commondefine::shoesproperty shoe_info , int pinky_num ) override;
         // bool SetRobotArmNextStep(Commondefine::RobotArmStep step) override;
         
-        bool ArmRequestMakeCall(int arm_num, int shelf_num, int pinky_num) override ;
+        bool ArmRequestMakeCall(int arm_num, int shelf_num, int pinky_num , std::string action) override ;
 
         int RequestCallback(const Commondefine::GUIRequest& request) override;
         

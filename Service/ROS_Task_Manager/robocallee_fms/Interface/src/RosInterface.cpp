@@ -21,7 +21,10 @@ RosInterface::~RosInterface()
     server_wait_thread_.join();
     log_->Log(INFO, "async_server_wait thread 정상 종료");
   }
+  
 }
+
+
 
 bool RosInterface::Initialize(Integrated::w_ptr<core::ICore> Icore)
 {
@@ -93,18 +96,36 @@ void RosInterface::async_server_wait()
 
 // int32 shelf_num
 // int32 pinky_num
-void RosInterface::arm1_send_request(int shelf_num, int pinky_num )
+void RosInterface::arm1_send_request(int shelf_num, int pinky_num , std::string action )
 {
-    log_->Log(Log::INFO, "arm1_send_request 진입");
+    log_->Log(Log::INFO, "arm1_send_request 진입. action: " + action);
 
     auto request = std::make_shared<ArmServiceType::Request>();
     request->shelf_num = shelf_num;
     request->pinky_num = pinky_num;
+    request->action = action;
 
     // 응답 도착 시, 아래 콜백이 자동 호출됨
     arm_clients_[Commondefine::RobotArm1]->async_send_request(request,
         std::bind(&RosInterface::cbArmService, this, std::placeholders::_1));
 }
+
+void RosInterface::arm2_send_request(int pinky_num , std::string action )
+{
+    log_->Log(Log::INFO, "arm2_send_request 진입. action: " + action);
+
+    auto request = std::make_shared<ArmServiceType::Request>();
+    request->shelf_num = -1;
+    request->pinky_num = pinky_num;
+    request->action = action;
+    
+    // 응답 도착 시, 아래 콜백이 자동 호출됨
+    arm_clients_[Commondefine::RobotArm2]->async_send_request(request,
+        std::bind(&RosInterface::cbArmService, this, std::placeholders::_1));
+}
+
+
+
 
 // 로봇팔한테 request 보내고 response 받는 부분
 void RosInterface::cbArmService(rclcpp::Client<ArmServiceType>::SharedFuture future)

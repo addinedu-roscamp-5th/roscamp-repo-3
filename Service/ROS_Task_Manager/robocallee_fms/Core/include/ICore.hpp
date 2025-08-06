@@ -20,7 +20,7 @@ public:
                                      int pinky_num) = 0;
 
     // 팔 서비스 호출
-    virtual bool ArmRequestMakeCall(int arm_num, int shelf_num,int pinky_num) = 0;
+    virtual bool ArmRequestMakeCall(int arm_num, int shelf_num,int pinky_num, std::string action) = 0;
 
     // 위치 콜백 (Aruco 또는 LM 위치)
     virtual bool PoseCallback(const Commondefine::pose2f &pos, int pinky_id) = 0;

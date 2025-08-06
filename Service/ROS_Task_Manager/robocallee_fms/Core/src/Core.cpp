@@ -70,6 +70,8 @@ bool Core::SetAmrNextStep(int idx, Commondefine::AmrStep step)
     return true;
 }
 
+
+// RobotArmStep 순서: shelf_to_buffer=1, buffer_to_pinky=2, pinky_to_buffer=3, buffer_to_shelf=4
 bool Core::SetRobotArmNextStep(Commondefine::RobotArmStep step , Commondefine::shoesproperty shoe_info , int pinky_num )
 {
     log_->Log(Log::LogLevel::INFO, "assignTask 직전 step은" + std::to_string(step));
@@ -80,9 +82,22 @@ bool Core::SetRobotArmNextStep(Commondefine::RobotArmStep step , Commondefine::s
             log_->Log(Log::LogLevel::INFO, "assignTask shelf_to_buffer");
             assignTask(std::bind(&Adapter::RobotArmAdapter::arm1_shelf_to_buffer, pRobotArmAdapter_.get(), shoe_info, pinky_num));
             break;
-        // case RobotArmStep::buffer_to_pinky:
-        // case RobotArmStep::pinky_to_buffer:
-        // case RobotArmStep::buffer_to_shelf:
+
+        case RobotArmStep::buffer_to_pinky:
+            log_->Log(Log::LogLevel::INFO, "assignTask buffer_to_pinky");
+            assignTask(std::bind(&Adapter::RobotArmAdapter::arm2_buffer_to_pinky, pRobotArmAdapter_.get(), pinky_num));
+            break;
+
+        case RobotArmStep::pinky_to_buffer:
+            log_->Log(Log::LogLevel::INFO, "assignTask pinky_to_buffer");
+            assignTask(std::bind(&Adapter::RobotArmAdapter::arm2_pinky_to_buffer, pRobotArmAdapter_.get(), pinky_num));
+            break;
+
+        case RobotArmStep::buffer_to_shelf:
+            log_->Log(Log::LogLevel::INFO, "assignTask buffer_to_shelf");
+            assignTask(std::bind(&Adapter::RobotArmAdapter::arm1_buffer_to_shelf, pRobotArmAdapter_.get(), pinky_num));
+            break;
+
         default:
             break;
     }
@@ -90,18 +105,33 @@ bool Core::SetRobotArmNextStep(Commondefine::RobotArmStep step , Commondefine::s
     return true;
 }
 
-bool Core::ArmRequestMakeCall(int arm_num, int shelf_num, int pinky_num)
+bool Core::ArmRequestMakeCall(int arm_num, int shelf_num, int pinky_num, std::string action)
 {
     if (arm_num == 1) {
         if (auto iface = Interface_.lock()) {
-            iface->arm1_send_request(shelf_num, pinky_num);
+            iface->arm1_send_request(shelf_num, pinky_num, action);
         } else {
             log_->Log(Log::LogLevel::ERROR,
                       "RosInterface가 유효하지 않습니다!");
         }
     }
+
+    else if (arm_num == 2) {
+        if (auto iface = Interface_.lock()) {
+            iface->arm2_send_request(pinky_num, action);
+        } else {
+            log_->Log(Log::LogLevel::ERROR,
+                      "RosInterface가 유효하지 않습니다!");
+        }
+    }
+
     return true;
 }
+
+
+
+
+
 
 bool Core::PoseCallback(const Commondefine::pose2f& pos, int pinky_id)
 {
