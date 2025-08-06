@@ -9,8 +9,8 @@
 #include "rclcpp/rclcpp.hpp"
 
 // 서비스·클라이언트
-#include "robocallee_fms/srv/shoe_request.hpp"
-#include "robocallee_fms/srv/done_msg.hpp"
+#include "robocallee_fms/srv/customer_request.hpp" 
+#include "robocallee_fms/srv/employee_request.hpp"
 #include "robocallee_fms/srv/robot_arm_request.hpp"
 
 // LM 위치 토픽 메시지 타입
@@ -26,8 +26,8 @@ namespace interface
 {
 
     using LmPoseMsg         = std_msgs::msg::Float32MultiArray;
-    using ReqServiceType    = robocallee_fms::srv::ShoeRequest;
-    using DoneServiceType   = robocallee_fms::srv::DoneMsg;
+    using CustomerServiceType = robocallee_fms::srv::CustomerRequest;    
+    using EmployeeServiceType = robocallee_fms::srv::EmployeeRequest;
     using ArmServiceType    = robocallee_fms::srv::RobotArmRequest;
 
     class RosInterface : public rclcpp::Node
@@ -37,9 +37,8 @@ namespace interface
         Integrated::w_ptr<core::ICore>                                  Icore_;
 
         // 서비스
-        rclcpp::Service<ReqServiceType>::SharedPtr                      req_service_;
-
-        rclcpp::Service<DoneServiceType>::SharedPtr                     done_service_;
+        rclcpp::Service<robocallee_fms::srv::CustomerRequest>::SharedPtr        customer_service_;
+        rclcpp::Service<robocallee_fms::srv::EmployeeRequest>::SharedPtr        employee_service_;
         
         // Arm 클라이언트
         std::vector<rclcpp::Client<ArmServiceType>::SharedPtr>          arm_clients_;
@@ -78,10 +77,10 @@ namespace interface
         void arucoPoseCallback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr & msg);
 
         // 요청·완료 서비스 콜백
-        void cbRequestService(const std::shared_ptr<ReqServiceType::Request>  request,
-                            std::shared_ptr<ReqServiceType::Response>       response);
-        void cbDoneService(const std::shared_ptr<DoneServiceType::Request> request,
-                        std::shared_ptr<DoneServiceType::Response>      response);
+        void cbCustomerRequest(const std::shared_ptr<CustomerServiceType::Request> request, 
+            std::shared_ptr<CustomerServiceType::Response> response);
+        void cbEmployeeRequest(const std::shared_ptr<EmployeeServiceType::Request> request,
+            std::shared_ptr<EmployeeServiceType::Response> response);
     };
 
     template<typename ServiceT>

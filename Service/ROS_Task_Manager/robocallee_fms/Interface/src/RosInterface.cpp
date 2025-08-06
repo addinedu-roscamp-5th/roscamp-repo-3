@@ -27,9 +27,9 @@ bool RosInterface::Initialize(Integrated::w_ptr<core::ICore> Icore)
 {
   Icore_ = Icore;
 
-  req_service_ = create_service<ReqServiceType>("request_service", std::bind(&RosInterface::cbRequestService, this, std::placeholders::_1, std::placeholders::_2));
-  done_service_ = create_service<DoneServiceType>("done_service", std::bind(&RosInterface::cbDoneService, this, std::placeholders::_1, std::placeholders::_2));
-  
+  customer_service_ = create_service<CustomerServiceType>("customer_service", std::bind(&RosInterface::cbCustomerRequest, this, std::placeholders::_1, std::placeholders::_2));
+  employee_service_ = create_service<EmployeeServiceType>("employee_service", std::bind(&RosInterface::cbEmployeeRequest, this, std::placeholders::_1, std::placeholders::_2));
+    
   for (int i = 0; i < _AMR_NUM_; ++i)
   {
     auto topic = "/aruco_pose" + std::to_string(i+1);
@@ -119,30 +119,101 @@ void RosInterface::cbArmService(rclcpp::Client<ArmServiceType>::SharedFuture fut
 }
 
 
-void RosInterface::cbRequestService(const std::shared_ptr<ReqServiceType::Request> request, std::shared_ptr<ReqServiceType::Response> response)
+void RosInterface::cbCustomerRequest(const std::shared_ptr<CustomerServiceType::Request> request, std::shared_ptr<CustomerServiceType::Response> response)
 {
-  Commondefine::GUIRequest r;
-  r.requester = request->requester;
-  r.shoes_property.size = request->size;
-  r.shoes_property.model = request->model;
-  r.shoes_property.color = request->color;
-  r.dest2.x = request->x;
-  r.dest2.y = request->y;
-  r.customer_id = request->customer_id;
-  
-  auto icore = Icore_.lock();
-  if(icore == nullptr)
-  {
-    log_->Log(Log::LogLevel::INFO, "ICore expire");
-    response->wait_list = -1;
-    
-    return;
-  }
-    
-  int wait_list = icore->RequestCallback(r);
-  response->wait_list = wait_list;
+    Commondefine::GUIRequest r;
+    r.requester = request->requester;
+    r.action = request->action;
+    r.shoes_property.size = request->size;
+    r.shoes_property.model = request->model;
+    r.shoes_property.color = request->color;
+    r.dest2.x = request->x;
+    r.dest2.y = request->y;
+    r.customer_id = request->customer_id;
 
-  return;
+    auto icore = Icore_.lock();
+    if(icore == nullptr)
+    {
+        log_->Log(Log::LogLevel::INFO, "ICore expired");
+
+        //error
+        response->wait_list = -1;
+        response->success = false;
+        response->action = r.action;
+
+        return;
+    }
+
+    if (r.action == "come_here")
+    {
+        int wait_list = icore->RequestCallback(r);
+        response->wait_list = wait_list;
+        response->success = true;
+        response->action = r.action;
+    }
+
+    else if (r.action == "done")
+    {
+        log_->Log(Log::LogLevel::INFO, "cbCustomerRequest DoneCallback() 호출 전");
+
+        bool success = icore->DoneCallback(r.requester, r.customer_id);
+        response->wait_list = 0;
+        response->success = success;
+        response->action = r.action;
+
+        log_->Log(Log::LogLevel::INFO, "cbCustomerRequest DoneCallback() 호출 후");   
+    }
+    
+    
+}
+
+void RosInterface::cbEmployeeRequest(const std::shared_ptr<EmployeeServiceType::Request> request,std::shared_ptr<EmployeeServiceType::Response> response)
+{
+    Commondefine::GUIRequest r;
+    r.requester = request->requester;
+    r.action = request->action;
+    r.customer_id = -1;
+
+    auto icore = Icore_.lock();
+    if(icore == nullptr)
+    {
+        log_->Log(Log::LogLevel::INFO, "ICore expired");
+
+        //error
+        response->wait_list = -1;
+        response->success = false;
+        response->action = r.action;
+
+        return;
+    }
+
+    if (r.action == "come_here")
+    {
+        int wait_list = icore->RequestCallback(r);
+        response->wait_list = wait_list;
+        response->success = true;
+        response->action = r.action;
+    }
+
+    else if (r.action == "done")
+    {
+        log_->Log(Log::LogLevel::INFO, "cbEmployeeRequest DoneCallback() 호출 전");
+
+        bool success = icore->DoneCallback(r.requester, r.customer_id);
+        response->wait_list = 0;
+        response->success = success;
+        response->action = r.action;   
+
+        log_->Log(Log::LogLevel::INFO, "cbEmployeeRequest DoneCallback() 호출 후");
+
+    }
+    else
+    {
+        log_->Log(Log::LogLevel::INFO, "ICore expired");
+        response->success = false;
+        response->action = r.action;
+        response->wait_list = -1;
+    }
 }
 
 void RosInterface::arucoPoseCallback(
@@ -162,17 +233,3 @@ void RosInterface::arucoPoseCallback(
   }
 }
 
-void RosInterface::cbDoneService(
-  const std::shared_ptr<DoneServiceType::Request>  request,
-  std::shared_ptr<DoneServiceType::Response>       response)
-{
-  if (auto icore = Icore_.lock())
-  {
-    response->accepted = icore->DoneCallback(request->requester,request->customer_id);
-  }
-  else 
-  {
-    log_->Log(Log::LogLevel::INFO, "ICore expired");
-    response->accepted = false;
-  }
-}

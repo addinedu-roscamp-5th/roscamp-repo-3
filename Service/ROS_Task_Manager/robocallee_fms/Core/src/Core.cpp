@@ -39,7 +39,7 @@ bool Core::Initialize()
     // AMR 어댑터 생성
     for (int i = 0; i < _AMR_NUM_; ++i)
     {
-        string name = "AMR" + to_string(i+1);
+        string name = "AMR" + to_string(i);
         amr_adapters_.emplace_back(make_uptr<Adapter::AmrAdapter>(self, log_, name));
     }
 
@@ -143,6 +143,7 @@ void Core::handleWaypointArrival(int pinky_id)
 int Core::RequestCallback(const Commondefine::GUIRequest& request)
 {
     log_->Log(Log::LogLevel::INFO, "Request received: " + request.shoes_property.model);
+    log_->Log(Log::LogLevel::INFO, "Request from: " + request.requester);
 
     if (pRequestManager_)
     {
@@ -193,7 +194,7 @@ bool Core::DoneCallback(const std::string& requester, const int& customer_id)
 
     else if (requester == "employee")
     {
-        // SetAmrNextStep(best_amr, Commondefine::AmrStep::MoveTo_dest2);
+        SetAmrNextStep(best_amr, Commondefine::AmrStep::MoveTo_dest2);
         return true;
     }
     

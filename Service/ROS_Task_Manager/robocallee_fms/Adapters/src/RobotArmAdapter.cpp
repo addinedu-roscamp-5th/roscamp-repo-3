@@ -63,7 +63,7 @@ void RobotArmAdapter::arm1_shelf_to_buffer(Commondefine::shoesproperty shoe, int
         log_->Log(Log::LogLevel::ERROR, "Arm1: 해당 신발 정보를 찾을 수 없습니다.");
         return;
     }
-    log_->Log(Log::LogLevel::INFO, "선반 번호 " + shelf_num );
+    log_->Log(Log::LogLevel::INFO, "선반 번호 " + std::to_string(shelf_num));
 
     
 

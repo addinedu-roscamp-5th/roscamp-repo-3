@@ -1,5 +1,9 @@
+srv/CustomerRequest.idl
+srv/CustomerRequest.srv
 srv/DoneMsg.idl
 srv/DoneMsg.srv
+srv/EmployeeRequest.idl
+srv/EmployeeRequest.srv
 srv/RobotArmRequest.idl
 srv/RobotArmRequest.srv
 srv/ShoeRequest.idl

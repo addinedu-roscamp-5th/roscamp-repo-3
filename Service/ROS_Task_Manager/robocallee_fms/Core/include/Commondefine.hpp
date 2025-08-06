@@ -65,6 +65,7 @@ namespace Commondefine
         shoesproperty          shoes_property;
         pose2f                 dest2;
         int                    customer_id;
+        std::string            action;
     }GUIRequest; 
 
     typedef struct RobotTaskInfo

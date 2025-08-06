@@ -67,6 +67,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/ShoeRequest.srv"
   "srv/DoneMsg.srv"
   "srv/RobotArmRequest.srv"
+  "srv/CustomerRequest.srv"
+  "srv/EmployeeRequest.srv"
 )
 
 

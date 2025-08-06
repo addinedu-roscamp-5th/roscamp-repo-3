@@ -2,7 +2,7 @@
 
 # since this file is sourced use either the provided AMENT_CURRENT_PREFIX
 # or fall back to the destination set at configure time
-: ${AMENT_CURRENT_PREFIX:="/home/addinedu/workspace/RoboCallee/Service/ROS_Task_Manager/robocallee_fms/install/robocallee_fms"}
+: ${AMENT_CURRENT_PREFIX:="/home/addinedu/dev_ws/roscamp-repo-3/Service/ROS_Task_Manager/robocallee_fms/install/robocallee_fms"}
 if [ ! -d "$AMENT_CURRENT_PREFIX" ]; then
   if [ -z "$COLCON_CURRENT_PREFIX" ]; then
     echo "The compile time prefix path '$AMENT_CURRENT_PREFIX' doesn't " \
