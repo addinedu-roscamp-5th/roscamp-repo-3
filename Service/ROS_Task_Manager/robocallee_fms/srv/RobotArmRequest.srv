@@ -1,5 +1,5 @@
 int32 shelf_num
-int32 pinky_num
+int32 robot_id
 string action
 string shoe_info
 ---

@@ -1,4 +1,0 @@
-string requester
-int32 customer_id
----
-bool accepted

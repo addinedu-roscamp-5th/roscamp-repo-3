@@ -24,13 +24,13 @@ namespace Adapter
 
 
 
-        void arm1_shelf_to_buffer(Commondefine::shoesproperty shoe, int pinky_num);
-        void arm2_buffer_to_pinky(int pinky_num);
-        void arm2_pinky_to_buffer(int pinky_num);
+        void arm1_shelf_to_buffer(Commondefine::shoesproperty shoe, int robot_id);
+        void arm2_buffer_to_pinky(int robot_id);
+        void arm2_pinky_to_buffer(int robot_id);
         
         // OCR 여기서 추가해볼까
         
-        void arm1_buffer_to_shelf(int pinky_num); 
+        void arm1_buffer_to_shelf(int robot_id); 
 
         
     };

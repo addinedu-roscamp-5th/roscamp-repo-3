@@ -25,7 +25,6 @@ function _colcon_prefix_chain_powershell_source_script {
 _colcon_prefix_chain_powershell_source_script "/opt/ros/jazzy\local_setup.ps1"
 _colcon_prefix_chain_powershell_source_script "/home/addinedu/ros2_ws/install\local_setup.ps1"
 _colcon_prefix_chain_powershell_source_script "/home/addinedu/pinky_violet/install\local_setup.ps1"
-_colcon_prefix_chain_powershell_source_script "/home/addinedu/dev_temp/roscamp-repo-3/Service/Robocallee_PickBot/install\local_setup.ps1"
 
 # source this prefix
 $env:COLCON_CURRENT_PREFIX=(Split-Path $PSCommandPath -Parent)

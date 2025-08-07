@@ -11,7 +11,7 @@ using namespace Manager;
 using namespace traffic;
 using namespace OG;
 
-Core::Core(Logger::s_ptr log, interface::RosInterface::s_ptr Interface)
+Core::Core(Logger::s_ptr log, interface::RosInterface::w_ptr Interface)
     : log_(log), Interface_(Interface)
 {
     log_->Log(Log::LogLevel::INFO, "Core 객체 생성");
@@ -39,8 +39,8 @@ bool Core::Initialize()
     // AMR 어댑터 생성
     for (int i = 0; i < _AMR_NUM_; ++i)
     {
-        string name = "AMR" + to_string(i);
-        amr_adapters_.emplace_back(make_uptr<Adapter::AmrAdapter>(self, log_, name));
+        // string name = "AMR" + to_string(i);
+        amr_adapters_.emplace_back(make_uptr<Adapter::AmrAdapter>(self, log_, i));
     }
 
     log_->Log(Log::LogLevel::INFO, "Core Initialize Done");
@@ -50,29 +50,32 @@ bool Core::Initialize()
 
 bool Core::SetAmrNextStep(int idx, Commondefine::AmrStep step)
 {
-    // switch (step)
-    // {
-    // case Commondefine::MoveTo_dest1:
-    //     assignTask(std::bind(&Adapter::AmrAdapter::MoveTo_dest1,
-    //                          amr_adapters_[idx].get()));
-    // case Commondefine::arm2_buffer_to_pinky:
-    //     assignTask(std::bind(&Adapter::AmrAdapter::arm2_buffer_to_pinky,
-    //                          amr_adapters_[idx].get()));
-    // case Commondefine::MoveTo_dest2:
-    //     assignTask(std::bind(&Adapter::AmrAdapter::MoveTo_dest2,
-    //                          amr_adapters_[idx].get()));
-    // case Commondefine::arm2_pinky_to_buffer:
-    //     assignTask(std::bind(&Adapter::AmrAdapter::arm2_pinky_to_buffer,
-    //                          amr_adapters_[idx].get()));
-    // case Commondefine::MoveTo_dest3:
-    //     assignTask(std::bind(&Adapter::AmrAdapter::MoveTo_dest3,
-    //                          amr_adapters_[idx].get()));
+    assignNewAmr_ = true;
+
+    switch (step)
+    {
+    case Commondefine::MoveTo_dest1:
+        assignTask(std::bind(&Adapter::AmrAdapter::MoveTo_dest1,
+                             amr_adapters_[idx].get(), idx));
+        break;
+
+    case Commondefine::MoveTo_dest2:
+        assignTask(std::bind(&Adapter::AmrAdapter::MoveTo_dest2,
+                             amr_adapters_[idx].get(), idx));
+        break;
+
+    case Commondefine::MoveTo_dest3:
+        assignTask(std::bind(&Adapter::AmrAdapter::MoveTo_dest3,
+                             amr_adapters_[idx].get(), idx));
+        break;
+
+    default:
+        break;
+    }    
     return true;
 }
 
-
-// RobotArmStep 순서: shelf_to_buffer=1, buffer_to_pinky=2, pinky_to_buffer=3, buffer_to_shelf=4
-bool Core::SetRobotArmNextStep(Commondefine::RobotArmStep step , Commondefine::shoesproperty shoe_info , int pinky_num )
+bool Core::SetRobotArmNextStep(Commondefine::RobotArmStep step, Commondefine::shoesproperty shoes, int robot_id)
 {
     log_->Log(Log::LogLevel::INFO, "assignTask 직전 step은" + std::to_string(step));
 
@@ -80,22 +83,22 @@ bool Core::SetRobotArmNextStep(Commondefine::RobotArmStep step , Commondefine::s
     {
         case RobotArmStep::shelf_to_buffer:
             log_->Log(Log::LogLevel::INFO, "assignTask shelf_to_buffer");
-            assignTask(std::bind(&Adapter::RobotArmAdapter::arm1_shelf_to_buffer, pRobotArmAdapter_.get(), shoe_info, pinky_num));
+            assignTask(std::bind(&Adapter::RobotArmAdapter::arm1_shelf_to_buffer, pRobotArmAdapter_.get(), shoes, robot_id));
             break;
 
         case RobotArmStep::buffer_to_pinky:
             log_->Log(Log::LogLevel::INFO, "assignTask buffer_to_pinky");
-            assignTask(std::bind(&Adapter::RobotArmAdapter::arm2_buffer_to_pinky, pRobotArmAdapter_.get(), pinky_num));
+            assignTask(std::bind(&Adapter::RobotArmAdapter::arm2_buffer_to_pinky, pRobotArmAdapter_.get(), robot_id));
             break;
 
         case RobotArmStep::pinky_to_buffer:
             log_->Log(Log::LogLevel::INFO, "assignTask pinky_to_buffer");
-            assignTask(std::bind(&Adapter::RobotArmAdapter::arm2_pinky_to_buffer, pRobotArmAdapter_.get(), pinky_num));
+            assignTask(std::bind(&Adapter::RobotArmAdapter::arm2_pinky_to_buffer, pRobotArmAdapter_.get(), robot_id));
             break;
 
         case RobotArmStep::buffer_to_shelf:
             log_->Log(Log::LogLevel::INFO, "assignTask buffer_to_shelf");
-            assignTask(std::bind(&Adapter::RobotArmAdapter::arm1_buffer_to_shelf, pRobotArmAdapter_.get(), pinky_num));
+            assignTask(std::bind(&Adapter::RobotArmAdapter::arm1_buffer_to_shelf, pRobotArmAdapter_.get(), robot_id));
             break;
 
         default:
@@ -105,11 +108,11 @@ bool Core::SetRobotArmNextStep(Commondefine::RobotArmStep step , Commondefine::s
     return true;
 }
 
-bool Core::ArmRequestMakeCall(int arm_num, int shelf_num, int pinky_num, std::string action)
+bool Core::ArmRequestMakeCall(int arm_num, int shelf_num, int robot_id, std::string action)
 {
     if (arm_num == 1) {
         if (auto iface = Interface_.lock()) {
-            iface->arm1_send_request(shelf_num, pinky_num, action);
+            iface->arm1_send_request(shelf_num, robot_id, action);
         } else {
             log_->Log(Log::LogLevel::ERROR,
                       "RosInterface가 유효하지 않습니다!");
@@ -118,7 +121,7 @@ bool Core::ArmRequestMakeCall(int arm_num, int shelf_num, int pinky_num, std::st
 
     else if (arm_num == 2) {
         if (auto iface = Interface_.lock()) {
-            iface->arm2_send_request(pinky_num, action);
+            iface->arm2_send_request(robot_id, action);
         } else {
             log_->Log(Log::LogLevel::ERROR,
                       "RosInterface가 유효하지 않습니다!");
@@ -128,47 +131,23 @@ bool Core::ArmRequestMakeCall(int arm_num, int shelf_num, int pinky_num, std::st
     return true;
 }
 
-
-
-
-
-
-bool Core::PoseCallback(const Commondefine::pose2f& pos, int pinky_id)
+#define _USE_ASSUNG_TASK_
+bool Core::PoseCallback(const Commondefine::pose2f& pos, int robot_id)
 {
-    auto& task_info = amr_adapters_[pinky_id]->GetTaskInfo();
-    task_info.current_position = pos;
+    if(robot_id > amr_adapters_.size()) 
+    {
+        log_->Log(Log::LogLevel::ERROR, "Pinky ID : " + std::to_string(robot_id) + " Not Invalide");
+        return false;
+    }
 
-    handleWaypointArrival(pinky_id);
+#ifdef _USE_ASSUNG_TASK_
+    assignTask(std::bind(&AmrAdapter::handleWaypointArrival,amr_adapters_[robot_id].get(),pos));
+#else
+    return amr_adapters_[robot_id]->handleWaypointArrival(pos);    
+#endif
 
     return true;
 }
-
-
-void Core::handleWaypointArrival(int pinky_id) 
-{
-    // if (GetAmrState(pinky_id) != Commondefine::RobotState::BUSY) return;
-    
-    // TrafficSolver solver(map, starts, goals);
-    // auto paths = solver.findSolution(true);
-
-    // paths[pinky_id][index]
-    // const auto &wps = amr_adapters_[pinky_id]->paths();
-    // int idx         = amr_adapters_[pinky_id]->GetCurrentWaypointIndex();
-    
-    // if (idx >= int(wps.size())) return;
-    
-    // const auto &cur = amr_adapters_[pinky_id]->GetTaskInfo().current_position;
-    // float dx = float(cur.x -wps[idx].x);
-    // float dy = float(cur.y -wps[idx].y);
-    
-    // float dist = std::hypot(dx, dy);
-    // if (dist <=0.05f)
-    // {
-    //     amr_adapters_[pinky_id]->incrementWaypointIndex();
-    //     amr_adapters_[pinky_id]->onWaypointReached(pinky_id);
-    // }
-}
-
 
 int Core::RequestCallback(const Commondefine::GUIRequest& request)
 {
@@ -229,6 +208,56 @@ bool Core::DoneCallback(const std::string& requester, const int& customer_id)
     }
     
     else return false ;
+}
+       
+bool Core::publishNavGoal(int idx, const Commondefine::Position wp)
+{
+    auto iface = Interface_.lock();
+    if (!iface) return false;
+
+    iface->publishNavGoal(idx, wp);
+
+    return true;
+}
+
+void Core::PlanPaths()
+{
+    vector<Commondefine::Position> starts;
+    vector<Commondefine::Position> goals;
+
+    for(const auto& amr : amr_adapters_)
+    {
+        if(amr->GetTaskInfo().robot_state == RobotState::IDLE) continue;
+        
+        amr->WaitUntilWaypointOccupied();
+        starts.push_back(amr->getCurrentWayPoint());
+        goals.push_back(amr->getCurrentGoal());
+    }
+
+    auto paths = traffic_Planner_->planPaths(starts, goals);
+
+    size_t size = amr_adapters_.size();
+    
+    for(size_t i = 0 ; i < size; ++i)
+    {
+        if(amr_adapters_[i]->GetTaskInfo().robot_state == RobotState::IDLE) continue;
+
+        amr_adapters_[i]->updatePath(paths[i]);
+    }
+
+    assignNewAmr_ = false;
+    path_cv_.notify_all();
+}
+
+void Core::waitNewPath()
+{
+    if(!assignNewAmr_) return;
+
+    std::unique_lock lock(path_mtx_);
+    path_cv_.wait(lock,[&]()
+    {
+        return !assignNewAmr_;
+    });
 }
 
 Commondefine::RobotState Core::GetAmrState(int idx)

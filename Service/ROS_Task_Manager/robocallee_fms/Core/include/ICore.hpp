@@ -15,18 +15,18 @@ public:
     virtual bool SetAmrNextStep(int idx, Commondefine::AmrStep step) = 0;
 
     // 로봇팔 요청
-    virtual bool SetRobotArmNextStep(Commondefine::RobotArmStep step,
-                                     Commondefine::shoesproperty shoe_info,
-                                     int pinky_num) = 0;
+    virtual bool SetRobotArmNextStep(Commondefine::RobotArmStep step, Commondefine::shoesproperty shoes, int robot_id) = 0;
 
     // 팔 서비스 호출
-    virtual bool ArmRequestMakeCall(int arm_num, int shelf_num,int pinky_num, std::string action) = 0;
+    virtual bool ArmRequestMakeCall(int arm_num, int shelf_num,int robot_id, std::string action) = 0;
 
     // 위치 콜백 (Aruco 또는 LM 위치)
-    virtual bool PoseCallback(const Commondefine::pose2f &pos, int pinky_id) = 0;
+    virtual bool PoseCallback(const Commondefine::pose2f &pos, int robot_id) = 0;
 
     // 요청 및 완료 콜백
     virtual int RequestCallback(const Commondefine::GUIRequest &request) = 0;
+
+    virtual bool publishNavGoal(int robot_id, const Commondefine::Position wp) = 0;
 
     virtual bool DoneCallback(const std::string &requester, const int &customer_id) = 0;
 
@@ -41,6 +41,14 @@ public:
 
     // 작업 정보 저장
     virtual void SetTaskInfo(int idx, const Commondefine::GUIRequest &request) = 0;
+
+    virtual void waitNewPath() = 0;
+
+    virtual void PlanPaths() = 0;
+
+    virtual void SetAssignNewAmr(bool assign) = 0;
+
+    virtual bool GetAssignNewAmr() = 0;
 };
 
 } // namespace core

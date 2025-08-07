@@ -15,6 +15,10 @@ namespace Commondefine
 
     #define _YAML_FILE_ "test_map.yaml"
 
+    #define _ARRIVAL_TOLERANCE_ 0.05f
+
+    #define _MAP_RESOLUTION_ 0.1d
+
     enum AmrStep {AmrStep_num = 0, MoveTo_dest1, MoveTo_dest2, MoveTo_dest3};
 
     // enum RobotArmStep {RobotArmStep_num = 0};
@@ -68,46 +72,25 @@ namespace Commondefine
         std::string            action;
     }GUIRequest; 
 
-    typedef struct RobotTaskInfo
-    {
-        std::string                         robot_id;
-        RobotState                          robot_state         = RobotState::IDLE;
-        int                                 battery             = 100;
-        shoesproperty                       shoes_property;
-        pose2f                              current_position;
-        pose2f                              dest1;
-        pose2f                              dest2;
-        pose2f                              dest3               = {1.0,0.4};
-        std::string                         requester;
-        int                                 customer_id;
-        
-        RobotTaskInfo& operator=(const RobotTaskInfo& rhs)
-        {
-            if(this != &rhs)
-            {
-                this->robot_id = rhs.robot_id;
-                this->robot_state = rhs.robot_state;
-                this->battery = rhs.battery;
-                this->shoes_property = rhs.shoes_property;
-                this->current_position = rhs.current_position;
-                this->dest1 = rhs.dest1;
-                this->dest2 = rhs.dest2;
-                this->dest3 = rhs.dest3;
-                this->requester = rhs.requester;
-                this->customer_id = rhs.customer_id;
-            }
-            
-            return *this;
-        }
-    }RobotTaskInfo;
-
     typedef struct Position
     {
         int x;
         int y;
-        bool operator==(const Position& other) const { return x == other.x && y == other.y;}
+        double yaw;
+
+        bool operator==(const Position& other) const { return x == other.x && y == other.y; && yaw == other.yaw;}
 
     }Position;
+
+    typedef struct Quaternion
+    {
+        double x;
+        double y;
+        double z;
+        double w;
+    }Quaternion;
+
+   
 
     typedef struct Constraint
     {
@@ -157,8 +140,57 @@ namespace Commondefine
         double              occ_thresh_;
         double              free_thresh_;
 
-    } YAMLFile;
+    } YAMLFile; 
 
+     typedef struct RobotTaskInfo
+    {
+        int                                 robot_id;
+        RobotState                          robot_state         = RobotState::IDLE;
+        int                                 battery             = 100;
+        shoesproperty                       shoes_property;
+        pose2f                              current_position;
+        pose2f                              dest1;
+        pose2f                              dest2;
+        pose2f                              dest3               = {1.0,0.4};
+        std::string                         requester;
+        int                                 customer_id;
+        
+        
+        RobotTaskInfo& operator=(const RobotTaskInfo& rhs)
+        {
+            if(this != &rhs)
+            {
+                this->robot_id = rhs.robot_id;
+                this->robot_state = rhs.robot_state;
+                this->battery = rhs.battery;
+                this->shoes_property = rhs.shoes_property;
+                this->current_position = rhs.current_position;
+                this->dest1 = rhs.dest1;
+                this->dest2 = rhs.dest2;
+                this->dest3 = rhs.dest3;
+                this->requester = rhs.requester;
+                this->customer_id = rhs.customer_id;
+            }
+            
+            return *this;
+        }
+    }RobotTaskInfo;
+
+    static double yaw(Commondefine::Position cur, Commondefine::Position next)
+    {
+        return std::atan2(next.y - cur.y, next.x - cur.x);
+    }
+
+    static Quaternion toQuaternion(Commondefine::Position p)
+    {
+        Commondefine::Quaternion q;
+        q.x = static_cast<double>(p.x);
+        q.y = static_cast<double>(p.y);
+        q.z = std::sin(p.yaw / 2.0);
+        q.w = std::cos(p.yaw / 2.0);
+        
+        return q;
+    }
 };
 
 

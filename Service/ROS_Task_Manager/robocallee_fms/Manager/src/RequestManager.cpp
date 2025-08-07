@@ -90,13 +90,13 @@ void RequestManager::BestRobotSelector()
 
         //AMR을 목적지 1로 이동
         core->SetAmrNextStep(best_amr, Commondefine::AmrStep::MoveTo_dest1);
+        core->SetAssignNewAmr(true);
 
         //로봇팔1에게 버퍼로 상자 이동 명령
-<<<<<<< Updated upstream
         if (req.requester == "customer")
         {
             Commondefine::shoesproperty shoe_info = req.shoes_property;
-            core->SetRobotArmNextStep(Commondefine::RobotArmStep::shelf_to_buffer , shoe_info , best_amr );
+            core->SetRobotArmNextStep(Commondefine::RobotArmStep::shelf_to_buffer , best_amr );
             log_->Log(Log::LogLevel::INFO, "로봇팔 작업 지정: " + shoe_info.model + ", " + shoe_info.color + ", " + std::to_string(shoe_info.size) + ", 핑키 번호: " + std::to_string(best_amr));
         }
         
@@ -121,13 +121,6 @@ void RequestManager::BestRobotSelector()
             
         return;
         
-=======
-        Commondefine::shoesproperty shoe_info = req.shoes_property;
-        core->SetRobotArmNextStep(Commondefine::RobotArmStep::shelf_to_buffer , shoe_info , best_amr);
-        log_->Log(Log::LogLevel::INFO, "로봇팔 작업 지정: " + shoe_info.model + ", " + shoe_info.color + ", " + std::to_string(shoe_info.size) + ", 핑키 번호: " + std::to_string(best_amr));
-
-        return;        
->>>>>>> Stashed changes
     }
 
 }

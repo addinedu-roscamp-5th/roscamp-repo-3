@@ -21,7 +21,6 @@ RosInterface::~RosInterface()
     server_wait_thread_.join();
     log_->Log(INFO, "async_server_wait thread 정상 종료");
   }
-  
 }
 
 
@@ -51,7 +50,16 @@ bool RosInterface::Initialize(Integrated::w_ptr<core::ICore> Icore)
     //모든 클라이언트는 서버 연결을 기다려야 하기 때문에 생성 후에 AddWaitClient함수를 통해 대기 Map에 넣어두고 thread 에서 각각 client가 서버에 연결되길 기다린다.
     AddWaitClient(client_name, client);
   }
-  
+
+    for (int i = 0; i < _AMR_NUM_; ++i)
+  {
+    std::string topic = "goalpose" + std::to_string(i+1);
+    nav_goal_pubs_.push_back(
+      create_publisher<geometry_msgs::msg::PoseStamped>(topic,10)
+    );
+    log_->Log(Log::LogLevel::INFO, "Created publisher for: " + topic);
+  }
+
   return true;
 }
 
@@ -95,14 +103,14 @@ void RosInterface::async_server_wait()
 }
 
 // int32 shelf_num
-// int32 pinky_num
-void RosInterface::arm1_send_request(int shelf_num, int pinky_num , std::string action )
+// int32 robot_id
+void RosInterface::arm1_send_request(int shelf_num, int robot_id , std::string action )
 {
     log_->Log(Log::INFO, "arm1_send_request 진입. action: " + action);
 
     auto request = std::make_shared<ArmServiceType::Request>();
     request->shelf_num = shelf_num;
-    request->pinky_num = pinky_num;
+    request->robot_id = robot_id;
     request->action = action;
 
     // 응답 도착 시, 아래 콜백이 자동 호출됨
@@ -110,13 +118,13 @@ void RosInterface::arm1_send_request(int shelf_num, int pinky_num , std::string 
         std::bind(&RosInterface::cbArmService, this, std::placeholders::_1));
 }
 
-void RosInterface::arm2_send_request(int pinky_num , std::string action )
+void RosInterface::arm2_send_request(int robot_id , std::string action )
 {
     log_->Log(Log::INFO, "arm2_send_request 진입. action: " + action);
 
     auto request = std::make_shared<ArmServiceType::Request>();
     request->shelf_num = -1;
-    request->pinky_num = pinky_num;
+    request->robot_id = robot_id;
     request->action = action;
     
     // 응답 도착 시, 아래 콜백이 자동 호출됨
@@ -246,11 +254,41 @@ void RosInterface::arucoPoseCallback(
   p.x = static_cast<float>(msg->pose.position.x);
   p.y = static_cast<float>(msg->pose.position.y);
 
-  int pinky_id = 0;
+  int robot_id = 0;
 
   if (auto icore = Icore_.lock())
   {
-    icore->PoseCallback(p, pinky_id);
+    icore->PoseCallback(p, robot_id);
   }
+
+  //pls make function for send pinky position;
 }
 
+void RosInterface::publishNavGoal(int idx, const Commondefine::Position wp)
+{
+    if (idx < 0 || idx >= static_cast<int>(nav_goal_pubs_.size())) {
+        log_->Log(Log::LogLevel::ERROR,
+                  "publishNavGoal: invalid robot_id " + std::to_string(idx));
+        return;
+    }
+
+    Commondefine::Quaternion q = Commondefine::toQuaternion(wp);
+
+    geometry_msgs::msg::PoseStamped ps;
+    ps.header.stamp = rclcpp::Clock().now();
+    ps.header.frame_id = "map";
+    ps.pose.position.x = ((wp.y - 1) * _MAP_RESOLUTION_) + (_MAP_RESOLUTION_ / 2.0);
+    ps.pose.position.y = ((wp.x - 1) * _MAP_RESOLUTION_) + (_MAP_RESOLUTION_ / 2.0);
+    ps.pose.position.z = 0.0;
+    ps.pose.orientation.x = q.x;
+    ps.pose.orientation.y = q.y;
+    ps.pose.orientation.z = q.z;
+    ps.pose.orientation.w = q.w;
+
+    nav_goal_pubs_[idx]->publish(ps);
+
+    log_->Log(Log::LogLevel::INFO,
+              "Published wp to goalpose" + std::to_string(idx+1) +
+              ": (" + std::to_string(wp.pose.position.x) +
+              ", " + std::to_string(wp.pose.position.y) + ")");
+}

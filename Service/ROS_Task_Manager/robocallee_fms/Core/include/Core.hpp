@@ -23,21 +23,25 @@ namespace core
         Logger::s_ptr                                               log_;
         Adapter::RobotArmAdapter::u_ptr                             pRobotArmAdapter_;
         Manager::RequestManager::u_ptr                              pRequestManager_;
+        interface::RosInterface::w_ptr                              Interface_;
+
 
         std::mutex                                                  assignmtx_;
-        interface::RosInterface::w_ptr                              Interface_;
+        std::mutex                                                  path_mtx_;
+        std::condition_variable                                     path_cv_;
+        
         
         Integrated::vec<Integrated::u_ptr<Adapter::AmrAdapter>>     amr_adapters_;
         Integrated::s_ptr<traffic::TrafficPlanner>                  traffic_Planner_;
         Integrated::u_ptr<OG::OccupancyGrid>                        occupancyGrid_;
-
+        std::atomic<bool>                                           assignNewAmr_;
 
     public:
         using s_ptr = std::shared_ptr<Core>;
         using u_ptr = std::unique_ptr<Core>;
         using w_ptr = std::weak_ptr<Core>;
 
-        Core(Logger::s_ptr log , interface::RosInterface::s_ptr Interface_);
+        Core(Logger::s_ptr log , interface::RosInterface::w_ptr Interface_);
         ~Core();
 
         template<typename F, typename... Args>
@@ -48,16 +52,18 @@ namespace core
         bool SetAmrNextStep(int idx, Commondefine::AmrStep step) override;
 
         
-        bool SetRobotArmNextStep(Commondefine::RobotArmStep step , Commondefine::shoesproperty shoe_info , int pinky_num ) override;
+        bool SetRobotArmNextStep(Commondefine::RobotArmStep step, Commondefine::shoesproperty shoes, int robot_id) override;
         // bool SetRobotArmNextStep(Commondefine::RobotArmStep step) override;
         
-        bool ArmRequestMakeCall(int arm_num, int shelf_num, int pinky_num , std::string action) override ;
+        bool ArmRequestMakeCall(int arm_num, int shelf_num, int robot_id , std::string action) override ;
 
         int RequestCallback(const Commondefine::GUIRequest& request) override;
         
         bool DoneCallback(const std::string& requester, const int& customer_id) override;
 
-        bool PoseCallback(const Commondefine::pose2f &pos, int pinky_id) override;
+        bool PoseCallback(const Commondefine::pose2f &pos, int robot_id) override;
+
+        bool publishNavGoal(int idx, const geometry_msgs::msg::PoseStamped wp) override;
 
         Commondefine::RobotState GetAmrState(int idx) override;
         
@@ -69,8 +75,13 @@ namespace core
 
         void SetTaskInfo(int idx, const Commondefine::GUIRequest& request) override;
 
-        void handleWaypointArrival(int pinky_id);
+        void PlanPaths() override;
 
+        void waitNewPath() override;
+
+        void SetAssignNewAmr(bool assign) override { assignNewAmr_ = assign; }
+
+        bool GetAssignNewAmr() override { return assignNewAmr_.load(); }
         // void SetAmrState(int idx) override;
     
     };

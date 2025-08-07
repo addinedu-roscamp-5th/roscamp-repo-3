@@ -49,7 +49,7 @@ RobotArmAdapter::~RobotArmAdapter()
 */
 
 
-void RobotArmAdapter::arm1_shelf_to_buffer(Commondefine::shoesproperty shoe, int pinky_num){
+void RobotArmAdapter::arm1_shelf_to_buffer(Commondefine::shoesproperty shoe, int robot_id){
 
     log_->Log(Log::LogLevel::INFO, "arm1_shelf_to_buffer 호출");
     
@@ -76,7 +76,7 @@ void RobotArmAdapter::arm1_shelf_to_buffer(Commondefine::shoesproperty shoe, int
 
     // ICore의 ArmRequestMakeCall() 호출하고  ArmRequestMakeCall()는 또 RosInterface의 arm1_send_request()를 호출
     if (auto core = Icore_.lock()) {
-        core->ArmRequestMakeCall(1, shelf_num, pinky_num, "shelf_to_buffer");
+        core->ArmRequestMakeCall(1, shelf_num, robot_id, "shelf_to_buffer");
     } else {
         log_->Log(Log::LogLevel::ERROR, "ICore 호출 실패");
     }
@@ -88,7 +88,7 @@ void RobotArmAdapter::arm1_shelf_to_buffer(Commondefine::shoesproperty shoe, int
 
 
 
-void RobotArmAdapter::arm2_buffer_to_pinky(int pinky_num){
+void RobotArmAdapter::arm2_buffer_to_pinky(int robot_id){
 
     log_->Log(Log::LogLevel::INFO, "arm2_buffer_to_pinky 호출");
     int shelf_num = -1;
@@ -96,12 +96,12 @@ void RobotArmAdapter::arm2_buffer_to_pinky(int pinky_num){
 
     // ICore의 ArmRequestMakeCall() 호출하고  ArmRequestMakeCall()는 또 RosInterface의 arm1_send_request()를 호출
     if (auto core = Icore_.lock()) {
-        core->ArmRequestMakeCall(2, shelf_num, pinky_num, "buffer_to_pinky");
+        core->ArmRequestMakeCall(2, shelf_num, robot_id, "buffer_to_pinky");
     } else {
         log_->Log(Log::LogLevel::ERROR, "ICore 호출 실패");
     }
  
-    // AMR Adapter의 함수 불러주기     pinky_num만 넘겨주면 될듯
+    // AMR Adapter의 함수 불러주기     robot_id만 넘겨주면 될듯
 
     // if (auto core = Icore_.lock()) {
     //     core->SetAmrNextStep(Commondefine::AmrAdapter::MoveTo_dest2 , 인자 알아야 );
@@ -112,7 +112,7 @@ void RobotArmAdapter::arm2_buffer_to_pinky(int pinky_num){
 }
 
 
-void RobotArmAdapter::arm2_pinky_to_buffer(int pinky_num){
+void RobotArmAdapter::arm2_pinky_to_buffer(int robot_id){
 
     log_->Log(Log::LogLevel::INFO, "arm2_pinky_to_buffer 호출");
     
@@ -120,30 +120,27 @@ void RobotArmAdapter::arm2_pinky_to_buffer(int pinky_num){
 
     // ICore의 ArmRequestMakeCall() 호출하고  ArmRequestMakeCall()는 또 RosInterface의 arm1_send_request()를 호출
     if (auto core = Icore_.lock()) {
-        core->ArmRequestMakeCall(2, shelf_num, pinky_num, "pinky_to_buffer");
+        core->ArmRequestMakeCall(2, shelf_num, robot_id, "pinky_to_buffer");
     } else {
         log_->Log(Log::LogLevel::ERROR, "ICore 호출 실패");
     }
 
 
-    // AMR Adapter의 함수 불러주기   pinky_num만 넘겨주면 될듯
+    // AMR Adapter의 함수 불러주기   robot_id만 넘겨주면 될듯
     // if (auto core = Icore_.lock()) {
     //     core->SetAmrNextStep(Commondefine::AmrAdapter::MoveTo_dest3 , 인자 알아야 );
     // } else {
     //     log_->Log(Log::LogLevel::ERROR, "ICore 호출 실패");
     // }
 
-    // arm1_buffer_to_shelf(shoe, pinky_num) 불러주기
+    // arm1_buffer_to_shelf(shoe, robot_id) 불러주기
 
-     Commondefine::shoesproperty dummy_shoe;
+    Commondefine::shoesproperty dummy_shoe;
     if (auto core = Icore_.lock() ) {
-        core->SetRobotArmNextStep( Commondefine::RobotArmStep::buffer_to_shelf , dummy_shoe, pinky_num);
+        core->SetRobotArmNextStep( Commondefine::RobotArmStep::buffer_to_shelf , dummy_shoe, robot_id);
     } else {
         log_->Log(Log::LogLevel::ERROR, "ICore 호출 실패");
     }
-            
-
-
 }
 
 
@@ -151,7 +148,7 @@ void RobotArmAdapter::arm2_pinky_to_buffer(int pinky_num){
 
 
 // 이 타이밍에서 OCR 시도
-void RobotArmAdapter::arm1_buffer_to_shelf(int pinky_num){
+void RobotArmAdapter::arm1_buffer_to_shelf(int robot_id){
 
     log_->Log(Log::LogLevel::INFO, "arm1_buffer_to_shelf 호출");
     
@@ -178,7 +175,7 @@ void RobotArmAdapter::arm1_buffer_to_shelf(int pinky_num){
 
     // ICore의 ArmRequestMakeCall() 호출하고  ArmRequestMakeCall()는 또 RosInterface의 arm1_send_request()를 호출
     if (auto core = Icore_.lock()) {
-        core->ArmRequestMakeCall(1, shelf_num, pinky_num, "buffer_to_shelf");
+        core->ArmRequestMakeCall(1, shelf_num, robot_id, "buffer_to_shelf");
     } else {
         log_->Log(Log::LogLevel::ERROR, "ICore 호출 실패");
     }

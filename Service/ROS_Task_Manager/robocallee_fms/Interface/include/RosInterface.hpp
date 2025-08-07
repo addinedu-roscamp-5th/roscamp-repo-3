@@ -46,6 +46,9 @@ namespace interface
         // Aruco Pose 구독
         std::vector< rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr> aruco_subs_;
 
+        // poseStamped publish
+        std::vector< rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr > nav_goal_pubs_;
+
         // 받은 좌표 저장
         std::mutex                                                      pose_mutex_;
 
@@ -70,13 +73,15 @@ namespace interface
         bool Initialize(Integrated::w_ptr<core::ICore> Icore);
 
         // 외부(Core)에서 호출될 때
-        void arm1_send_request(int shelf_num, int pinky_num , std::string action );
-        void arm2_send_request(int pinky_num, std::string action );
+        void arm1_send_request(int shelf_num, int robot_id , std::string action );
+        void arm2_send_request(int robot_id, std::string action );
 
 
         void cbArmService(rclcpp::Client<ArmServiceType>::SharedFuture future);
 
         void arucoPoseCallback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr & msg);
+
+        void publishNavGoal(int idx, const Commondefine::Position wp);
 
         // 요청·완료 서비스 콜백
         void cbCustomerRequest(const std::shared_ptr<CustomerServiceType::Request> request, 
