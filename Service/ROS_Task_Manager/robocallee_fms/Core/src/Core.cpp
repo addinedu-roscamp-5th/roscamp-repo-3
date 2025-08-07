@@ -125,6 +125,17 @@ bool Core::ArmRequestMakeCall(int arm_num, int shelf_num, int robot_id, std::str
     return true;
 }
 
+
+bool Core::UpdateShelfInfo(Commondefine::shoesproperty incoming_shoe , int shelf_num){
+    pRobotArmAdapter_->shelf_info[shelf_num] = incoming_shoe ;
+    pRobotArmAdapter_->shelf_occupied[shelf_num] = true ;
+
+    return true;
+}
+
+
+
+
 #define _USE_ASSUNG_TASK_
 bool Core::PoseCallback(const Commondefine::pose2f& pos, int robot_id)
 {
@@ -134,7 +145,9 @@ bool Core::PoseCallback(const Commondefine::pose2f& pos, int robot_id)
         return false;
     }
 
-    amr_adapters_[robot_id]->SetCurrentPosition(pos);
+    //amr_adapters_[robot_id]->SetCurrentPosition(pos);
+    amr_adapters_[robot_id]->SetCurrentPosition( { (float)pos.x , (float)pos.y } );
+
 
 #ifdef _USE_ASSUNG_TASK_
     assignTask(std::bind(&AmrAdapter::handleWaypointArrival,amr_adapters_[robot_id].get(),pos));
@@ -221,8 +234,8 @@ void Core::PlanPaths()
         
         amr->WaitUntilWaypointOccupied();
 
-        starts.push_back(amr->GetCurrentPosition());
-        goals.push_back(amr->GetDestPosition());
+        // starts.push_back(amr->GetCurrentPosition());         아직 undefined
+        // goals.push_back(amr->GetDestPosition());             아직 undefined
     }
 
     auto paths = traffic_Planner_->planPaths(starts, goals);
@@ -252,7 +265,9 @@ void Core::assignWork(int amr)
     if(amr > amr_adapters_.size())
     {
         SetAssignNewAmr(false);
-        return false;
+        
+        //return false;
+
     }
 
     PlanPaths();

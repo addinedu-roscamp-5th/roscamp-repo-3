@@ -84,7 +84,7 @@ namespace Commondefine
         int y;
         double yaw;
 
-        bool operator==(const Position& other) const { return x == other.x && y == other.y; && yaw == other.yaw;}
+        bool operator==(const Position& other) const { return x == other.x && y == other.y && yaw == other.yaw;}
 
     }Position;
 

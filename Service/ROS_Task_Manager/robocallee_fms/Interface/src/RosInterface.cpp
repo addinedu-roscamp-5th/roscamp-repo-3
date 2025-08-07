@@ -109,9 +109,10 @@ void RosInterface::arm1_send_request(int shelf_num, int robot_id , std::string a
     log_->Log(Log::INFO, "arm1_send_request 진입. action: " + action);
 
     auto request = std::make_shared<ArmServiceType::Request>();
-    request->shelf_num = shelf_num;
     request->robot_id = robot_id;
     request->action = action;
+    request->shelf_num = shelf_num;
+
 
     // 응답 도착 시, 아래 콜백이 자동 호출됨
     arm_clients_[Commondefine::RobotArm1]->async_send_request(request,
@@ -123,9 +124,9 @@ void RosInterface::arm2_send_request(int robot_id , std::string action )
     log_->Log(Log::INFO, "arm2_send_request 진입. action: " + action);
 
     auto request = std::make_shared<ArmServiceType::Request>();
-    request->shelf_num = -1;
     request->robot_id = robot_id;
     request->action = action;
+    request->shelf_num = -1;
     
     // 응답 도착 시, 아래 콜백이 자동 호출됨
     arm_clients_[Commondefine::RobotArm2]->async_send_request(request,
@@ -141,11 +142,35 @@ void RosInterface::cbArmService(rclcpp::Client<ArmServiceType>::SharedFuture fut
   log_->Log(Log::INFO, "cbArmService 진입");
 
   auto res = future.get();
-  
-  if(res->success) log_->Log(Log::INFO, "Arm 요청 성공 !");
 
-  else log_->Log(Log::INFO, "Arm 요청 실패 !");
+  auto icore = Icore_.lock();
+  if(icore == nullptr)
+  {
+      log_->Log(Log::LogLevel::INFO, "ICore expired");
+
+      //error
+      return;
+  }
+
+
+  if(res->success){
+
+    // 다시 서랍에 넣는 신발 정보 업뎃
+    if(res->action == "buffer_to_shelf"){
+      Commondefine::shoesproperty incoming_shoe;
+      incoming_shoe.size = res->size ;
+      incoming_shoe.model = res->model ;
+      incoming_shoe.color = res->color ;
+      int shelf_num = res->shelf_num ;
+
+      icore->UpdateShelfInfo(incoming_shoe, shelf_num);
+    }
+    log_->Log(Log::INFO, "RobotArm " + res->action + " 요청 성공 !");
+
+  } 
+  else log_->Log(Log::INFO, "RobotArm 요청 실패 !");
 }
+
 
 
 void RosInterface::cbCustomerRequest(const std::shared_ptr<CustomerServiceType::Request> request, std::shared_ptr<CustomerServiceType::Response> response)
@@ -289,6 +314,8 @@ void RosInterface::publishNavGoal(int idx, const Commondefine::Position wp)
 
     log_->Log(Log::LogLevel::INFO,
               "Published wp to goalpose" + std::to_string(idx+1) +
-              ": (" + std::to_string(wp.pose.position.x) +
-              ", " + std::to_string(wp.pose.position.y) + ")");
+              // ": (" + std::to_string(wp.pose.position.x) +
+              // ", " + std::to_string(wp.pose.position.y) + ")");
+              ": (" + std::to_string(wp.x) +
+              ", " + std::to_string(wp.y) + ")");
 }

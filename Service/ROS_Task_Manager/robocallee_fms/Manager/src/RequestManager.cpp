@@ -106,7 +106,7 @@ void RequestManager::BestRobotSelector()
     if (req.requester == "customer")
     {
         Commondefine::shoesproperty shoe_info = req.shoes_property;
-        core->SetRobotArmNextStep(Commondefine::RobotArmStep::shelf_to_buffer , best_amr );
+        core->SetRobotArmNextStep(Commondefine::RobotArmStep::shelf_to_buffer , dummy_shoe , best_amr );
         log_->Log(Log::LogLevel::INFO, "로봇팔 작업 지정: " + shoe_info.model + ", " + shoe_info.color + ", " + std::to_string(shoe_info.size) + ", 핑키 번호: " + std::to_string(best_amr));
     }
     return;

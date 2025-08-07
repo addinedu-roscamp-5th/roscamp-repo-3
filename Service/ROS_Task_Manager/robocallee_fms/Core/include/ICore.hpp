@@ -20,13 +20,18 @@ public:
     // 팔 서비스 호출
     virtual bool ArmRequestMakeCall(int arm_num, int shelf_num,int robot_id, std::string action) = 0;
 
+    // 들어오는 신발 OCR로 정보 알아낸 후 서랍 정보 업뎃
+    virtual bool UpdateShelfInfo(Commondefine::shoesproperty incoming_shoe, int shelf_num) = 0;
+
+
     // 위치 콜백 (Aruco 또는 LM 위치)
     virtual bool PoseCallback(const Commondefine::pose2f &pos, int robot_id) = 0;
 
     // 요청 및 완료 콜백
     virtual int RequestCallback(const Commondefine::GUIRequest &request) = 0;
 
-    virtual bool publishNavGoal(int robot_id, const Commondefine::Position wp) = 0;
+    // virtual bool publishNavGoal(int robot_id, const Commondefine::Position wp) = 0;
+    virtual bool publishNavGoal(int idx, const Commondefine::Position wp) = 0;
 
     virtual bool DoneCallback(const std::string &requester, const int &customer_id) = 0;
 

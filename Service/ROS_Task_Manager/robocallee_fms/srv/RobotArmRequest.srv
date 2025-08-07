@@ -1,6 +1,10 @@
-int32 shelf_num
 int32 robot_id
 string action
-string shoe_info
+int32 shelf_num
 ---
+string action
+int32 shelf_num
+string model
+int32 size
+string color
 bool success

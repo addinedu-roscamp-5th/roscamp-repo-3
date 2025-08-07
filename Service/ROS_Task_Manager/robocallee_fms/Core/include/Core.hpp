@@ -55,6 +55,8 @@ namespace core
         bool SetRobotArmNextStep(Commondefine::RobotArmStep step, Commondefine::shoesproperty shoes, int robot_id) override;
         
         bool ArmRequestMakeCall(int arm_num, int shelf_num, int robot_id , std::string action) override ;
+        
+        bool UpdateShelfInfo(Commondefine::shoesproperty incoming_shoe , int shelf_num ) override;
 
         int RequestCallback(const Commondefine::GUIRequest& request) override;
         
@@ -62,7 +64,8 @@ namespace core
 
         bool PoseCallback(const Commondefine::pose2f &pos, int robot_id) override;
 
-        bool publishNavGoal(int idx, const geometry_msgs::msg::PoseStamped wp) override;
+        // bool publishNavGoal(int idx, const geometry_msgs::msg::PoseStamped wp) override;
+        bool publishNavGoal(int idx, const Commondefine::Position wp) override;
 
         Commondefine::RobotState GetAmrState(int idx) override;
         

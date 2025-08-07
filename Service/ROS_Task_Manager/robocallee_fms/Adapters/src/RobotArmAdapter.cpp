@@ -66,15 +66,21 @@ void RobotArmAdapter::arm1_shelf_to_buffer(Commondefine::shoesproperty shoe, int
         }
     }
 
-    
-
 
     if(shelf_num == -1) {
         log_->Log(Log::LogLevel::ERROR, "Arm1: 해당 신발 정보를 찾을 수 없습니다.");
         return;
     }
     log_->Log(Log::LogLevel::INFO, "꺼낼 선반 번호 " + std::to_string(shelf_num));
-    shelf_occupied[shelf_num] = false; // 선반 비어있음으로 표시
+
+
+    // 선반 비어있음으로 표시
+    shelf_info[shelf_num].size = -1;
+    shelf_info[shelf_num].model = "";
+    shelf_info[shelf_num].color = "";
+    shelf_occupied[shelf_num] = false; 
+
+
 
     // ICore의 ArmRequestMakeCall() 호출하고  ArmRequestMakeCall()는 또 RosInterface의 arm1_send_request()를 호출
     if (auto core = Icore_.lock()) {
@@ -82,6 +88,10 @@ void RobotArmAdapter::arm1_shelf_to_buffer(Commondefine::shoesproperty shoe, int
     } else {
         log_->Log(Log::LogLevel::ERROR, "ICore 호출 실패");
     }
+
+
+    // 후속 작업 없으니 호출 안 함
+
 }
 
 
@@ -100,14 +110,19 @@ void RobotArmAdapter::arm2_buffer_to_pinky(int robot_id)
     } else {
         log_->Log(Log::LogLevel::ERROR, "ICore 호출 실패");
     }
+
+        // 후속 작업 필요 시 호출
+
  
     // AMR Adapter의 함수 불러주기     robot_id만 넘겨주면 될듯
 
     // if (auto core = Icore_.lock()) {
-    //     core->SetAmrNextStep(Commondefine::AmrAdapter::MoveTo_dest2 , 인자 알아야 );
+    //     core->SetAmrNextStep(Commondefine::AmrAdapter::MoveTo_dest2 , robot_id );
     // } else {
     //     log_->Log(Log::LogLevel::ERROR, "ICore 호출 실패");
     // }
+
+
 }
 
 
@@ -125,22 +140,25 @@ void RobotArmAdapter::arm2_pinky_to_buffer(int robot_id)
         log_->Log(Log::LogLevel::ERROR, "ICore 호출 실패");
     }
 
+    // 후속 작업 필요 시 호출
 
     // AMR Adapter의 함수 불러주기   robot_id만 넘겨주면 될듯
     // if (auto core = Icore_.lock()) {
-    //     core->SetAmrNextStep(Commondefine::AmrAdapter::MoveTo_dest3 , 인자 알아야 );
+    //     core->SetAmrNextStep(Commondefine::AmrAdapter::MoveTo_dest3 , robot_id );
     // } else {
     //     log_->Log(Log::LogLevel::ERROR, "ICore 호출 실패");
     // }
 
-    // arm1_buffer_to_shelf(shoe, robot_id) 불러주기
 
+    // arm1_buffer_to_shelf(shoe, robot_id) 불러주기
     Commondefine::shoesproperty dummy_shoe;
     if (auto core = Icore_.lock() ) {
         core->SetRobotArmNextStep( Commondefine::RobotArmStep::buffer_to_shelf , dummy_shoe, robot_id);
     } else {
         log_->Log(Log::LogLevel::ERROR, "ICore 호출 실패");
     }
+
+
 }
 
 
@@ -180,25 +198,10 @@ void RobotArmAdapter::arm1_buffer_to_shelf(int robot_id){
         log_->Log(Log::LogLevel::ERROR, "ICore 호출 실패");
     }
 
+    // response 오면 RosInterface::cbArmService() 호출 -> Core::UpdateShelfInfo() 호출 통해 서랍 정보 업뎃
 
-    shelf_occupied[shelf_num] = true;
-    shelf_info[shelf_num] = Commondefine::shoesproperty{260, "Nike", "White"}; // 예시로 하드코딩된 신발 정보. 실제론 OCR 결과로 받아서 처리해야 함
-
-    // 선반 정보 업데이트. 실제론 response로 받아서 할 거임
-
-
-
-
-    // for (int i=1 ; i<=9 ; ++i) {
-    //     if (shelf_info[i].size == shoe.size && 
-    //         shelf_info[i].model == shoe.model && 
-    //         shelf_info[i].color == shoe.color) {
-    //         shelf_num = i;
-    //         break;
-    //     }
-    // }
-
-
+    // shelf_occupied[shelf_num] = true; 
+    // shelf_info[shelf_num] = Commondefine::shoesproperty{260, "Nike", "White"}; // 예시로 하드코딩된 신발 정보. 실제론 OCR 결과로 받아서 처리해야 함
 
 }
 

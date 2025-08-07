@@ -13,6 +13,8 @@ namespace Manager
         std::queue<Commondefine::GUIRequest>        request_queue_;
         std::mutex                                  mtx_;
 
+        Commondefine::shoesproperty dummy_shoe;
+
     public:
         using u_ptr = Integrated::u_ptr<RequestManager>;
 

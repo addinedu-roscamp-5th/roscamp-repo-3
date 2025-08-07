@@ -36,6 +36,8 @@ namespace Adapter
         std::mutex                           current_position_mtx_;
 
 
+        Commondefine::shoesproperty          dummy_shoe;
+
     public:
         using u_ptr = Integrated::u_ptr<AmrAdapter>;
 

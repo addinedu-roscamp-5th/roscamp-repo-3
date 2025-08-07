@@ -132,18 +132,22 @@ void AmrAdapter::MoveTo_dest1(int robot_id)
 
     log_->Log(Log::LogLevel::INFO, "MoveTo_dest1() 호출");
 
-    core->publishNavGoal(robot_task_info_.robot_id, robot_task_info_.dest1);
+    // core->publishNavGoal(robot_task_info_.robot_id, robot_task_info_.dest1);
+    core->publishNavGoal(robot_task_info_.robot_id, { (int)robot_task_info_.dest.x , (int)robot_task_info_.dest.y } );
+
 
     
     log_->Log(Log::LogLevel::INFO, "sent dest1 (" +
         std::to_string(robot_task_info_.robot_id) + ", " +
-        std::to_string(robot_task_info_.dest1.y) + ") to pinky " +
+        // std::to_string(robot_task_info_.dest1.y) + ") to pinky " +
+        std::to_string( (int)robot_task_info_.dest.x ) + std::to_string(  (int)robot_task_info_.dest.y ) + ") to pinky " +
+
         std::to_string(robot_task_info_.robot_id)
     );
 
     if (robot_task_info_.requester == "customer")
-    {
-        core->SetRobotArmNextStep(Commondefine::RobotArmStep::buffer_to_pinky, robot_task_info_.robot_id);
+    {   
+        core->SetRobotArmNextStep(Commondefine::RobotArmStep::buffer_to_pinky, dummy_shoe, robot_task_info_.robot_id);
         return;
     }
 }
@@ -155,17 +159,20 @@ void AmrAdapter::MoveTo_dest2(int robot_id)
 
     log_->Log(Log::LogLevel::INFO, "MoveTo_dest2() 호출");
 
-    core->publishNavGoal(robot_task_info_.robot_id, robot_task_info_.dest2);
+    // core->publishNavGoal(robot_task_info_.robot_id, robot_task_info_.dest2);
+    core->publishNavGoal(robot_task_info_.robot_id, { (int)robot_task_info_.dest.x , (int)robot_task_info_.dest.y } );
+
 
     log_->Log(Log::LogLevel::INFO, "sent dest2 (" +
         std::to_string(robot_task_info_.robot_id) + ", " +
-        std::to_string(robot_task_info_.dest2.y) + ") to pinky " +
+        // std::to_string(robot_task_info_.dest2.y) + ") to pinky " +
+        std::to_string( (int)robot_task_info_.dest.x ) + std::to_string(  (int)robot_task_info_.dest.y ) + ") to pinky " +
         std::to_string(robot_task_info_.robot_id)
     );
 
     if (robot_task_info_.requester == "employee")
     {
-        core->SetRobotArmNextStep(Commondefine::RobotArmStep::pinky_to_buffer, robot_task_info_.robot_id);
+        core->SetRobotArmNextStep(Commondefine::RobotArmStep::pinky_to_buffer, dummy_shoe, robot_task_info_.robot_id);
         return;
     }
 }
@@ -178,11 +185,15 @@ void AmrAdapter::MoveTo_dest3(int robot_id)
 
     log_->Log(Log::LogLevel::INFO, "MoveTo_dest3() 호출");
 
-    core->publishNavGoal(robot_task_info_.robot_id, robot_task_info_.dest3);
+    // core->publishNavGoal(robot_task_info_.robot_id, robot_task_info_.dest3  );
+    // core->publishNavGoal(robot_task_info_.robot_id, {robot_task_info_.dest3.x , robot_task_info_.dest3.y}  );
+    core->publishNavGoal(robot_task_info_.robot_id, { (int)robot_task_info_.dest.x , (int)robot_task_info_.dest.y } );
+
 
     log_->Log(Log::LogLevel::INFO, "sent dest3 (" +
         std::to_string(robot_task_info_.robot_id) + ", " +
-        std::to_string(robot_task_info_.dest3.y) + ") to pinky " +
+        // std::to_string(robot_task_info_.dest3.y) + ") to pinky " +
+        std::to_string( (int)robot_task_info_.dest.x ) + std::to_string(  (int)robot_task_info_.dest.y ) + ") to pinky " +
         std::to_string(robot_task_info_.robot_id)
     );
 }
