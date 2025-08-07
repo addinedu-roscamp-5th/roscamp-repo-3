@@ -58,24 +58,21 @@ double DepthEstimate::MonoDepthEstimate
         unit_rights.push_back(unit_right);
     }
 
-    Mat T_se3, invT_se3, rvec, tvec, invrvec, invtvec;
+    Mat rvec, tvec;
     Geometry::estimateRigidTransformSVD(unit_lefts, unit_rights, rvec, tvec);
 
-    double err_sum = 0.0;
-    for (size_t i = 0; i < size; ++i)
-    {
-        cv::Mat ul = (cv::Mat_<double>(3,1) << unit_lefts[i].x, unit_lefts[i].y, unit_lefts[i].z);
-        cv::Mat ur_pred = rvec * ul + tvec;
-        cv::Point3d ur_actual = unit_rights[i];
-        cv::Mat ur_act = (cv::Mat_<double>(3,1) << ur_actual.x, ur_actual.y, ur_actual.z);
-        err_sum += norm(ur_act - ur_pred);
-    }
-    std::cout << "Transform residual: " << err_sum / size << std::endl;
+    // double err_sum = 0.0;
+    // for (size_t i = 0; i < size; ++i)
+    // {
+    //     cv::Mat ul = (cv::Mat_<double>(3,1) << unit_lefts[i].x, unit_lefts[i].y, unit_lefts[i].z);
+    //     cv::Mat ur_pred = rvec * ul + tvec;
+    //     cv::Point3d ur_actual = unit_rights[i];
+    //     cv::Mat ur_act = (cv::Mat_<double>(3,1) << ur_actual.x, ur_actual.y, ur_actual.z);
+    //     err_sum += norm(ur_act - ur_pred);
+    // }
+    // std::cout << "Transform residual: " << err_sum / size << std::endl;
 
-    std::cout << "Transform Norm: " << norm(tvec) << std::endl;
-
-    cv::Mat t_dir = tvec / cv::norm(tvec);    
-    double scale = baseline;
+    // std::cout << "Transform Norm: " << norm(tvec) << std::endl;
 
     double residual_error = 0.0;
 
@@ -85,24 +82,26 @@ double DepthEstimate::MonoDepthEstimate
         cv::Mat v2 = (Mat_<double>(3,1) << unit_rights[i].x, unit_rights[i].y, unit_rights[i].z);
 
         // R, t 적용
-        Mat v2p = rvec.t() * v2;
-        Mat tp = rvec.t() * tvec;
+        cv::Mat Rv2 = rvec.t() * v2;
 
-        Mat A(3, 2, CV_64F), b(3, 1, CV_64F);
+        cv::Mat A(3, 2, CV_64F);
+        cv::Mat b(3, 1, CV_64F);
+
         for (int j = 0; j < 3; ++j)
         {
-            A.at<double>(j,0) = v1.at<double>(j);
-            A.at<double>(j,1) = -v2p.at<double>(j);
-            b.at<double>(j,0) = -tp.at<double>(j);
+            A.at<double>(j, 0) = v1.at<double>(j);         // λ1 * v1
+            A.at<double>(j, 1) = -Rv2.at<double>(j);       // -λ2 * Rv2
+            b.at<double>(j, 0) = tvec.at<double>(j);       // +t
         }
 
-        Mat lambda;
-        solve(A, b, lambda, DECOMP_SVD);
-        double lambda_l = lambda.at<double>(0);
+        cv::Mat lambda;
+        cv::solve(A, b, lambda, DECOMP_SVD);
+        double lambda1 = lambda.at<double>(0);
+        double lambda2 = lambda.at<double>(1);
 
-        // if(lambda_l < DEPTH_MIN || lambda_l > DEPTH_MAX) continue;
-
-        cv::Point3d point3D = lambda_l * scale * unit_lefts[i];
+        // if(lambda1 < DEPTH_MIN || lambda1 > DEPTH_MAX) continue;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+        cv::Point3d point3D = lambda1 * unit_lefts[i];
         pointcloud.push_back(point3D);
 
         std::cout << "X : " << point3D.x << " Y : " << point3D.y << " Z : " << point3D.z << std::endl;
@@ -112,6 +111,18 @@ double DepthEstimate::MonoDepthEstimate
         Mat diff = P2 - P1;
 
         residual_error += norm(diff);
+
+        cv::Point3d norm_point3D = point3D / cv::norm(point3D);
+        cv::Point3d unit_dir = unit_lefts[i];
+
+        double dot = norm_point3D.dot(unit_dir);  // [-1, 1]
+        dot = std::clamp(dot, -1.0, 1.0);         // 안전 처리
+
+        double angle_rad = std::acos(dot);
+        double angle_deg = angle_rad * 180.0 / CV_PI;
+
+        std::cout << "Angle error (deg): " << angle_deg << std::endl;
+
     }
 
     return residual_error /= size;
@@ -126,142 +137,87 @@ double DepthEstimate::MonoDepthEstimate
 // {
 //     const double Err = -1.0;
 
-//     // 1. 입력 검증
-//     if(left.empty() || right.empty()) return Err;
-//     if(left.size() != right.size()) return Err;
+//     if (left.empty() || right.empty()) return Err;
+//     if (left.size() != right.size()) return Err;
 
 //     auto calib = calib_.lock();
-//     if(calib == nullptr) return Err;
+//     if (calib == nullptr) return Err;
 
-//     // 2. 픽셀 → 카메라 좌표계 → 단위 벡터
-//     vec<cv::Point3d> unit_lefts, unit_rights;
-//     for(size_t i = 0; i < left.size(); ++i)
+//     vec<cv::Point3d> unit_lefts;
+//     vec<cv::Point3d> unit_rights;
+
+//     const size_t size = left.size();
+//     for (size_t i = 0; i < size; ++i)
 //     {
-//         cv::Point3d uL, uR;
-//         Geometry::transformCameraPose(left[i],  uL, calib->GetCameraMatrix(), calib->GetdistCoeffs());
-//         Geometry::transformCameraPose(right[i], uR, calib->GetCameraMatrix(), calib->GetdistCoeffs());
+//         cv::Point3d ul, ur;
 
-//         // 정규화하여 단위벡터로
-//         unit_lefts.push_back(uL / cv::norm(uL));
-//         unit_rights.push_back(uR / cv::norm(uR));
+//         // 1. 픽셀 → 정규화된 단위벡터로 변환
+//         Geometry::transformCameraPose(left[i],  ul, calib->GetCameraMatrix(), calib->GetdistCoeffs(),true);
+//         Geometry::transformCameraPose(right[i], ur, calib->GetCameraMatrix(), calib->GetdistCoeffs(),true);
+
+//         unit_lefts.push_back(ul);
+//         unit_rights.push_back(ur);
 //     }
 
-//     // 3. SE(3) 추정: R, t 구하기 (단위벡터 기반)
-//     cv::Mat rvec, tvec;
-//     Geometry::estimateRigidTransformSVD(unit_lefts, unit_rights, rvec, tvec);
+//     // 2. 단위벡터 기반 SVD로 SE(3) 추정
+//     cv::Mat R, t;
+//     Geometry::estimateRigidTransformSVD(unit_lefts, unit_rights, R, t);
 
-//     std::cout << "[Info] 추정된 이동 벡터 norm (단위 없음): " << cv::norm(tvec) << std::endl;
-
-//     // 4. 스케일 보정: 방향만 유지하고 baseline으로 스케일 고정
-//     cv::Mat t_dir = tvec / cv::norm(tvec);
-//     tvec = t_dir * baseline_mm;  // 단위: mm
-
-//     double residual_error = 0.0;
-
-//     // 5. 삼각측량: λ 계산 후 λ * 단위벡터 = 3D 포인트
-//     for(size_t i = 0; i < unit_lefts.size(); ++i)
+//     // 3. 변환 정합 오차 출력
+//     double err_sum = 0.0;
+//     for (size_t i = 0; i < size; ++i)
 //     {
-//         cv::Mat v1 = (cv::Mat_<double>(3,1) << unit_lefts[i].x, unit_lefts[i].y, unit_lefts[i].z);
-//         cv::Mat v2 = (cv::Mat_<double>(3,1) << unit_rights[i].x, unit_rights[i].y, unit_rights[i].z);
+//         cv::Mat ul = (cv::Mat_<double>(3,1) << unit_lefts[i].x, unit_lefts[i].y, unit_lefts[i].z);
+//         cv::Mat ur_actual = (cv::Mat_<double>(3,1) << unit_rights[i].x, unit_rights[i].y, unit_rights[i].z);
+//         cv::Mat ur_pred = R * ul + t;
+//         err_sum += norm(ur_pred - ur_actual);
+//     }
+//     std::cout << "[Transform residual]: " << err_sum / size << std::endl;
 
-//         // 우측 기준으로 좌측 벡터 정렬
-//         cv::Mat v2p = rvec.t() * v2;
-//         cv::Mat tp = rvec.t() * tvec;
+//     // 4. 스케일 보정
+//     // double scale = baseline_mm / cv::norm(t);
+//     t = t / cv::norm(t) * baseline_mm;
+//     std::cout << "[Scaled t norm]: " << norm(t) << std::endl;
 
-//         // 선형 방정식 구성: Aλ = b
-//         cv::Mat A(3, 2, CV_64F), b(3, 1, CV_64F);
-//         for(int j = 0; j < 3; ++j)
+//     // 5. 삼각측량 및 포인트 추정
+//     double residual_error = 0.0;
+//     pointcloud.clear();
+
+//     for (size_t i = 0; i < size; ++i)
+//     {
+//         cv::Mat f1 = (cv::Mat_<double>(3,1) << unit_lefts[i].x, unit_lefts[i].y, unit_lefts[i].z);
+//         cv::Mat f2 = (cv::Mat_<double>(3,1) << unit_rights[i].x, unit_rights[i].y, unit_rights[i].z);
+
+//         cv::Mat Rf2 = R * f2;
+//         cv::Mat Rt = t;
+
+//         // Ax = b 구성
+//         cv::Mat A(3, 2, CV_64F);
+//         cv::Mat b(3, 1, CV_64F);
+//         for (int j = 0; j < 3; ++j)
 //         {
-//             A.at<double>(j,0) = v1.at<double>(j);
-//             A.at<double>(j,1) = -v2p.at<double>(j);
-//             b.at<double>(j,0) = -tp.at<double>(j);
+//             A.at<double>(j,0) = f1.at<double>(j);
+//             A.at<double>(j,1) = -Rf2.at<double>(j);
+//             b.at<double>(j,0) = Rt.at<double>(j);
 //         }
 
-//         cv::Mat lambda;
-//         solve(A, b, lambda, cv::DECOMP_SVD);
+//         cv::Mat lambdas;
+//         cv::solve(A, b, lambdas, cv::DECOMP_SVD);
 
-//         double lambda1 = lambda.at<double>(0);  // 좌측 단위벡터의 람다
+//         double lambda1 = lambdas.at<double>(0);  // left 기준
+//         cv::Point3d point3D = unit_lefts[i] * lambda1;
 
-//         // mm 단위 3D 포인트 계산
-//         cv::Point3d point3D = lambda1 * unit_lefts[i];
 //         pointcloud.push_back(point3D);
+//         std::cout << "X: " << point3D.x << " Y: " << point3D.y << " Z: " << point3D.z << std::endl;
 
-//         // 재투영 오차 계산 (R, t 기반 양쪽 포인트 비교)
+//         // 6. 재투영 residual 확인
 //         cv::Mat P1 = (cv::Mat_<double>(3,1) << point3D.x, point3D.y, point3D.z);
-//         cv::Mat P2 = rvec * P1 + tvec;
-//         cv::Mat diff = P2 - P1;
-//         residual_error += norm(diff);
-
-//         std::cout << "[3D Point] X: " << point3D.x << " Y: " << point3D.y << " Z: " << point3D.z << std::endl;
+//         cv::Mat P2 = R * P1 + t;
+//         residual_error += norm(P2 - P1);  // 트랜스폼된 위치와 원위치 차이
 //     }
 
-//     return residual_error / static_cast<double>(unit_lefts.size());
+//     return residual_error / size;
 // }
-
-double DepthEstimate::MonoDepthEstimate(
-    vec<cv::Point>& left,
-    vec<cv::Point>& right,
-    vec<cv::Point3d>& pointcloud,
-    double baseline_mm
-)
-{
-    const double Err = -1.0;
-
-    if(left.empty() || right.empty()) return Err;
-    if(left.size() != right.size()) return Err;
-
-    auto calib = calib_.lock();
-    if(calib == nullptr) return Err;
-
-    // 1. 내부 파라미터
-    cv::Mat K = calib->GetCameraMatrix();     // 3x3
-    cv::Mat D = calib->GetdistCoeffs();       // 왜곡 계수 (사용 안함 가정)
-    
-    // 2. 좌/우 카메라 포즈 정의 (기준: 좌측 카메라 원점 기준)
-    // P1 = K * [I | 0], P2 = K * [R | t]
-    cv::Mat R = cv::Mat::eye(3,3,CV_64F);
-    cv::Mat t = (cv::Mat_<double>(3,1) << -baseline_mm, 0, 0);  // X축 기준 baseline (mm)
-
-    cv::Mat Rt1, Rt2;
-    cv::hconcat(R, cv::Mat::zeros(3,1,CV_64F), Rt1);  // [I | 0]
-    cv::hconcat(R, t, Rt2);                           // [I | t]
-
-    cv::Mat P1 = K * Rt1;
-    cv::Mat P2 = K * Rt2;
-
-    // 3. 좌/우 픽셀 좌표 → Point2f로 변환
-    std::vector<cv::Point2f> pts1, pts2;
-    for (size_t i = 0; i < left.size(); ++i)
-    {
-        pts1.push_back(cv::Point2f(left[i]));
-        pts2.push_back(cv::Point2f(right[i]));
-    }
-
-    // 4. 삼각측량
-    cv::Mat points4D;  // 4xN (동차좌표)
-    cv::triangulatePoints(P1, P2, pts1, pts2, points4D);
-
-    // 5. 동차좌표 → 3D (정규화) → mm 단위 보존
-    pointcloud.clear();
-    double total_z = 0.0;
-
-    for (int i = 0; i < points4D.cols; ++i)
-    {
-        cv::Mat col = points4D.col(i);
-        cv::Point3d pt;
-
-        pt.x = col.at<float>(0) / col.at<float>(3);
-        pt.y = col.at<float>(1) / col.at<float>(3);
-        pt.z = col.at<float>(2) / col.at<float>(3);  // 단위: mm (baseline을 mm로 설정했기 때문)
-
-        pointcloud.push_back(pt);
-        total_z += pt.z;
-
-        std::cout << "[3D Point] X: " << pt.x << " Y: " << pt.y << " Z: " << pt.z << std::endl;
-    }
-
-    return total_z / static_cast<double>(points4D.cols);  // 평균 Z값 반환 (평균 깊이)
-}
 
 double DepthEstimate::computeBaseLine(cv::Mat& T_base_grip1 , cv::Mat& T_base_grip2)
 {

@@ -69,6 +69,7 @@ add_executable(robocallee_fms_node
     Adapters/src/AmrAdapter.cpp
     Adapters/src/RobotArmAdapter.cpp
     Manager/src/RequestManager.cpp
+    Manager/src/StorageManager.cpp
     Traffic/src/OccupancyGrid.cpp
     Traffic/src/TrafficPlanner.cpp
 )

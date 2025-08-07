@@ -2,7 +2,7 @@
 
 using namespace Adapter;
 
-AmrAdapter::AmrAdapter(Integrated::w_ptr<core::ICore> Icore, Logger::s_ptr log, const int& id)
+AmrAdapter::AmrAdapter(Integrated::w_ptr<core::ICore> Icore, Logger::s_ptr log, const int id)
     :Icore_(Icore), log_(log), isOccupyWaypoint_(false)
 {
     log_->Log(Log::LogLevel::INFO,"AmrAdapter 객체 생성");
@@ -24,7 +24,7 @@ Commondefine::RobotTaskInfo& AmrAdapter::GetTaskInfo()
 void AmrAdapter::SetTaskInfo(const Commondefine::GUIRequest& request)
 {
     {
-        std::lock_guard<std::mutex> lock(mtx_);
+        std::lock_guard<std::mutex> lock(Task_mtx_);
 
         robot_task_info_.robot_state = Commondefine::RobotState::BUSY;
         robot_task_info_.shoes_property = request.shoes_property;
@@ -32,11 +32,6 @@ void AmrAdapter::SetTaskInfo(const Commondefine::GUIRequest& request)
         robot_task_info_.requester = request.requester;
         robot_task_info_.customer_id = request.customer_id;
     }
-    // std::ostringstream oss;
-    // oss << ",color=" << robot_task_info_.shoes_property.color
-    //     << ",model=" << robot_task_info_.shoes_property.model
-    //     << ",size=" << robot_task_info_.shoes_property.size
-    //     << ",robot_id=" << robot_task_info_.robot_id;
 
     std::string msg = "color = " + robot_task_info_.shoes_property.color +
     ", model = " + robot_task_info_.shoes_property.model + "size = " + std::to_string(robot_task_info_.shoes_property.size) +
@@ -49,7 +44,7 @@ void AmrAdapter::SetTaskInfo(const Commondefine::GUIRequest& request)
 void AmrAdapter::SetAmrState(const Commondefine::RobotState& state)
 {
     {
-        std::lock_guard<std::mutex> lock(mtx_);
+        std::lock_guard<std::mutex> lock(Task_mtx_);
         
         robot_task_info_.robot_state = state;
     }
@@ -75,10 +70,7 @@ bool AmrAdapter::handleWaypointArrival(const Commondefine::pose2f& pos)
 
         setOccupyWayPoint(true);
         
-        if (isGetGoal()) { return true;}
-
-        //무조건 increment 하기 전에 불려져야함 !!
-        yaw();
+        if (isGoal()){ return true; }
 
         incrementWaypointIndex();
 
@@ -93,6 +85,9 @@ void AmrAdapter::WaitUntilWaypointOccupied()
 {
     std::unique_lock<std::mutex> lock(occupy_mtx_);
 
+    //할당된 waypoint가 없으면 바로 return 해서 데드락 문제 해결
+    if(waypoints_.empty()) return;
+
     if (!isOccupyWaypoint_.load())
     {
         occupy_cv_.wait(lock, [&]()
@@ -105,9 +100,20 @@ void AmrAdapter::WaitUntilWaypointOccupied()
 void AmrAdapter::updatePath(const std::vector<Commondefine::Position>& new_path)
 {
     {
-        std::lock_guard<std::mutex> lk(mtx_);
+        std::lock_guard<std::mutex> lk(waypoint_mtx_);
+        
+        ResetWaypoint();
+        
         waypoints_ = new_path;
-        ResetCurrentWpIndex();
+    }
+
+    const int nextiter = 1;
+    for (auto it = waypoints_.begin(); it + nextiter != waypoints_.end(); ++it)
+    {
+        auto& cur = *it;
+        auto& next = *(it + nextiter);
+
+        cur.yaw = Commondefine::yaw(cur, next);
     }
 
     setOccupyWayPoint(false);
@@ -122,8 +128,7 @@ void AmrAdapter::updatePath(const std::vector<Commondefine::Position>& new_path)
 void AmrAdapter::MoveTo_dest1(int robot_id)
 {
     auto core = Icore_.lock();
-    if (!core) return;
-    core->waitNewPath();
+    if (core == nullptr) return;
 
     log_->Log(Log::LogLevel::INFO, "MoveTo_dest1() 호출");
 
@@ -138,16 +143,15 @@ void AmrAdapter::MoveTo_dest1(int robot_id)
 
     if (robot_task_info_.requester == "customer")
     {
-            core->SetRobotArmNextStep(Commondefine::RobotArmStep::buffer_to_pinky, robot_task_info_.robot_id) ;
-
-            return;
-        }
+        core->SetRobotArmNextStep(Commondefine::RobotArmStep::buffer_to_pinky, robot_task_info_.robot_id);
+        return;
+    }
 }
 
 void AmrAdapter::MoveTo_dest2(int robot_id)
 {
     auto core = Icore_.lock();
-    if (!core) return;
+    if (core == nullptr) return;
 
     log_->Log(Log::LogLevel::INFO, "MoveTo_dest2() 호출");
 
@@ -170,7 +174,7 @@ void AmrAdapter::MoveTo_dest2(int robot_id)
 void AmrAdapter::MoveTo_dest3(int robot_id)
 {
     auto core = Icore_.lock();
-    if(!core) return;
+    if(core == nullptr) return;
 
     log_->Log(Log::LogLevel::INFO, "MoveTo_dest3() 호출");
 
@@ -183,18 +187,55 @@ void AmrAdapter::MoveTo_dest3(int robot_id)
     );
 }
 
-bool AmrAdapter::yaw()
+void AmrAdapter::setOccupyWayPoint(bool occupy)
 {
-    auto way = getWaypoints();
-    int index = current_wp_idx_.load();
+    isOccupyWaypoint_.store(occupy);
 
-    int size = current_wp_idx_.size() - 1;
-    if(index > size) return false;
+    if(occupy) occupy_cv_.notify_one();
+}
 
-    const Commondefine::Position cur = way[index];
-    const Commondefine::Position& next = way[index + 1];
+const bool AmrAdapter::isGoal()
+{ 
+    if(current_wp_idx_.load() == waypoints_.size())
+    {
+        {
+            std::lock_guard<std::mutex> lk(waypoint_mtx_);
+            ResetWaypoint();
+        }
 
-    next.yaw = Commondefine::yaw(cur, next);
+        return true;
+    }
 
-    return true;
+    return false;
+}
+
+void AmrAdapter::SetCurrentPosition(Commondefine::Position p)
+{
+    {
+        std::lock_guard lock(current_position_mtx_);
+
+        Commondefine::pose2f pose;
+        pose.x = static_cast<float>(p.x);
+        pose.y = static_cast<float>(p.y);
+
+        robot_task_info_.current_position = std::move(pose);
+    }
+
+    return;
+}
+
+Commondefine::Position AmrAdapter::GetDestPosition()
+{
+    Commondefine::Position pose;
+    pose.x = static_cast<int>(robot_task_info_.dest.x);
+    pose.y = static_cast<int>(robot_task_info_.dest.y);
+
+    return pose;
+}
+
+void AmrAdapter::ResetWaypoint()
+{
+    current_wp_idx_.store(0);
+
+    waypoints_.clear(); 
 }

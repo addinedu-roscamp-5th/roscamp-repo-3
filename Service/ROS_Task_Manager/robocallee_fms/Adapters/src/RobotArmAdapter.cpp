@@ -66,6 +66,8 @@ void RobotArmAdapter::arm1_shelf_to_buffer(Commondefine::shoesproperty shoe, int
         }
     }
 
+    
+
 
     if(shelf_num == -1) {
         log_->Log(Log::LogLevel::ERROR, "Arm1: 해당 신발 정보를 찾을 수 없습니다.");
@@ -80,16 +82,14 @@ void RobotArmAdapter::arm1_shelf_to_buffer(Commondefine::shoesproperty shoe, int
     } else {
         log_->Log(Log::LogLevel::ERROR, "ICore 호출 실패");
     }
-
-    
 }
 
 
 
 
 
-void RobotArmAdapter::arm2_buffer_to_pinky(int robot_id){
-
+void RobotArmAdapter::arm2_buffer_to_pinky(int robot_id)
+{
     log_->Log(Log::LogLevel::INFO, "arm2_buffer_to_pinky 호출");
     int shelf_num = -1;
 
@@ -108,11 +108,11 @@ void RobotArmAdapter::arm2_buffer_to_pinky(int robot_id){
     // } else {
     //     log_->Log(Log::LogLevel::ERROR, "ICore 호출 실패");
     // }
-
 }
 
 
-void RobotArmAdapter::arm2_pinky_to_buffer(int robot_id){
+void RobotArmAdapter::arm2_pinky_to_buffer(int robot_id)
+{
 
     log_->Log(Log::LogLevel::INFO, "arm2_pinky_to_buffer 호출");
     

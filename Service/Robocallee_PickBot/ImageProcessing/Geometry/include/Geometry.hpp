@@ -39,8 +39,13 @@ namespace geometry
                 cv::Point3d& point3d, // mm
                 const cv::Mat& cameraMatrix,
                 const cv::Mat& distCoeffs,
+                const bool useNorm = false,
                 const bool useUnDist = false
             );
+
+            static bool SkewSymmetricMatrix(const cv::Vec3d& v, cv::Mat& m);
+
+            static bool computeEssentialMatrixFromSE3(const cv::Mat& R, const cv::Mat& t,cv::Mat& E);
 
             static bool estimateRigidTransformSVD(const std::vector<cv::Point3d>& P1, const std::vector<cv::Point3d>& P2, cv::Mat& R, cv::Mat& t);
             

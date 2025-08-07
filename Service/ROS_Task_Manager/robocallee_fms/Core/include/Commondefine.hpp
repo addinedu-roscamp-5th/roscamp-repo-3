@@ -70,7 +70,13 @@ namespace Commondefine
         pose2f                 dest2;
         int                    customer_id;
         std::string            action;
-    }GUIRequest; 
+    }GUIRequest;
+
+    typedef struct StorageRequest
+    {
+        shoesproperty shoes;
+        int robot_id;
+    }StorageRequest;
 
     typedef struct Position
     {
@@ -149,12 +155,10 @@ namespace Commondefine
         int                                 battery             = 100;
         shoesproperty                       shoes_property;
         pose2f                              current_position;
-        pose2f                              dest1;
-        pose2f                              dest2;
-        pose2f                              dest3               = {1.0,0.4};
+        pose2f                              start;
+        pose2f                              dest;
         std::string                         requester;
         int                                 customer_id;
-        
         
         RobotTaskInfo& operator=(const RobotTaskInfo& rhs)
         {
@@ -165,9 +169,8 @@ namespace Commondefine
                 this->battery = rhs.battery;
                 this->shoes_property = rhs.shoes_property;
                 this->current_position = rhs.current_position;
-                this->dest1 = rhs.dest1;
-                this->dest2 = rhs.dest2;
-                this->dest3 = rhs.dest3;
+                this->current_position = rhs.current_position;
+                this->dest = rhs.dest;
                 this->requester = rhs.requester;
                 this->customer_id = rhs.customer_id;
             }

@@ -11,6 +11,7 @@ double Geometry::transformCameraPose(
     cv::Point3d& point3d, // mm
     const cv::Mat& cameraMatrix,
     const cv::Mat& distCoeffs,
+    const bool useNorm,
     const bool useUnDist
 )
 {
@@ -27,19 +28,24 @@ double Geometry::transformCameraPose(
 		cv::undistortPoints(pointToMat(distorted), undistorted2f, cameraMatrix, distCoeffs);
         
         cv::Point3f pt = matToPoint<Point3f>(undistorted2f);
+        unitVec = pt;
 
-        unitVec = pt / cv::norm(pt); 
+        if(useNorm)
+            unitVec = pt / cv::norm(pt); 
+
 	}
 	else
 	{
 		cv::Mat invk = cameraMatrix.inv();
         
         cv::Mat uv = (cv::Mat_<double>(3,1) << point2d.x, point2d.y, 1.0);
-        cv::Mat ray = cameraMatrix.inv() * uv;
+        cv::Mat ray = invk * uv;
         
         cv::Point3d vec3D(ray.at<double>(0), ray.at<double>(1), ray.at<double>(2));
+        unitVec = vec3D;
         
-        unitVec = vec3D / cv::norm(vec3D);  // 단위벡터화
+        if(useNorm)
+            unitVec = vec3D / cv::norm(vec3D);
     }
 
     point3d = unitVec;
@@ -204,5 +210,32 @@ bool Geometry::homogeneousInverse(const cv::Mat& T, cv::Mat& invT)
 
     invT = Tinv.clone();
     
+    return true;
+}
+
+bool Geometry::SkewSymmetricMatrix(const cv::Vec3d& v, cv::Mat& m)
+{
+    m = std::move(
+        (cv::Mat_<double>(3,3) <<
+           0,    -v[2],  v[1],
+        v[2],     0,   -v[0],
+        -v[1],   v[0],    0)
+    );
+}
+
+bool Geometry::computeEssentialMatrixFromSE3(const cv::Mat& R, const cv::Mat& t,cv::Mat& E)
+{
+    if(R.empty() || t.empty()) return true;
+
+    cv::Mat t_unit = t / cv::norm(t);
+
+    cv::Mat tx = (cv::Mat_<double>(3, 3) <<
+         0, -t_unit.at<double>(2),  t_unit.at<double>(1),
+      t_unit.at<double>(2), 0, -t_unit.at<double>(0),
+     -t_unit.at<double>(1), t_unit.at<double>(0), 0);
+
+    // 3. E = [t]_x * R
+    E = tx * R;
+
     return true;
 }

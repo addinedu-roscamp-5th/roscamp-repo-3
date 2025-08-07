@@ -33,7 +33,7 @@ bool ImageCapture::open(int index ,cv::VideoCaptureAPIs api)
     return videoCap_->open(index, api);
 }
 
-bool ImageCapture::Getframe(cv::Mat& frame)
+bool ImageCapture::getCurrentframe(cv::Mat& frame)
 {
     std::lock_guard lock(capmtx_);
 

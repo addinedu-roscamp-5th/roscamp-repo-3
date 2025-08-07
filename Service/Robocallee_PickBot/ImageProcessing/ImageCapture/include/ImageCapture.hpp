@@ -26,7 +26,7 @@ namespace cap
 
         bool open(int index ,cv::VideoCaptureAPIs api);
 
-        bool Getframe(cv::Mat& frame);
+        bool getCurrentframe(cv::Mat& frame);
         
     };
 };

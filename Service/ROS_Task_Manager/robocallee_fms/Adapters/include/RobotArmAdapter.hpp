@@ -15,7 +15,7 @@ namespace Adapter
 
         std::vector<Commondefine::shoesproperty> shelf_info; // 0번 인덱스는 사용하지 않음, 1~9번 인덱스에 선반 정보 저장
         std::vector<bool>shelf_occupied; // 선반이 비어있는지 여부를 저장하는 벡터
-
+        
     public:
         using u_ptr = Integrated::u_ptr<RobotArmAdapter>;
 

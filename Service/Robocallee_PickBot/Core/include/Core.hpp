@@ -8,6 +8,7 @@
 #include "objectDetector.hpp"
 #include "ImageProcDetector.hpp"
 #include "Geometry.hpp"
+#include "ImageCapture.hpp"
 #include "RosInterface.hpp"
 
 #include "opencv2/opencv.hpp"
@@ -22,7 +23,7 @@ namespace core
         Integrated::w_ptr<interface::RosInterface>            Interface_;
         
         Integrated::u_ptr<RA::RobotArm>                       RobotArm_;
-        Integrated::u_ptr<cv::VideoCapture>                   video_;
+        Integrated::u_ptr<cap::ImageCapture>                  capture_;
         Integrated::u_ptr<depth::DepthEstimate>               depth_;
         
         Integrated::s_ptr<Calib::Calibrator>                  calib_;

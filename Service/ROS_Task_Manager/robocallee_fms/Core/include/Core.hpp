@@ -4,6 +4,7 @@
 #include <type_traits>
 #include <memory>
 #include <mutex>
+
 #include "Commondefine.hpp"
 #include "ICore.hpp"
 #include "Dispatcher.hpp"
@@ -50,10 +51,8 @@ namespace core
         bool Initialize();
 
         bool SetAmrNextStep(int idx, Commondefine::AmrStep step) override;
-
         
         bool SetRobotArmNextStep(Commondefine::RobotArmStep step, Commondefine::shoesproperty shoes, int robot_id) override;
-        // bool SetRobotArmNextStep(Commondefine::RobotArmStep step) override;
         
         bool ArmRequestMakeCall(int arm_num, int shelf_num, int robot_id , std::string action) override ;
 
@@ -79,11 +78,11 @@ namespace core
 
         void waitNewPath() override;
 
-        void SetAssignNewAmr(bool assign) override { assignNewAmr_ = assign; }
+        void SetAssignNewAmr(bool assign) override { assignNewAmr_.store(assign); }
 
         bool GetAssignNewAmr() override { return assignNewAmr_.load(); }
-        // void SetAmrState(int idx) override;
-    
+
+        void assignWork(int amr) override;
     };
 
     // Template implementation

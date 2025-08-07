@@ -46,6 +46,8 @@ public:
 
     virtual void PlanPaths() = 0;
 
+    virtual void assignWork(int amr) = 0;
+
     virtual void SetAssignNewAmr(bool assign) = 0;
 
     virtual bool GetAssignNewAmr() = 0;
