@@ -31,15 +31,7 @@ bool RosInterface::Initialize(Integrated::w_ptr<core::ICore> Icore)
 
   customer_service_ = create_service<CustomerServiceType>("customer_service", std::bind(&RosInterface::cbCustomerRequest, this, std::placeholders::_1, std::placeholders::_2));
   employee_service_ = create_service<EmployeeServiceType>("employee_service", std::bind(&RosInterface::cbEmployeeRequest, this, std::placeholders::_1, std::placeholders::_2));
-    
-  for (int i = 0; i < _AMR_NUM_; ++i)
-  {
-    auto topic = "/aruco_pose" + std::to_string(i+1);
-    auto p = create_subscription<geometry_msgs::msg::PoseStamped>(topic, 10, std::bind(&RosInterface::arucoPoseCallback, this, std::placeholders::_1));
-    aruco_subs_.push_back(p);
-
-    log_->Log(INFO, "Subscribed to " + topic);
-  }
+  aurco_array_sub_  = create_subscription<ArucoPoseArray>("/aruco_pose_array", 10, std::bind(&RosInterface::cbarucoPoseArray, this, std::placeholders::_1));
 
   for(int i = 0 ; i < RobotArm::RobotArmNum; ++i)
   {
@@ -59,7 +51,6 @@ bool RosInterface::Initialize(Integrated::w_ptr<core::ICore> Icore)
     );
     log_->Log(Log::LogLevel::INFO, "Created publisher for: " + topic);
   }
-
   return true;
 }
 
@@ -270,30 +261,48 @@ void RosInterface::cbEmployeeRequest(const std::shared_ptr<EmployeeServiceType::
     }
 }
 
-void RosInterface::arucoPoseCallback(
-  const geometry_msgs::msg::PoseStamped::ConstSharedPtr & msg)
+void RosInterface::cbarucoPoseArray(const ArucoPoseArray::ConstSharedPtr & msg)
 {
   std::lock_guard<std::mutex> lk(pose_mutex_);
   
-  Commondefine::pose2f p;
-  p.x = static_cast<float>(msg->pose.position.x);
-  p.y = static_cast<float>(msg->pose.position.y);
+  std::vector<Commondefine::pose2f> pos;
 
-  int robot_id = 0;
+  for (const auto & ap : msg->poses)
+  {
+    Commondefine::pose2f p;
+    p.x = static_cast<float>(ap.x);
+    p.y = static_cast<float>(ap.y);
+
+    pos.push_back(p);
+
+    nav_msgs::msg::Odometry odom;
+    odom.header    = msg->header;
+    odom.child_frame_id = "pinky_" + std::to_string(ap.id);
+
+    odom.pose.pose.position.x = ap.x;
+    odom.pose.pose.position.y = ap.y;
+    odom.pose.pose.position.z = 0.0;
+
+    tf2::Quaternion q; 
+    q.setRPY(0.0, 0.0, ap.yaw);
+    odom.pose.pose.orientation = tf2::toMsg(q);
+
+    odom.twist.twist = geometry_msgs::msg::Twist();
+
+    odom2_pub_->publish(odom);
+  }
 
   if (auto icore = Icore_.lock())
   {
-    icore->PoseCallback(p, robot_id);
+    icore->PoseCallback(pos);
   }
-
-  //pls make function for send pinky position;
 }
 
 void RosInterface::publishNavGoal(int idx, const Commondefine::Position wp)
 {
-    if (idx < 0 || idx >= static_cast<int>(nav_goal_pubs_.size())) {
-        log_->Log(Log::LogLevel::ERROR,
-                  "publishNavGoal: invalid robot_id " + std::to_string(idx));
+    if (idx < 0 || idx >= static_cast<int>(nav_goal_pubs_.size()))
+    {
+        log_->Log(Log::LogLevel::ERROR, "publishNavGoal: invalid robot_id " + std::to_string(idx));
         return;
     }
 

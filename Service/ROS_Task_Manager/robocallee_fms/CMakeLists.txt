@@ -42,11 +42,12 @@ include_directories(
   find_package(ament_cmake REQUIRED)
   find_package(rclcpp REQUIRED)
   find_package(std_msgs REQUIRED)
-  find_package(geometry_msgs REQUIRED)         # ← 추가
-  find_package(tf2 REQUIRED)                   # ← 추가
-  find_package(tf2_ros REQUIRED)               # ← 추가
-  find_package(tf2_geometry_msgs REQUIRED)     # ← 추가
+  find_package(geometry_msgs REQUIRED)         
+  find_package(tf2 REQUIRED)                   
+  find_package(tf2_ros REQUIRED)               
+  find_package(tf2_geometry_msgs REQUIRED)     
   find_package(rosidl_default_generators REQUIRED)
+  find_package(nav_msgs REQUIRED)
 
 
 # 서비스 메시지 생성
@@ -54,8 +55,11 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/ShoeRequest.srv"
   "srv/DoneMsg.srv"
   "srv/RobotArmRequest.srv"
-    "srv/CustomerRequest.srv"
+  "srv/CustomerRequest.srv"
   "srv/EmployeeRequest.srv"
+  "msg/ArucoPose.msg"
+  "msg/ArucoPoseArray.msg"
+  DEPENDENCIES std_msgs
 )
 
 
@@ -92,8 +96,9 @@ ament_target_dependencies(robocallee_fms_node
   std_msgs
   geometry_msgs            # ← 추가
   tf2                      # ← 추가
-  tf2_ros                  # ← 추가
+  tf2_ros                  # ← 추가 
   tf2_geometry_msgs        # ← 추가
+  nav_msgs
 )
 
 # 링크 라이브러리

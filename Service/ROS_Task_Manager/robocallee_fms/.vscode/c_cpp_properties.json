@@ -13,6 +13,8 @@
                 "${workspaceFolder}/../../Utile/Logger/include",
                 "${workspaceFolder}/../../Utile/Common/include",
                 "${workspaceFolder}/../../Lib/YAML/include",
+                "${workspaceFolder}/srv",
+                "${workspaceFolder}/msg",
                 "/opt/ros/jazzy/include",
                 "/opt/ros/jazzy/include/rclcpp"
                 

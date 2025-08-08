@@ -25,7 +25,7 @@ public:
 
 
     // 위치 콜백 (Aruco 또는 LM 위치)
-    virtual bool PoseCallback(const Commondefine::pose2f &pos, int robot_id) = 0;
+    virtual bool PoseCallback(const std::vector<Commondefine::pose2f> &pos) =0;
 
     // 요청 및 완료 콜백
     virtual int RequestCallback(const Commondefine::GUIRequest &request) = 0;

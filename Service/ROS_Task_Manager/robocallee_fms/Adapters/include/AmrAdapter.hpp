@@ -75,7 +75,7 @@ namespace Adapter
         
         void incrementWaypointIndex() { ++current_wp_idx_; }
 
-        void SetCurrentPosition(Commondefine::Position p);
+        void SetCurrentPosition(Commondefine::pose2f p);
         Commondefine::Position GetCurrentPosition();
 
         Commondefine::Position GetDestPosition();

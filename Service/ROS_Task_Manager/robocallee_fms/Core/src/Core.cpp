@@ -39,6 +39,7 @@ bool Core::Initialize()
     // AMR 어댑터 생성
     for (int i = 0; i < _AMR_NUM_; ++i)
     {
+        // string name = "AMR" + to_string(i);
         amr_adapters_.emplace_back(make_uptr<Adapter::AmrAdapter>(self, log_, i));
     }
 
@@ -49,6 +50,8 @@ bool Core::Initialize()
 
 bool Core::SetAmrNextStep(int idx, Commondefine::AmrStep step)
 {
+    assignNewAmr_ = true;
+
     switch (step)
     {
     case Commondefine::MoveTo_dest1:
@@ -106,54 +109,48 @@ bool Core::SetRobotArmNextStep(Commondefine::RobotArmStep step, Commondefine::sh
 }
 
 bool Core::ArmRequestMakeCall(int arm_num, int shelf_num, int robot_id, std::string action)
-{ 
-    auto iface = Interface_.lock();
-    if(iface == nullptr)
-    {
-        log_->Log(Log::LogLevel::ERROR,"RosInterface가 유효하지 않습니다!");
-        return false;
+{
+    if (arm_num == 1) {
+        if (auto iface = Interface_.lock()) {
+            iface->arm1_send_request(shelf_num, robot_id, action);
+        } else {
+            log_->Log(Log::LogLevel::ERROR,
+                      "RosInterface가 유효하지 않습니다!");
+        }
     }
 
-    if(arm_num == 1) iface->arm1_send_request(shelf_num, robot_id, action);
-    else if(arm_num == 2) iface->arm2_send_request(robot_id, action);
-    else
-    {
-        log_->Log(Log::LogLevel::ERROR,"Arm, index 가 invilad"); return false;
-        return false;
-    } 
+    else if (arm_num == 2) {
+        if (auto iface = Interface_.lock()) {
+            iface->arm2_send_request(robot_id, action);
+        } else {
+            log_->Log(Log::LogLevel::ERROR,
+                      "RosInterface가 유효하지 않습니다!");
+        }
+    }
 
     return true;
 }
-
-
-bool Core::UpdateShelfInfo(Commondefine::shoesproperty incoming_shoe , int shelf_num){
-    pRobotArmAdapter_->shelf_info[shelf_num] = incoming_shoe ;
-    pRobotArmAdapter_->shelf_occupied[shelf_num] = true ;
-
-    return true;
-}
-
-
-
 
 #define _USE_ASSUNG_TASK_
-bool Core::PoseCallback(const Commondefine::pose2f& pos, int robot_id)
+bool Core::PoseCallback(const std::vector<Commondefine::pose2f> &pos)
 {
-    if(robot_id > amr_adapters_.size()) 
+    if(pos.size() > amr_adapters_.size()) 
     {
-        log_->Log(Log::LogLevel::ERROR, "Pinky ID : " + std::to_string(robot_id) + " Not Invalide");
+        log_->Log(Log::LogLevel::ERROR, "Pinky pos is not invalid");
         return false;
     }
 
-    //amr_adapters_[robot_id]->SetCurrentPosition(pos);
-    amr_adapters_[robot_id]->SetCurrentPosition( { (float)pos.x , (float)pos.y } );
-
+    size_t size = pos.size();
+    for(size_t robot_id = 0 ; robot_id < size; ++robot_id)
+    {
+        amr_adapters_[robot_id]->SetCurrentPosition(pos[robot_id]);
 
 #ifdef _USE_ASSUNG_TASK_
-    assignTask(std::bind(&AmrAdapter::handleWaypointArrival,amr_adapters_[robot_id].get(),pos));
+        assignTask(std::bind(&AmrAdapter::handleWaypointArrival,amr_adapters_[robot_id].get(), pos[robot_id]));
 #else
-    return amr_adapters_[robot_id]->handleWaypointArrival(pos);    
+        return amr_adapters_[robot_id]->handleWaypointArrival(pos[robot_id]);    
 #endif
+    }
 
     return true;
 }
@@ -166,6 +163,12 @@ int Core::RequestCallback(const Commondefine::GUIRequest& request)
     if (pRequestManager_)
     {
         int wait_list = pRequestManager_->EnqueueRequest(request);
+        // if (wait_list>0)
+        // {
+        //     pRequestManager_->BestRobotSelector();
+
+        //     return wait_list;
+        // }
 
         pRequestManager_->BestRobotSelector();
 
@@ -216,7 +219,7 @@ bool Core::DoneCallback(const std::string& requester, const int& customer_id)
 bool Core::publishNavGoal(int idx, const Commondefine::Position wp)
 {
     auto iface = Interface_.lock();
-    if(iface == nullptr) return false;
+    if (!iface) return false;
 
     iface->publishNavGoal(idx, wp);
 
@@ -233,14 +236,14 @@ void Core::PlanPaths()
         if(amr->GetTaskInfo().robot_state == RobotState::IDLE) continue;
         
         amr->WaitUntilWaypointOccupied();
-
-        // starts.push_back(amr->GetCurrentPosition());         아직 undefined
-        // goals.push_back(amr->GetDestPosition());             아직 undefined
+        starts.push_back(amr->GetCurrentPosition());
+        goals.push_back(amr->GetDestPosition());
     }
 
     auto paths = traffic_Planner_->planPaths(starts, goals);
 
     size_t size = amr_adapters_.size();
+    
     for(size_t i = 0 ; i < size; ++i)
     {
         if(amr_adapters_[i]->GetTaskInfo().robot_state == RobotState::IDLE) continue;
@@ -257,20 +260,10 @@ void Core::waitNewPath()
     if(!assignNewAmr_) return;
 
     std::unique_lock lock(path_mtx_);
-    path_cv_.wait(lock,[&]() { return !assignNewAmr_; });
-}
-
-void Core::assignWork(int amr)
-{
-    if(amr > amr_adapters_.size())
+    path_cv_.wait(lock,[&]()
     {
-        SetAssignNewAmr(false);
-        
-        //return false;
-
-    }
-
-    PlanPaths();
+        return !assignNewAmr_;
+    });
 }
 
 Commondefine::RobotState Core::GetAmrState(int idx)
@@ -304,4 +297,14 @@ void Core::SetTaskInfo(int idx, const Commondefine::GUIRequest& request)
     if (idx < 0 || idx >= amr_adapters_.size()) return;
 
     amr_adapters_[idx]->SetTaskInfo(request);
+}
+
+void Core::assignWork(int amr)
+{
+    return;
+}
+
+bool Core::UpdateShelfInfo(Commondefine::shoesproperty incoming_shoe, int shelf_num)
+{
+    return true;
 }

@@ -62,7 +62,7 @@ namespace core
         
         bool DoneCallback(const std::string& requester, const int& customer_id) override;
 
-        bool PoseCallback(const Commondefine::pose2f &pos, int robot_id) override;
+        bool PoseCallback(const std::vector<Commondefine::pose2f> &pos) override;
 
         // bool publishNavGoal(int idx, const geometry_msgs::msg::PoseStamped wp) override;
         bool publishNavGoal(int idx, const Commondefine::Position wp) override;

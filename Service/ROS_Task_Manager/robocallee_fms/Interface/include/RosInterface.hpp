@@ -8,15 +8,24 @@
 // ROS2 기본
 #include "rclcpp/rclcpp.hpp"
 
+#include "tf2/LinearMath/Quaternion.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
+
 // 서비스·클라이언트
 #include "robocallee_fms/srv/customer_request.hpp" 
 #include "robocallee_fms/srv/employee_request.hpp"
 #include "robocallee_fms/srv/robot_arm_request.hpp"
 
+#include "geometry_msgs/msg/pose_stamped.hpp"
+
 // LM 위치 토픽 메시지 타입
 #include "std_msgs/msg/float32_multi_array.hpp"
+
 // Aruco PoseStamped 토픽 메시지 타입
-#include "geometry_msgs/msg/pose_stamped.hpp"
+#include "robocallee_fms/msg/aruco_pose_array.hpp"
+#include "robocallee_fms/msg/aruco_pose.hpp"
+
+#include "nav_msgs/msg/odometry.hpp"
 
 #include <mutex>
 #include <vector>
@@ -25,10 +34,13 @@
 namespace interface 
 {
 
-    using LmPoseMsg         = std_msgs::msg::Float32MultiArray;
-    using CustomerServiceType = robocallee_fms::srv::CustomerRequest;    
-    using EmployeeServiceType = robocallee_fms::srv::EmployeeRequest;
-    using ArmServiceType    = robocallee_fms::srv::RobotArmRequest;
+    using LmPoseMsg                 = std_msgs::msg::Float32MultiArray;
+    using CustomerServiceType       = robocallee_fms::srv::CustomerRequest;    
+    using EmployeeServiceType       = robocallee_fms::srv::EmployeeRequest;
+    using ArmServiceType            = robocallee_fms::srv::RobotArmRequest;
+    using ArucoPoseArray            = robocallee_fms::msg::ArucoPoseArray;
+    using ArucoPose                 = robocallee_fms::msg::ArucoPose;
+
 
     class RosInterface : public rclcpp::Node
     {
@@ -39,15 +51,17 @@ namespace interface
         // 서비스
         rclcpp::Service<robocallee_fms::srv::CustomerRequest>::SharedPtr        customer_service_;
         rclcpp::Service<robocallee_fms::srv::EmployeeRequest>::SharedPtr        employee_service_;
+        rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr                   odom2_pub_;
         
         // Arm 클라이언트
         std::vector<rclcpp::Client<ArmServiceType>::SharedPtr>          arm_clients_;
 
         // Aruco Pose 구독
-        std::vector< rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr> aruco_subs_;
+        rclcpp::Subscription<ArucoPoseArray>::SharedPtr  aurco_array_sub_;
+
 
         // poseStamped publish
-        std::vector< rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr > nav_goal_pubs_;
+        std::vector<rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr> nav_goal_pubs_;
 
         // 받은 좌표 저장
         std::mutex                                                      pose_mutex_;
@@ -76,10 +90,9 @@ namespace interface
         void arm1_send_request(int shelf_num, int robot_id , std::string action );
         void arm2_send_request(int robot_id, std::string action );
 
-
         void cbArmService(rclcpp::Client<ArmServiceType>::SharedFuture future);
 
-        void arucoPoseCallback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr & msg);
+        void cbarucoPoseArray(const ArucoPoseArray::ConstSharedPtr & msg);
 
         void publishNavGoal(int idx, const Commondefine::Position wp);
 

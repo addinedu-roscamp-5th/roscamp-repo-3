@@ -50,37 +50,6 @@ void AmrAdapter::SetAmrState(const Commondefine::RobotState& state)
     }
 }
 
-bool AmrAdapter::handleWaypointArrival(const Commondefine::pose2f& pos)
-{
-    auto core = Icore_.lock();
-    if(core == nullptr) return false;
-
-    Commondefine::Position p = getCurrentWayPoint();
-    if(p.x == -1 || p.y ==-1) return false;
-
-    float dx = float(pos.x - static_cast<float>(p.x));
-    float dy = float(pos.y - static_cast<float>(p.y));
-
-    float dist = std::hypot(dx, dy);
-
-    if (dist <= _ARRIVAL_TOLERANCE_)
-    {
-        log_->Log(Log::LogLevel::INFO, "핑키 "+ std::to_string(robot_task_info_.robot_id) + "가 waypoint " 
-        + std::to_string(current_wp_idx_.load()) + "에 도달했습니다.");
-
-        setOccupyWayPoint(true);
-        
-        if (isGoal()){ return true; }
-
-        incrementWaypointIndex();
-
-        core->publishNavGoal(robot_task_info_.robot_id, getCurrentWayPoint());
-
-        setOccupyWayPoint(false);
-    }
-}
-
-
 void AmrAdapter::WaitUntilWaypointOccupied()
 {
     std::unique_lock<std::mutex> lock(occupy_mtx_);
@@ -94,6 +63,37 @@ void AmrAdapter::WaitUntilWaypointOccupied()
         {
             return isOccupyWaypoint_.load();
         });
+    }
+}
+
+bool AmrAdapter::handleWaypointArrival(const Commondefine::pose2f& pos)
+{
+    auto core = Icore_.lock();
+    if(core == nullptr) return false;
+
+    Commondefine::Position p = getCurrentWayPoint();
+    if(p.x == -1 || p.y ==-1) return false;
+
+    float dx = float(pos.x - static_cast<float>(p.x));
+    float dy = float(pos.y - static_cast<float>(p.y));
+    float dist = std::hypot(dx, dy);
+
+    if (dist <= _ARRIVAL_TOLERANCE_)
+    {
+        log_->Log(Log::LogLevel::INFO, "핑키 "+ std::to_string(robot_task_info_.robot_id) + "가 waypoint "
+        + std::to_string(current_wp_idx_.load()) + "에 도달했습니다.");
+
+        setOccupyWayPoint(true);
+
+        if (isGoal()){ return true; }
+
+        core->waitNewPath();
+
+        incrementWaypointIndex();
+
+        core->publishNavGoal(robot_task_info_.robot_id, getCurrentWayPoint());
+
+        setOccupyWayPoint(false);
     }
 }
 
@@ -114,6 +114,7 @@ void AmrAdapter::updatePath(const std::vector<Commondefine::Position>& new_path)
         auto& next = *(it + nextiter);
 
         cur.yaw = Commondefine::yaw(cur, next);
+        // 
     }
 
     setOccupyWayPoint(false);
@@ -220,19 +221,23 @@ const bool AmrAdapter::isGoal()
     return false;
 }
 
-void AmrAdapter::SetCurrentPosition(Commondefine::Position p)
+void AmrAdapter::SetCurrentPosition(Commondefine::pose2f p)
 {
     {
         std::lock_guard lock(current_position_mtx_);
-
-        Commondefine::pose2f pose;
-        pose.x = static_cast<float>(p.x);
-        pose.y = static_cast<float>(p.y);
-
-        robot_task_info_.current_position = std::move(pose);
+        robot_task_info_.current_position = std::move(p);
     }
 
     return;
+}
+
+Commondefine::Position AmrAdapter::GetCurrentPosition()
+{
+    Commondefine::Position p;
+    p.x = static_cast<float>(robot_task_info_.current_position.x);
+    p.y = static_cast<float>(robot_task_info_.current_position.y);
+
+    return p;
 }
 
 Commondefine::Position AmrAdapter::GetDestPosition()

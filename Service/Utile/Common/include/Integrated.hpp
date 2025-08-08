@@ -10,7 +10,7 @@
 #include <map>
 #include <algorithm>
 #include <condition_variable>
-
+#include <cmath>
 #include "Logger.hpp"
 using namespace Log;
 
