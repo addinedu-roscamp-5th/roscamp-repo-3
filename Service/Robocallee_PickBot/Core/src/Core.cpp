@@ -56,8 +56,8 @@ bool Core::initialize()
 
 bool Core::computeDepth()
 {
-    std::vector<double> left_joint = {0.028, -0.103, -0.494, -0.615, -0.018, 0.79};
-    std::vector<double> right_joint = {-0.095, -0.241, -0.348, -0.679, 0.018, 0.664};
+    std::vector<double> left_joint = {-0.285, -0.104, -0.011, -1.206, 0.086, 0.538};
+    std::vector<double> right_joint = {-0.066, 0.141, -0.29, -1.206, 0.04, 0.753};
 
     cv::Mat lT , rT;
     Geometry::compute_forward_kinematics(left_joint, mycobot280_dh_params, lT);
@@ -66,16 +66,33 @@ bool Core::computeDepth()
     double baseline = depth_->computeBaseLine(lT, rT);
 
     vec<OB::object2d> leftob,rightob;
-    cv::Mat left = cv::imread("../../../DepthTEST/img_pos1.bmp");
-    cv::Mat right = cv::imread("../../../DepthTEST/img_pos2.bmp");
+    cv::Mat left = cv::imread("calib_file/25.08.08/img_pos1.bmp");
+    cv::Mat right = cv::imread("calib_file/25.08.08/img_pos2.bmp");
 
     Mat k = calib_->GetCameraMatrix();
     Mat d = calib_->GetdistCoeffs();
 
-    vec<Mat> rvec , tvec;
+    vec<Mat> rvec , tvec ,rrvec , rtvec;
     detector_->EstimatePose(left, k, d, 50, rvec, tvec);
+    detector_->EstimatePose(right, k, d, 50, rrvec, rtvec);
 
     std::cout << tvec[0] << std::endl;
+    std::cout << rvec[0] << std::endl;
+    std::cout << rtvec[0] << std::endl;
+    std::cout << rrvec[0] << std::endl;
+
+    Mat pt1_cam = (cv::Mat_<double>(4, 1) << tvec[0].at<double>(0), tvec[0].at<double>(1), tvec[0].at<double>(2), 1.0);
+    Mat pt2_cam = (cv::Mat_<double>(4, 1) << rtvec[0].at<double>(0), rtvec[0].at<double>(1), rtvec[0].at<double>(2), 1.0);
+
+    // 카메라 → base 변환
+    Mat pt1_base = lT.inv() * calib_->Getcam2gripper() * pt1_cam;
+    Mat pt2_base = rT.inv() * calib_->Getcam2gripper() * pt2_cam;
+
+    // 유클리드 거리 계산
+    Point3d p1(pt1_base.at<double>(0), pt1_base.at<double>(1), pt1_base.at<double>(2));
+    Point3d p2(pt2_base.at<double>(0), pt2_base.at<double>(1), pt2_base.at<double>(2));
+    
+    double dist = norm(p2 - p1);
 
     detector_->FindObject(left,leftob);
     detector_->FindObject(right,rightob);

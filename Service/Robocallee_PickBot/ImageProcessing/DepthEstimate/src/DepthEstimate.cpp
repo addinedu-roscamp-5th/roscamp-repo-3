@@ -48,18 +48,27 @@ double DepthEstimate::MonoDepthEstimate
         cv::Point3d unit_left;
         cv::Point3d unit_right;
         
-        Geometry::transformCameraPose(left[i],  unit_left,  calib->GetCameraMatrix(), calib->GetdistCoeffs());
-        Geometry::transformCameraPose(right[i], unit_right, calib->GetCameraMatrix(), calib->GetdistCoeffs());
+        Geometry::transformCameraPose(left[i],  unit_left,  calib->GetCameraMatrix(), calib->GetdistCoeffs(), true);
+        Geometry::transformCameraPose(right[i], unit_right, calib->GetCameraMatrix(), calib->GetdistCoeffs(), true);
 
-        std::cout << "left Norm: " << norm(unit_left) << std::endl;
-        std::cout << "right Norm: " << norm(unit_right) << std::endl;
+        // std::cout << "left Norm: " << norm(unit_left) << std::endl;
+        // std::cout << "right Norm: " << norm(unit_right) << std::endl;
 
         unit_lefts.push_back(unit_left);
         unit_rights.push_back(unit_right);
     }
 
+    for(int i = 0 ; i < unit_lefts.size(); ++i)
+    {
+        std::cout << "left: " << (unit_lefts[i]) << std::endl;
+        std::cout << "right: " << (unit_rights[i]) << std::endl;
+    }
+
     Mat rvec, tvec;
     Geometry::estimateRigidTransformSVD(unit_lefts, unit_rights, rvec, tvec);
+
+    std::cout << rvec << endl;
+    std::cout << tvec << endl;
 
     // double err_sum = 0.0;
     // for (size_t i = 0; i < size; ++i)
