@@ -145,6 +145,8 @@ bool Core::PoseCallback(const std::vector<Commondefine::pose2f> &pos)
     {
         amr_adapters_[robot_id]->SetCurrentPosition(pos[robot_id]);
 
+        if(amr_adapters_[robot_id]->GetTaskInfo().robot_state == RobotState::IDLE) continue;
+
 #ifdef _USE_ASSUNG_TASK_
         assignTask(std::bind(&AmrAdapter::handleWaypointArrival,amr_adapters_[robot_id].get(), pos[robot_id]));
 #else

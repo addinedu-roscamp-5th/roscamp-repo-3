@@ -32,6 +32,7 @@ bool RosInterface::Initialize(Integrated::w_ptr<core::ICore> Icore)
   customer_service_ = create_service<CustomerServiceType>("customer_service", std::bind(&RosInterface::cbCustomerRequest, this, std::placeholders::_1, std::placeholders::_2));
   employee_service_ = create_service<EmployeeServiceType>("employee_service", std::bind(&RosInterface::cbEmployeeRequest, this, std::placeholders::_1, std::placeholders::_2));
   aurco_array_sub_  = create_subscription<ArucoPoseArray>("/aruco_pose_array", 10, std::bind(&RosInterface::cbarucoPoseArray, this, std::placeholders::_1));
+  odom2_pub_ = create_publisher<nav_msgs::msg::Odometry>("/odom_2",10);
 
   for(int i = 0 ; i < RobotArm::RobotArmNum; ++i)
   {
@@ -263,39 +264,50 @@ void RosInterface::cbEmployeeRequest(const std::shared_ptr<EmployeeServiceType::
 
 void RosInterface::cbarucoPoseArray(const ArucoPoseArray::ConstSharedPtr & msg)
 {
-  std::lock_guard<std::mutex> lk(pose_mutex_);
+  auto start = std::chrono::high_resolution_clock::now();
+
+  {
+    std::lock_guard<std::mutex> lk(pose_mutex_);
+    
+    std::vector<Commondefine::pose2f> pos;
+
+    for (const auto & ap : msg->poses)
+    {
+      Commondefine::pose2f p;
+      p.x = static_cast<float>(ap.x);
+      p.y = static_cast<float>(ap.y);
+
+      pos.push_back(p);
+
+      nav_msgs::msg::Odometry odom;
+      odom.header    = msg->header;
+      odom.child_frame_id = "pinky_" + std::to_string(ap.id);
+
+      odom.pose.pose.position.x = ap.x;
+      odom.pose.pose.position.y = ap.y;
+      odom.pose.pose.position.z = 0.0;
+
+      tf2::Quaternion q; 
+      q.setRPY(0.0, 0.0, ap.yaw);
+      odom.pose.pose.orientation = tf2::toMsg(q);
+
+      odom.twist.twist = geometry_msgs::msg::Twist();
+
+      odom2_pub_->publish(odom);
+    }
+
+    if (auto icore = Icore_.lock())
+    {
+      if(pos.empty()) return;
+      
+      icore->PoseCallback(pos);
+    }
+  }
   
-  std::vector<Commondefine::pose2f> pos;
+  auto end = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
-  for (const auto & ap : msg->poses)
-  {
-    Commondefine::pose2f p;
-    p.x = static_cast<float>(ap.x);
-    p.y = static_cast<float>(ap.y);
-
-    pos.push_back(p);
-
-    nav_msgs::msg::Odometry odom;
-    odom.header    = msg->header;
-    odom.child_frame_id = "pinky_" + std::to_string(ap.id);
-
-    odom.pose.pose.position.x = ap.x;
-    odom.pose.pose.position.y = ap.y;
-    odom.pose.pose.position.z = 0.0;
-
-    tf2::Quaternion q; 
-    q.setRPY(0.0, 0.0, ap.yaw);
-    odom.pose.pose.orientation = tf2::toMsg(q);
-
-    odom.twist.twist = geometry_msgs::msg::Twist();
-
-    odom2_pub_->publish(odom);
-  }
-
-  if (auto icore = Icore_.lock())
-  {
-    icore->PoseCallback(pos);
-  }
+  log_->Log(Log::LogLevel::INFO, "arucoPose function duration : " + std::to_string(duration.count()) + " ms");
 }
 
 void RosInterface::publishNavGoal(int idx, const Commondefine::Position wp)

@@ -84,7 +84,8 @@ namespace Commondefine
         int y;
         double yaw;
 
-        bool operator==(const Position& other) const { return x == other.x && y == other.y && yaw == other.yaw;}
+        Position(int x_, int y_, double yaw_) : x(x_), y(y_), yaw(yaw_) {}
+        bool operator==(const Position& other) const { return x == other.x && y == other.y && std::abs(yaw - other.yaw) < 1e-6;}
 
     }Position;
 

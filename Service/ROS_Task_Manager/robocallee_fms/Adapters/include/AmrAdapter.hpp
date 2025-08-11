@@ -68,7 +68,16 @@ namespace Adapter
         // 경로 조회
         const std::vector<Commondefine::Position>& getWaypoints() const;
         
-        Commondefine::Position getCurrentWayPoint() { return waypoints_[current_wp_idx_];}
+        Commondefine::Position getCurrentWayPoint() 
+        { 
+            if(waypoints_.empty())
+            {
+                Commondefine::Position p = {-1,-1,-1};
+                return p;
+            }
+
+            return waypoints_[current_wp_idx_];
+        }
         Commondefine::Position getEndWayPoint(){ return *(waypoints_.end());}
         
         const bool isGoal();
