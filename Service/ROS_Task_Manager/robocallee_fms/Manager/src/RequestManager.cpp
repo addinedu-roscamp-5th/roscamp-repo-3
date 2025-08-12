@@ -97,9 +97,9 @@ void RequestManager::BestRobotSelector()
     core->SetAssignNewAmr(true);
 
     //AMR을 목적지 1로 이동
-    core->assignWork(best_amr);
+    //core->assignWork(best_amr);
 
-    // core->SetAmrNextStep(best_amr, Commondefine::AmrStep::MoveTo_dest1);
+    core->SetAmrNextStep(best_amr, Commondefine::AmrStep::MoveTo_dest1);
     
 
     // //로봇팔1에게 버퍼로 상자 이동 명령

@@ -31,6 +31,7 @@ void AmrAdapter::SetTaskInfo(const Commondefine::GUIRequest& request)
     
         robot_task_info_.requester = request.requester;
         robot_task_info_.customer_id = request.customer_id;
+        robot_task_info_.dest = request.dest2;
     }
 
     std::string msg = "color = " + robot_task_info_.shoes_property.color +
@@ -234,8 +235,9 @@ void AmrAdapter::SetCurrentPosition(Commondefine::pose2f p)
 Commondefine::Position AmrAdapter::GetCurrentPosition()
 {
     Commondefine::Position p;
-    p.x = static_cast<float>(robot_task_info_.current_position.x);
-    p.y = static_cast<float>(robot_task_info_.current_position.y);
+
+    p.x = (robot_task_info_.current_position.x - (_MAP_RESOLUTION_ / 2.0)) / _MAP_RESOLUTION_ + 1;
+    p.y = (robot_task_info_.current_position.y - (_MAP_RESOLUTION_ / 2.0)) / _MAP_RESOLUTION_ + 1;
 
     return p;
 }
@@ -243,9 +245,9 @@ Commondefine::Position AmrAdapter::GetCurrentPosition()
 Commondefine::Position AmrAdapter::GetDestPosition()
 {
     Commondefine::Position pose;
+
     pose.x = static_cast<int>(robot_task_info_.dest.x);
     pose.y = static_cast<int>(robot_task_info_.dest.y);
-
     return pose;
 }
 
