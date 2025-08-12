@@ -25,10 +25,7 @@ void AmrAdapter::SetTaskInfo(const Commondefine::GUIRequest& request)
 {
     {
         std::lock_guard<std::mutex> lock(Task_mtx_);
-
-        robot_task_info_.robot_state = Commondefine::RobotState::BUSY;
         robot_task_info_.shoes_property = request.shoes_property;
-    
         robot_task_info_.requester = request.requester;
         robot_task_info_.customer_id = request.customer_id;
     }
@@ -38,15 +35,16 @@ void AmrAdapter::SetTaskInfo(const Commondefine::GUIRequest& request)
     ", robot_id = " + std::to_string(robot_task_info_.robot_id);
 
     log_->Log(Log::LogLevel::INFO, msg);
+
     log_->Log(Log::LogLevel::INFO,"SetTaskInfo 완료");
 }
 
-void AmrAdapter::SetAmrState(const Commondefine::RobotState& state)
+void AmrAdapter::SetAmrState(const Commondefine::RobotState state)
 {
     {
         std::lock_guard<std::mutex> lock(Task_mtx_);
         
-        robot_task_info_.robot_state = state;
+        this->state_ = state;
     }
 }
 
@@ -114,89 +112,27 @@ void AmrAdapter::updatePath(const std::vector<Commondefine::Position>& new_path)
         auto& next = *(it + nextiter);
 
         cur.yaw = Commondefine::yaw(cur, next);
-        // 
     }
 
     setOccupyWayPoint(false);
 
     if (auto core = Icore_.lock())
     {
+        //여기서 일을 시킨다.
         core->SetAmrNextStep(robot_task_info_.robot_id, Commondefine::AmrStep::MoveTo_dest1);
     }
 
 }
 
-void AmrAdapter::MoveTo_dest1(int robot_id)
+void AmrAdapter::MoveTo(Commondefine::Position dst)
 {
     auto core = Icore_.lock();
     if (core == nullptr) return;
 
-    log_->Log(Log::LogLevel::INFO, "MoveTo_dest1() 호출");
+    core->publishNavGoal(robot_task_info_.robot_id, dst);
 
-    // core->publishNavGoal(robot_task_info_.robot_id, robot_task_info_.dest1);
-    core->publishNavGoal(robot_task_info_.robot_id, { (int)robot_task_info_.dest.x , (int)robot_task_info_.dest.y } );
-
-
-    
-    log_->Log(Log::LogLevel::INFO, "sent dest1 (" +
-        std::to_string(robot_task_info_.robot_id) + ", " +
-        // std::to_string(robot_task_info_.dest1.y) + ") to pinky " +
-        std::to_string( (int)robot_task_info_.dest.x ) + std::to_string(  (int)robot_task_info_.dest.y ) + ") to pinky " +
-
-        std::to_string(robot_task_info_.robot_id)
-    );
-
-    if (robot_task_info_.requester == "customer")
-    {   
-        core->SetRobotArmNextStep(Commondefine::RobotArmStep::buffer_to_pinky, dummy_shoe, robot_task_info_.robot_id);
-        return;
-    }
-}
-
-void AmrAdapter::MoveTo_dest2(int robot_id)
-{
-    auto core = Icore_.lock();
-    if (core == nullptr) return;
-
-    log_->Log(Log::LogLevel::INFO, "MoveTo_dest2() 호출");
-
-    // core->publishNavGoal(robot_task_info_.robot_id, robot_task_info_.dest2);
-    core->publishNavGoal(robot_task_info_.robot_id, { (int)robot_task_info_.dest.x , (int)robot_task_info_.dest.y } );
-
-
-    log_->Log(Log::LogLevel::INFO, "sent dest2 (" +
-        std::to_string(robot_task_info_.robot_id) + ", " +
-        // std::to_string(robot_task_info_.dest2.y) + ") to pinky " +
-        std::to_string( (int)robot_task_info_.dest.x ) + std::to_string(  (int)robot_task_info_.dest.y ) + ") to pinky " +
-        std::to_string(robot_task_info_.robot_id)
-    );
-
-    if (robot_task_info_.requester == "employee")
-    {
-        core->SetRobotArmNextStep(Commondefine::RobotArmStep::pinky_to_buffer, dummy_shoe, robot_task_info_.robot_id);
-        return;
-    }
-}
-
-
-void AmrAdapter::MoveTo_dest3(int robot_id)
-{
-    auto core = Icore_.lock();
-    if(core == nullptr) return;
-
-    log_->Log(Log::LogLevel::INFO, "MoveTo_dest3() 호출");
-
-    // core->publishNavGoal(robot_task_info_.robot_id, robot_task_info_.dest3  );
-    // core->publishNavGoal(robot_task_info_.robot_id, {robot_task_info_.dest3.x , robot_task_info_.dest3.y}  );
-    core->publishNavGoal(robot_task_info_.robot_id, { (int)robot_task_info_.dest.x , (int)robot_task_info_.dest.y } );
-
-
-    log_->Log(Log::LogLevel::INFO, "sent dest3 (" +
-        std::to_string(robot_task_info_.robot_id) + ", " +
-        // std::to_string(robot_task_info_.dest3.y) + ") to pinky " +
-        std::to_string( (int)robot_task_info_.dest.x ) + std::to_string(  (int)robot_task_info_.dest.y ) + ") to pinky " +
-        std::to_string(robot_task_info_.robot_id)
-    );
+    log_->Log(Log::LogLevel::INFO, "MoveTo st x: " + std::to_string(st.x) + ",y:" + std::to_string(st.y)
+    + " dst x: " + std::to_string(dst.x) + ",y:" + std::to_string(dst.y));
 }
 
 void AmrAdapter::setOccupyWayPoint(bool occupy)
@@ -252,6 +188,5 @@ Commondefine::Position AmrAdapter::GetDestPosition()
 void AmrAdapter::ResetWaypoint()
 {
     current_wp_idx_.store(0);
-
     waypoints_.clear(); 
 }

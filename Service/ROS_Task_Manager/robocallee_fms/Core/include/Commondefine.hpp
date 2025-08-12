@@ -19,14 +19,20 @@ namespace Commondefine
 
     #define _MAP_RESOLUTION_ 0.1d
 
-    enum AmrStep {AmrStep_num = 0, MoveTo_dest1, MoveTo_dest2, MoveTo_dest3};
+    #define _ARM_BUFFER_ 4
+
+    #define _ARM_SHELF_ 9
+
+    enum AmrStep {MoveTo_Storage = 0, MoveTo_dst, MoveTo_charging_station, AmrStep_num};
 
     // enum RobotArmStep {RobotArmStep_num = 0};
-    enum RobotArmStep {shelf_to_buffer=1, buffer_to_pinky, pinky_to_buffer, buffer_to_shelf };
+    enum RobotArmStep {check_critical_section = 0, resolve_Request , shelf_to_buffer, buffer_to_Amr, Amr_to_buffer, buffer_to_shelf, RobotArmStep_num };
 
-    enum RobotState {IDLE = 0 , BUSY, STOP , INVALID};
+    enum RobotState {IDLE = 0, BUSY, RETURN, STOP , INVALID};
 
     enum RobotArm { RobotArm1 = 0 ,RobotArm2 , RobotArmNum};
+
+    enum ContainerType { Buffer, Shelf };
 
     // enum Requester {CUSTOMER = 0, EMPLOYEE};
 
@@ -75,7 +81,10 @@ namespace Commondefine
     typedef struct StorageRequest
     {
         shoesproperty shoes;
+        ContainerType container;
+        int containerIndex;
         int robot_id;
+        RobotArmStep command;
     }StorageRequest;
 
     typedef struct Position
@@ -96,8 +105,6 @@ namespace Commondefine
         double z;
         double w;
     }Quaternion;
-
-   
 
     typedef struct Constraint
     {
@@ -149,11 +156,10 @@ namespace Commondefine
 
     } YAMLFile; 
 
-     typedef struct RobotTaskInfo
+    typedef struct RobotTaskInfo
     {
         int                                 robot_id;
-        RobotState                          robot_state         = RobotState::IDLE;
-        int                                 battery             = 100;
+        int                                 battery = 100;
         shoesproperty                       shoes_property;
         pose2f                              current_position;
         pose2f                              start;
@@ -166,7 +172,6 @@ namespace Commondefine
             if(this != &rhs)
             {
                 this->robot_id = rhs.robot_id;
-                this->robot_state = rhs.robot_state;
                 this->battery = rhs.battery;
                 this->shoes_property = rhs.shoes_property;
                 this->current_position = rhs.current_position;

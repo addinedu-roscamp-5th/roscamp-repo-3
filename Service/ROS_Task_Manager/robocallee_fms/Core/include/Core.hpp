@@ -20,22 +20,25 @@ namespace core
     class Core : public std::enable_shared_from_this<Core> , public ICore
     {
     private:
-        task::Dispatcher::u_ptr                                     pdispatcher_;
-        Logger::s_ptr                                               log_;
-        Adapter::RobotArmAdapter::u_ptr                             pRobotArmAdapter_;
-        Manager::RequestManager::u_ptr                              pRequestManager_;
-        interface::RosInterface::w_ptr                              Interface_;
+        task::Dispatcher::u_ptr                                         pdispatcher_;
+        Logger::s_ptr                                                   log_;
+        
+        Manager::RequestManager::u_ptr                                  pRequestManager_;
+        Manager::StorageManager::u_ptr                                  pStorageManager_;
+        
+        interface::RosInterface::w_ptr                                  Interface_;
 
+        Integrated::vec<Integrated::u_ptr<Adapter::RobotArmAdapter>>    RobotArm_Adapters_;
 
-        std::mutex                                                  assignmtx_;
-        std::mutex                                                  path_mtx_;
-        std::condition_variable                                     path_cv_;
+        std::mutex                                                      assignmtx_;
+        std::mutex                                                      path_mtx_;
+        std::condition_variable                                         path_cv_;
         
         
-        Integrated::vec<Integrated::u_ptr<Adapter::AmrAdapter>>     amr_adapters_;
-        Integrated::s_ptr<traffic::TrafficPlanner>                  traffic_Planner_;
-        Integrated::u_ptr<OG::OccupancyGrid>                        occupancyGrid_;
-        std::atomic<bool>                                           assignNewAmr_;
+        Integrated::vec<Integrated::u_ptr<Adapter::AmrAdapter>>         amr_adapters_;
+        Integrated::s_ptr<traffic::TrafficPlanner>                      traffic_Planner_;
+        Integrated::u_ptr<OG::OccupancyGrid>                            occupancyGrid_;
+        std::atomic<bool>                                               assignNewAmr_;
 
     public:
         using s_ptr = std::shared_ptr<Core>;
@@ -50,13 +53,15 @@ namespace core
 
         bool Initialize();
 
+        bool assignTask(int idx, Commondefine::AmrStep step) override;
+
+        bool assignTask(Commondefine::RobotArmStep step) override;
+
         bool SetAmrNextStep(int idx, Commondefine::AmrStep step) override;
         
         bool SetRobotArmNextStep(Commondefine::RobotArmStep step, Commondefine::shoesproperty shoes, int robot_id) override;
         
-        bool ArmRequestMakeCall(int arm_num, int shelf_num, int robot_id , std::string action) override ;
-        
-        bool UpdateShelfInfo(Commondefine::shoesproperty incoming_shoe , int shelf_num ) override;
+        bool ArmRequestMakeCall(Commondefine::RobotArm arm, int shelf_num, int robot_id, std::string action) override ;
 
         int RequestCallback(const Commondefine::GUIRequest& request) override;
         
@@ -64,7 +69,8 @@ namespace core
 
         bool PoseCallback(const std::vector<Commondefine::pose2f> &pos) override;
 
-        // bool publishNavGoal(int idx, const geometry_msgs::msg::PoseStamped wp) override;
+        bool ArmDoneCallback(int id, std::string action, bool success) override;
+
         bool publishNavGoal(int idx, const Commondefine::Position wp) override;
 
         Commondefine::RobotState GetAmrState(int idx) override;
@@ -85,7 +91,19 @@ namespace core
 
         bool GetAssignNewAmr() override { return assignNewAmr_.load(); }
 
-        void assignWork(int amr) override;
+        void assignWork(int amr, Commondefine::GUIRequest r) override;
+
+        bool setStorageRequest(Commondefine::StorageRequest& Request) override;
+
+        bool findStorage(Commondefine::ContainerType Container , Commondefine::StorageRequest& Request) override;
+
+        bool setStorage(Commondefine::ContainerType Container , Commondefine::StorageRequest Request) override;
+
+        bool getStorage(Commondefine::ContainerType Container , Commondefine::StorageRequest& Request) override;
+
+        int findEmptyStorage(Commondefine::ContainerType Container) override;
+
+        void 
     };
 
     // Template implementation

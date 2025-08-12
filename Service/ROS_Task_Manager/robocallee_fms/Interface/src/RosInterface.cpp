@@ -124,46 +124,36 @@ void RosInterface::arm2_send_request(int robot_id , std::string action )
     arm_clients_[Commondefine::RobotArm2]->async_send_request(request,
         std::bind(&RosInterface::cbArmService, this, std::placeholders::_1));
 }
-
-
-
-
 // 로봇팔한테 request 보내고 response 받는 부분
 void RosInterface::cbArmService(rclcpp::Client<ArmServiceType>::SharedFuture future)
 {
   log_->Log(Log::INFO, "cbArmService 진입");
 
   auto res = future.get();
-
   auto icore = Icore_.lock();
+
   if(icore == nullptr)
   {
       log_->Log(Log::LogLevel::INFO, "ICore expired");
-
-      //error
       return;
   }
 
+  if(!res->success) log_->Log(Log::INFO, "RobotArm 요청 실패 !");
+  
+  // 다시 서랍에 넣는 신발 정보 업뎃
+  if(res->action == "buffer_to_shelf")
+  {
+    Commondefine::shoesproperty incoming_shoe;
+    incoming_shoe.size = res->size ;
+    incoming_shoe.model = res->model ;
+    incoming_shoe.color = res->color ;
+    int shelf_num = res->shelf_num ;
 
-  if(res->success){
-
-    // 다시 서랍에 넣는 신발 정보 업뎃
-    if(res->action == "buffer_to_shelf"){
-      Commondefine::shoesproperty incoming_shoe;
-      incoming_shoe.size = res->size ;
-      incoming_shoe.model = res->model ;
-      incoming_shoe.color = res->color ;
-      int shelf_num = res->shelf_num ;
-
-      icore->UpdateShelfInfo(incoming_shoe, shelf_num);
-    }
-    log_->Log(Log::INFO, "RobotArm " + res->action + " 요청 성공 !");
-
-  } 
-  else log_->Log(Log::INFO, "RobotArm 요청 실패 !");
+    icore->UpdateShelfInfo(incoming_shoe, shelf_num);
+  }
+  log_->Log(Log::INFO, "RobotArm " + res->action + " 요청 성공 !");
+  
 }
-
-
 
 void RosInterface::cbCustomerRequest(const std::shared_ptr<CustomerServiceType::Request> request, std::shared_ptr<CustomerServiceType::Response> response)
 {

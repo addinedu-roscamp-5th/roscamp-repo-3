@@ -80,34 +80,9 @@ void RequestManager::BestRobotSelector()
 
     log_->Log(Log::INFO, "선택된 AMR: AMR" + std::to_string(best_amr));
 
-    //밀린 작업 없음
-    if (request_queue_.empty())
-    {
-        core->SetAmrNextStep(best_amr, Commondefine::AmrStep::MoveTo_dest3);
-        log_->Log(Log::INFO, "밀린 작업 없음, MoveTo_dest3 호출");
-
-        return;
-    }
-
-    //요청 밀린 작업 있음
+    // 요청 POP
     PopRequest(req);
 
-    //여기에서 BUSY 상태가 된다.
-    core->SetTaskInfo(best_amr, req);
-    core->SetAssignNewAmr(true);
-
-    //AMR을 목적지 1로 이동
-    core->assignWork(best_amr);
-
-    // core->SetAmrNextStep(best_amr, Commondefine::AmrStep::MoveTo_dest1);
-    
-
-    // //로봇팔1에게 버퍼로 상자 이동 명령
-    if (req.requester == "customer")
-    {
-        Commondefine::shoesproperty shoe_info = req.shoes_property;
-        core->SetRobotArmNextStep(Commondefine::RobotArmStep::shelf_to_buffer , dummy_shoe , best_amr );
-        log_->Log(Log::LogLevel::INFO, "로봇팔 작업 지정: " + shoe_info.model + ", " + shoe_info.color + ", " + std::to_string(shoe_info.size) + ", 핑키 번호: " + std::to_string(best_amr));
-    }
+    core->assignWork(best_amr, req);
     return;
 }

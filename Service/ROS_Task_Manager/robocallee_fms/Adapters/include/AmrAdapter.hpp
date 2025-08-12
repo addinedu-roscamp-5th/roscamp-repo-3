@@ -17,26 +17,25 @@ namespace Adapter
     class AmrAdapter
     {
     private:
-        Integrated::w_ptr<core::ICore>       Icore_;
-        Logger::s_ptr                        log_;
-        Commondefine::RobotTaskInfo          robot_task_info_;
-        std::mutex                           Task_mtx_;
+        Integrated::w_ptr<core::ICore>        Icore_;
+        Logger::s_ptr                         log_;
+        Commondefine::RobotTaskInfo           robot_task_info_;
+        std::mutex                            Task_mtx_;
 
         // Planner → Adapter 로 받은 웨이포인트
-        std::mutex                           waypoint_mtx_;
-        std::vector<Commondefine::Position>  waypoints_;
-        std::atomic<int>                     current_wp_idx_{0};
-        std::atomic<Commondefine::Position>  current_goal_;
+        std::mutex                            waypoint_mtx_;
+        std::vector<Commondefine::Position>   waypoints_;
+        std::atomic<int>                      current_wp_idx_{0};
+        std::atomic<Commondefine::Position>   current_goal_;
 
         // Waypoint 점유 플래그
-        std::atomic<bool>                    isOccupyWaypoint_;
-        std::mutex                           occupy_mtx_;
-        std::condition_variable              occupy_cv_;
+        std::atomic<bool>                     isOccupyWaypoint_;
+        std::mutex                            occupy_mtx_;
+        std::condition_variable               occupy_cv_;
 
-        std::mutex                           current_position_mtx_;
+        std::mutex                            current_position_mtx_;
 
-
-        Commondefine::shoesproperty          dummy_shoe;
+        std::atomic<Commondefine::RobotState> state_;
 
     public:
         using u_ptr = Integrated::u_ptr<AmrAdapter>;
@@ -50,7 +49,8 @@ namespace Adapter
         Commondefine::RobotTaskInfo& GetTaskInfo();
 
         // AMR 상태 변경
-        void SetAmrState(const Commondefine::RobotState& state);
+        void SetAmrState(const Commondefine::RobotState state);
+        const Commondefine::RobotState GetAmrState(){return state_.load();}
 
         // Waypoint 로직
         bool handleWaypointArrival(const Commondefine::pose2f& pos);
@@ -88,6 +88,8 @@ namespace Adapter
         Commondefine::Position GetCurrentPosition();
 
         Commondefine::Position GetDestPosition();
+
+        void MoveTo(Commondefine::Position dst);
 
         void MoveTo_dest1(int robot_id);
         
