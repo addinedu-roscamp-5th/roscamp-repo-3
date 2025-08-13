@@ -34,6 +34,8 @@ public:
     //--------------------------AMR STATE--------------------------
     virtual Commondefine::RobotState GetAmrState(int idx) = 0;
 
+    virtual void UpdateBattery(int idx, float percent) = 0;
+
     virtual int GetAmrBattery(int idx) = 0;
 
     virtual int GetAmrCustID(int idx) = 0;

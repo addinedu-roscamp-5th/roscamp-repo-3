@@ -167,7 +167,7 @@ namespace Commondefine
     typedef struct RobotTaskInfo
     {
         int                                 robot_id;
-        int                                 battery = 100;
+        float                               battery = 100.f;
         shoesproperty                       shoes_property;
         pose2f                              dest;
         std::string                         requester;

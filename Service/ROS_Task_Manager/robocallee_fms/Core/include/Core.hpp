@@ -41,6 +41,8 @@ namespace core
         Integrated::u_ptr<OG::OccupancyGrid>                            occupancyGrid_;
         std::atomic<bool>                                               assignNewAmr_;
 
+        std::mutex                                                      battery_mtx_;
+
     public:
         using s_ptr = std::shared_ptr<Core>;
         using u_ptr = std::unique_ptr<Core>;
@@ -72,6 +74,8 @@ namespace core
 
         Commondefine::RobotState GetAmrState(int idx) override;
         
+        void UpdateBattery(int idx, float percent) override;
+
         int GetAmrBattery(int idx) override;
         
         int GetAmrCustID(int idx);

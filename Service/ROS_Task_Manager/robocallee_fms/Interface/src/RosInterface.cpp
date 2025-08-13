@@ -6,7 +6,7 @@ using namespace Integrated;
 using namespace Commondefine;
 
 RosInterface::RosInterface(Logger::s_ptr log)
-: Node(_ROS_NODE_NAME_), log_(log) , server_wait_is_Running(true)
+: Node(_ROS_NODE_NAME_), log_(log) , server_wait_is_Running(true), battery_topic_("/pinky_battery_present")
 {
   server_wait_thread_ = std::thread(&RosInterface::async_server_wait, this);
 }
@@ -32,8 +32,7 @@ bool RosInterface::Initialize(Integrated::w_ptr<core::ICore> Icore)
   customer_service_ = create_service<CustomerServiceType>("customer_service", std::bind(&RosInterface::cbCustomerRequest, this, std::placeholders::_1, std::placeholders::_2));
   employee_service_ = create_service<EmployeeServiceType>("employee_service", std::bind(&RosInterface::cbEmployeeRequest, this, std::placeholders::_1, std::placeholders::_2));
   aurco_array_sub_  = create_subscription<ArucoPoseArray>("/aruco_pose_array", 10, std::bind(&RosInterface::cbarucoPoseArray, this, std::placeholders::_1));
-  odom2_pub_ = create_publisher<nav_msgs::msg::Odometry>("/odom_2",10);
-
+  
   for(int i = 0 ; i < RobotArm::RobotArmNum; ++i)
   {
     auto client_name = "arm" + std::to_string(i+1) + "_service";
@@ -44,13 +43,24 @@ bool RosInterface::Initialize(Integrated::w_ptr<core::ICore> Icore)
     AddWaitClient(client_name, client);
   }
 
-    for (int i = 0; i < _AMR_NUM_; ++i)
+  odom_pubs_.clear();
+  nav_goal_pubs_.clear();
+  battery_subs_.clear();
+
+  for (int i = 0; i < _AMR_NUM_; ++i)
   {
-    std::string topic = "goalpose" + std::to_string(i+1);
-    nav_goal_pubs_.push_back(
-      create_publisher<geometry_msgs::msg::PoseStamped>(topic,10)
-    );
+    std::string topic = "/odom_" + std::to_string(i+1);
+    odom_pubs_.push_back(create_publisher<nav_msgs::msg::Odometry>(topic, 10));
+    log_->Log(Log::LogLevel::INFO, "Created odom for: " + topic);
+  
+    topic = "goalpose" + std::to_string(i+1);
+    nav_goal_pubs_.push_back( create_publisher<geometry_msgs::msg::PoseStamped>(topic,10));
     log_->Log(Log::LogLevel::INFO, "Created publisher for: " + topic);
+
+    topic = "/pinky" + std::to_string(i+1) + "/pinky_battery_present";
+    auto func = [this, i](const std_msgs::msg::Float32::SharedPtr msg) {this->cbBattery(i, msg);};
+    battery_subs_.push_back(create_subscription<std_msgs::msg::Float32>(topic, 10, func));
+    log_->Log(Log::LogLevel::INFO, "Subscribed battery for:" + topic);
   }
   return true;
 }
@@ -257,6 +267,8 @@ void RosInterface::cbarucoPoseArray(const ArucoPoseArray::ConstSharedPtr & msg)
 
     for (const auto & ap : msg->poses)
     {
+      int idx = ap.id -1;
+
       Commondefine::pose2f p;
       p.x = static_cast<float>(ap.x);
       p.y = static_cast<float>(ap.y);
@@ -276,7 +288,9 @@ void RosInterface::cbarucoPoseArray(const ArucoPoseArray::ConstSharedPtr & msg)
 
       odom.twist.twist = geometry_msgs::msg::Twist();
 
-      odom2_pub_->publish(odom);
+      if (idx < 0 && idx > static_cast<int>(odom_pubs_.size())) return;
+     
+      odom_pubs_[idx]->publish(odom);
     }
 
     if (auto icore = Icore_.lock())
@@ -314,4 +328,25 @@ void RosInterface::publishNavGoal(int idx, const Commondefine::Position wp)
     nav_goal_pubs_[idx]->publish(ps);
 
     log_->Log(Log::LogLevel::INFO,"Published wp to goalpose" + std::to_string(idx+1) + ": (" + std::to_string(wp.x) +", " + std::to_string(wp.y) + ")");
+}
+
+void RosInterface::cbBattery(const int idx, const std_msgs::msg::Float32::SharedPtr msg)
+{
+  updatebattery(idx, msg->data);
+}
+
+
+void RosInterface::updatebattery(int idx, float percent)
+{
+  if (percent < 0.f) percent = 0.f;
+  if (percent > 100.f) percent = 100.f;
+
+  if (auto icore = Icore_.lock())
+  {
+    icore->UpdateBattery(idx, percent);
+  }
+
+  log_->Log(Log::LogLevel::INFO, (std::ostringstream{} << "[BAT] pinky" << (idx+1) << " = "
+                                  << std::fixed << std::setprecision(1)
+                                  << percent << "%").str());
 }

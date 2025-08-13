@@ -20,6 +20,7 @@
 
 // LM 위치 토픽 메시지 타입
 #include "std_msgs/msg/float32_multi_array.hpp"
+#include "std_msgs/msg/float32.hpp"
 
 // Aruco PoseStamped 토픽 메시지 타입
 #include "robocallee_fms/msg/aruco_pose_array.hpp"
@@ -49,29 +50,31 @@ namespace interface
         Integrated::w_ptr<core::ICore>                                  Icore_;
 
         // 서비스
-        rclcpp::Service<robocallee_fms::srv::CustomerRequest>::SharedPtr        customer_service_;
-        rclcpp::Service<robocallee_fms::srv::EmployeeRequest>::SharedPtr        employee_service_;
-        rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr                   odom2_pub_;
+        rclcpp::Service<robocallee_fms::srv::CustomerRequest>::SharedPtr            customer_service_;
+        rclcpp::Service<robocallee_fms::srv::EmployeeRequest>::SharedPtr            employee_service_;
         
         // Arm 클라이언트
-        std::vector<rclcpp::Client<ArmServiceType>::SharedPtr>          arm_clients_;
+        std::vector<rclcpp::Client<ArmServiceType>::SharedPtr>                      arm_clients_;
 
         // Aruco Pose 구독
-        rclcpp::Subscription<ArucoPoseArray>::SharedPtr  aurco_array_sub_;
+        rclcpp::Subscription<ArucoPoseArray>::SharedPtr                             aurco_array_sub_;
 
+        std::vector<rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr>        battery_subs_;
 
         // poseStamped publish
-        std::vector<rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr> nav_goal_pubs_;
+        std::vector<rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr>  nav_goal_pubs_;
+        std::vector<rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr>          odom_pubs_;
 
+        std::string                                                                 battery_topic_;
         // 받은 좌표 저장
-        std::mutex                                                      pose_mutex_;
+        std::mutex                                                                  pose_mutex_;
 
         //서버와 연결될때 까지 대기
-        std::mutex                                                      client_mutex_;
-        std::condition_variable                                         client_cv_;
-        std::map<std::string , CW::ClientWrapperBase::s_ptr>            wait_clients_;
-        std::thread                                                     server_wait_thread_;
-        bool                                                            server_wait_is_Running;
+        std::mutex                                                                  client_mutex_;
+        std::condition_variable                                                     client_cv_;
+        std::map<std::string , CW::ClientWrapperBase::s_ptr>                        wait_clients_;
+        std::thread                                                                 server_wait_thread_;
+        bool                                                                        server_wait_is_Running;
         void async_server_wait();
 
         template<typename ServiceT>
@@ -95,6 +98,10 @@ namespace interface
         void cbarucoPoseArray(const ArucoPoseArray::ConstSharedPtr & msg);
 
         void publishNavGoal(int idx, const Commondefine::Position wp);
+
+        void cbBattery(const int idx, const std_msgs::msg::Float32::SharedPtr msg);
+
+        void updatebattery(int idx, float percent);
 
         // 요청·완료 서비스 콜백
         void cbCustomerRequest(const std::shared_ptr<CustomerServiceType::Request> request, 

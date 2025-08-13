@@ -302,6 +302,17 @@ Commondefine::RobotState Core::GetAmrState(int idx)
     return amr_adapters_[idx]->GetAmrState();
 }
 
+void Core::UpdateBattery(int idx, float percent)
+{
+    if (idx < 0 || idx >= static_cast<int>(amr_adapters_.size())) return;
+    std::lock_guard<std::mutex> lk(battery_mtx_);
+    amr_adapters_[idx]->GetTaskInfo().battery = percent;
+
+    log_->Log(Log::LogLevel::INFO, (std::ostringstream{} << "[BAT] Core::UpdateBattery AMR" << idx
+                                                        << " = " << std::fixed << std::setprecision(1)
+                                                        << percent << "%").str());
+}
+
 int Core::GetAmrBattery(int idx)
 {
     if (idx < 0 || idx >= amr_adapters_.size()) return -1;
