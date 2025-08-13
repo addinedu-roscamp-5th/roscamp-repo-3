@@ -55,12 +55,12 @@ void RequestManager::BestRobotSelector()
 
     int amrs_num = core->GetAmrVecSize();
     int best_amr = err;
-    int max_battery = err;
+    float max_battery = err;
 
     for (int i = 0; i < amrs_num; ++i)
     {
         Commondefine::RobotState status = core->GetAmrState(i);
-        int battery = core->GetAmrBattery(i);
+        float battery = core->GetAmrBattery(i);
 
         if (status == Commondefine::RobotState::IDLE)
         {

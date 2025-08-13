@@ -25,8 +25,16 @@ public:
     virtual bool DoneCallback(const std::string &requester, const int &customer_id) = 0;
     // 상태 조회
     virtual Commondefine::RobotState GetAmrState(int idx) = 0;
+<<<<<<< Updated upstream
     virtual float GetAmrBattery(int idx) = 0;
     virtual void UpdateBattery(int idx, float precent) = 0;
+=======
+
+    virtual float GetAmrBattery(int idx) = 0;
+
+    virtual void UpdateBattery(int idx, float precent) = 0;
+
+>>>>>>> Stashed changes
     virtual int GetAmrCustID(int idx) = 0;
     virtual int GetAmrVecSize() = 0;
     // 작업 정보 저장

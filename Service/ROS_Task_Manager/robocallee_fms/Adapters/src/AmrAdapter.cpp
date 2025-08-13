@@ -1,6 +1,7 @@
 #include "AmrAdapter.hpp"
 
 using namespace Adapter;
+using namespace Commondefine;
 
 AmrAdapter::AmrAdapter(Integrated::w_ptr<core::ICore> Icore, Logger::s_ptr log, const int id)
     :Icore_(Icore), log_(log), isOccupyWaypoint_(false)
@@ -70,15 +71,19 @@ void AmrAdapter::WaitUntilWaypointOccupied()
 bool AmrAdapter::handleWaypointArrival(const Commondefine::pose2f& pos)
 {
     auto core = Icore_.lock();
-    if(core == nullptr) return false;
+    if(core == nullptr) 
+    {
+        return false;
+    }
 
     Commondefine::Position p = getCurrentWayPoint();
     if(p.x == -1 || p.y ==-1) return false;
 
+    Commondefine::pose2f wp = convertWaypoint(p);
     float dx = float(pos.x - static_cast<float>(p.x));
     float dy = float(pos.y - static_cast<float>(p.y));
-    float dist = std::hypot(dx, dy);
-
+    const float dist = std::hypot(dx, dy);
+    
     if (dist <= _ARRIVAL_TOLERANCE_)
     {
         log_->Log(Log::LogLevel::INFO, "핑키 "+ std::to_string(robot_task_info_.robot_id) + "가 waypoint "
@@ -91,6 +96,10 @@ bool AmrAdapter::handleWaypointArrival(const Commondefine::pose2f& pos)
         core->waitNewPath();
 
         incrementWaypointIndex();
+
+         // ★ Core::publishNavGoal 인덱스 주의 (0-based 기대)
+        // int core_idx = robot_task_info_.robot_id - 1; // robot_id가 1-based라면
+        // core->publishNavGoal(core_idx, getCurrentWayPoint());
 
         core->publishNavGoal(robot_task_info_.robot_id, getCurrentWayPoint());
 
@@ -115,14 +124,13 @@ void AmrAdapter::updatePath(const std::vector<Commondefine::Position>& new_path)
         auto& next = *(it + nextiter);
 
         cur.yaw = Commondefine::yaw(cur, next);
-        // 
     }
 
     setOccupyWayPoint(false);
 
     if (auto core = Icore_.lock())
     {
-        core->SetAmrNextStep(robot_task_info_.robot_id, Commondefine::AmrStep::MoveTo_dest1);
+       // core->SetAmrNextStep(robot_task_info_.robot_id, Commondefine::AmrStep::MoveTo_dest1);
     }
 
 }
@@ -256,4 +264,14 @@ void AmrAdapter::ResetWaypoint()
     current_wp_idx_.store(0);
 
     waypoints_.clear(); 
+}
+
+Commondefine::pose2f AmrAdapter::convertWaypoint(Commondefine::Position wp)
+{
+    pose2f p2f;
+
+    p2f.x = (wp.x - 1) * _MAP_RESOLUTION_ + _MAP_RESOLUTION_ / 2.0;
+    p2f.y = (wp.y - 1) * _MAP_RESOLUTION_ + _MAP_RESOLUTION_ / 2.0;
+    
+    return p2f;
 }

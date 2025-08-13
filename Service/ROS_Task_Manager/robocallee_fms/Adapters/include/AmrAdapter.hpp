@@ -89,8 +89,10 @@ namespace Adapter
 
         Commondefine::Position GetDestPosition();
 
+        Commondefine::pose2f convertWaypoint(Commondefine::Position wp);
+
         void MoveTo_dest1(int robot_id);
-        
+
         void MoveTo_dest2(int robot_id);
         
         void MoveTo_dest3(int robot_id);

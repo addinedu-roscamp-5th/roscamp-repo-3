@@ -41,7 +41,7 @@ class GoalMover(Node):
         self.timer = self.create_timer(0.01, self.control_loop)
 
         # 초기 파라미터 값 로깅
-        self.log_parameters()
+        self.log_parameters()-
 
     def update_parameters(self):
         """파라미터 값들을 업데이트"""

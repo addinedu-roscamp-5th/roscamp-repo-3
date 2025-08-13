@@ -54,8 +54,16 @@ namespace core
         // bool publishNavGoal(int idx, const geometry_msgs::msg::PoseStamped wp) override;
         bool publishNavGoal(int idx, const Commondefine::Position wp) override;
         Commondefine::RobotState GetAmrState(int idx) override;
+<<<<<<< Updated upstream
         float GetAmrBattery(int idx) override;
         void UpdateBattery(int idx, float precent) override;
+=======
+        
+        float GetAmrBattery(int idx) override;
+
+        void UpdateBattery(int idx, float precent) override;
+        
+>>>>>>> Stashed changes
         int GetAmrCustID(int idx);
         int GetAmrVecSize();
         void SetTaskInfo(int idx, const Commondefine::GUIRequest& request) override;
@@ -64,10 +72,22 @@ namespace core
         void SetAssignNewAmr(bool assign) override { assignNewAmr_.store(assign); }
         bool GetAssignNewAmr() override { return assignNewAmr_.load(); }
         void assignWork(int amr) override;
+<<<<<<< Updated upstream
         void SendTestGoal(int robot_id_1based, const Commondefine::Position wp);
         void SendTestGoal(int robot_id, int cell_x, int cell_y, float yaw_rad);
         void SendTestGoalAll(const Commondefine::Position wp);
         bool IsReachedNow(int robot_id, float pos_tol_m=0.15f, float yaw_tol_rad=0.26f); // ~15도
+=======
+
+        void SendTestGoal(int robot_id_1based, const Commondefine::Position wp);
+
+        void SendTestGoal(int robot_id, int cell_x, int cell_y, float yaw_rad);
+
+        void SendTestGoalAll(const Commondefine::Position wp);
+        
+        bool IsReachedNow(int robot_id, float pos_tol_m=0.15f, float yaw_tol_rad=0.26f); // ~15도
+
+>>>>>>> Stashed changes
     };
     
     // Template implementation

@@ -7,9 +7,19 @@ namespace Commondefine
     #define _MAX_EXECUTOR_NUM_ 5
     #define _AMR_NUM_ 3
     #define _YAML_PATH_ "Map"
+<<<<<<< Updated upstream
     #define _YAML_FILE_ "map001.yaml"
     #define _ARRIVAL_TOLERANCE_ 0.05f
     #define _MAP_RESOLUTION_ 0.1f
+=======
+
+    #define _YAML_FILE_ "map001.yaml"
+
+    #define _ARRIVAL_TOLERANCE_ 0.05f
+
+    #define _MAP_RESOLUTION_ 0.01f
+
+>>>>>>> Stashed changes
     enum AmrStep {AmrStep_num = 0, MoveTo_dest1, MoveTo_dest2, MoveTo_dest3};
     // enum RobotArmStep {RobotArmStep_num = 0};
     enum RobotArmStep {shelf_to_buffer=1, buffer_to_pinky, pinky_to_buffer, buffer_to_shelf };
@@ -62,6 +72,10 @@ namespace Commondefine
         int x;
         int y;
         double yaw;
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
         bool operator==(const Position& other) const { return x == other.x && y == other.y && std::abs(yaw - other.yaw) < 1e-6;}
     }Position;
     typedef struct Quaternion
@@ -152,6 +166,10 @@ namespace Commondefine
         q.w = std::cos(p.yaw / 2.0);
         return q;
     }
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
     static std::vector<std::vector<bool>> map
     {
         {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
@@ -167,4 +185,11 @@ namespace Commondefine
         {1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1},
         {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
     };
+<<<<<<< Updated upstream
 };
+=======
+};
+
+
+
+>>>>>>> Stashed changes

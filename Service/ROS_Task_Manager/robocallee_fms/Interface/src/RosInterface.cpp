@@ -17,12 +17,21 @@ RosInterface::~RosInterface()
     log_->Log(INFO, "async_server_wait thread 정상 종료");
   }
 }
+<<<<<<< Updated upstream
+=======
+
+
+>>>>>>> Stashed changes
 bool RosInterface::Initialize(Integrated::w_ptr<core::ICore> Icore)
 {
   Icore_ = Icore;
   customer_service_ = create_service<CustomerServiceType>("customer_service", std::bind(&RosInterface::cbCustomerRequest, this, std::placeholders::_1, std::placeholders::_2));
   employee_service_ = create_service<EmployeeServiceType>("employee_service", std::bind(&RosInterface::cbEmployeeRequest, this, std::placeholders::_1, std::placeholders::_2));
   aurco_array_sub_  = create_subscription<ArucoPoseArray>("/aruco_pose_array", 10, std::bind(&RosInterface::cbarucoPoseArray, this, std::placeholders::_1));
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
   for(int i = 0 ; i < RobotArm::RobotArmNum; ++i)
   {
     auto client_name = "arm" + std::to_string(i+1) + "_service";
@@ -31,16 +40,34 @@ bool RosInterface::Initialize(Integrated::w_ptr<core::ICore> Icore)
     //모든 클라이언트는 서버 연결을 기다려야 하기 때문에 생성 후에 AddWaitClient함수를 통해 대기 Map에 넣어두고 thread 에서 각각 client가 서버에 연결되길 기다린다.
     AddWaitClient(client_name, client);
   }
+<<<<<<< Updated upstream
   odom_pubs_.clear();
+=======
+
+  odom_pubs_.clear();
+  nav_goal_pubs_.clear();
+  battery_subs_.clear();
+
+>>>>>>> Stashed changes
   for (int i = 0; i < _AMR_NUM_; ++i)
   {
     std::string topic = "/odom_" + std::to_string(i+1);
     odom_pubs_.push_back(create_publisher<nav_msgs::msg::Odometry>(topic, 10));
     log_->Log(Log::LogLevel::INFO, "Created odom for: " + topic);
+<<<<<<< Updated upstream
+=======
+  
+>>>>>>> Stashed changes
     topic = "goalpose" + std::to_string(i+1);
     nav_goal_pubs_.push_back( create_publisher<geometry_msgs::msg::PoseStamped>(topic,10));
     log_->Log(Log::LogLevel::INFO, "Created publisher for: " + topic);
+
+    topic = "/pinky" + std::to_string(i+1) + "/pinky_battery_present";
+    auto func = [this, i](const std_msgs::msg::Float32::SharedPtr msg) {this->cbBattery(i, msg);};
+    battery_subs_.push_back(create_subscription<std_msgs::msg::Float32>(topic, 10, func));
+    log_->Log(Log::LogLevel::INFO, "Subscribed battery for:" + topic);
   }
+
   return true;
 }
 void RosInterface::async_server_wait()
@@ -202,23 +229,65 @@ void RosInterface::cbEmployeeRequest(const std::shared_ptr<EmployeeServiceType::
         response->wait_list = -1;
     }
 }
+<<<<<<< Updated upstream
+=======
+
+void RosInterface::cbBattery(const int idx, const std_msgs::msg::Float32::SharedPtr msg)
+{
+  updatebattery(idx, msg->data);
+}
+
+
+void RosInterface::updatebattery(int idx, float percent)
+{
+  if (percent < 0.f) percent = 0.f;
+  if (percent > 100.f) percent = 100.f;
+
+  if (auto icore = Icore_.lock())
+  {
+    icore->UpdateBattery(idx, percent);
+  }
+
+  log_->Log(Log::LogLevel::INFO, (std::ostringstream{} << "[BAT] pinky" << (idx+1) << " = "
+                                  << std::fixed << std::setprecision(1)
+                                  << percent << "%").str());
+}
+>>>>>>> Stashed changes
 void RosInterface::cbarucoPoseArray(const ArucoPoseArray::ConstSharedPtr & msg)
 {
   {
     std::lock_guard<std::mutex> lk(pose_mutex_);
+<<<<<<< Updated upstream
     std::vector<Commondefine::pose2f> pos(_AMR_NUM_, Commondefine::pose2f{-1.f, -1.f});
+=======
+    
+    std::vector<Commondefine::pose2f> pos(_AMR_NUM_, Commondefine::pose2f{-1.f, -1.f});
+
+>>>>>>> Stashed changes
     for (const auto & ap : msg->poses)
     {
       int odom_i = ap.id;
       if (odom_i < 1 || odom_i > _AMR_NUM_) continue;
       int idx = odom_i -1 ;
+<<<<<<< Updated upstream
       Commondefine::pose2f p;
       pos[idx].x = static_cast<float>(ap.x);
       pos[idx].y = static_cast<float>(ap.y);
+=======
+
+      Commondefine::pose2f p;
+      pos[idx].x = static_cast<float>(ap.x);
+      pos[idx].y = static_cast<float>(ap.y);
+
+>>>>>>> Stashed changes
       nav_msgs::msg::Odometry odom;
       odom.header.stamp       = msg->header.stamp;
       odom.header.frame_id    = "map";
       odom.child_frame_id     = "pinky_" + std::to_string(odom_i);
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
       odom.pose.pose.position.x = ap.x;
       odom.pose.pose.position.y = ap.y;
       odom.pose.pose.position.z = 0.0;
@@ -226,6 +295,10 @@ void RosInterface::cbarucoPoseArray(const ArucoPoseArray::ConstSharedPtr & msg)
       q.setRPY(0.0, 0.0, ap.yaw);
       odom.pose.pose.orientation = tf2::toMsg(q);
       odom.twist.twist = geometry_msgs::msg::Twist();
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
       if (idx >= 0 && idx < static_cast<int>(odom_pubs_.size()))
         odom_pubs_[idx]->publish(odom);
     }

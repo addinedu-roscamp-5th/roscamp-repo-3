@@ -14,15 +14,25 @@
 #include "geometry_msgs/msg/pose_stamped.hpp"
 // LM 위치 토픽 메시지 타입
 #include "std_msgs/msg/float32_multi_array.hpp"
+<<<<<<< Updated upstream
+=======
+#include "std_msgs/msg/float32.hpp"
+
+>>>>>>> Stashed changes
 // Aruco PoseStamped 토픽 메시지 타입
 #include "robocallee_fms/msg/aruco_pose_array.hpp"
 #include "robocallee_fms/msg/aruco_pose.hpp"
 #include "nav_msgs/msg/odometry.hpp"
+<<<<<<< Updated upstream
 #include <mutex>
 #include <vector>
 #include <string>
 
 namespace interface
+=======
+
+namespace interface 
+>>>>>>> Stashed changes
 {
     using LmPoseMsg                 = std_msgs::msg::Float32MultiArray;
     using CustomerServiceType       = robocallee_fms::srv::CustomerRequest;
@@ -34,6 +44,7 @@ namespace interface
     class RosInterface : public rclcpp::Node
     {
     private:
+<<<<<<< Updated upstream
         Logger::s_ptr                                                   log_;
         Integrated::w_ptr<core::ICore>                                  Icore_;
         // 서비스
@@ -48,12 +59,37 @@ namespace interface
         std::vector<rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr>         odom_pubs_;
         // 받은 좌표 저장
         std::mutex                                                      pose_mutex_;
+=======
+        Logger::s_ptr                                                               log_;
+        Integrated::w_ptr<core::ICore>                                              Icore_;
+
+        // 서비스
+        rclcpp::Service<robocallee_fms::srv::CustomerRequest>::SharedPtr            customer_service_;
+        rclcpp::Service<robocallee_fms::srv::EmployeeRequest>::SharedPtr            employee_service_;
+        
+        // Arm 클라이언트
+        std::vector<rclcpp::Client<ArmServiceType>::SharedPtr>                      arm_clients_;
+
+        // Aruco Pose 구독
+        rclcpp::Subscription<ArucoPoseArray>::SharedPtr                             aurco_array_sub_;
+        std::vector<rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr>        battery_subs_;
+
+        // poseStamped publish
+        std::vector<rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr> nav_goal_pubs_;
+        std::vector<rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr>         odom_pubs_;
+
+        // 받은 좌표 저장
+        std::mutex                                                                  pose_mutex_;
+
+>>>>>>> Stashed changes
         //서버와 연결될때 까지 대기
-        std::mutex                                                      client_mutex_;
-        std::condition_variable                                         client_cv_;
-        std::map<std::string , CW::ClientWrapperBase::s_ptr>            wait_clients_;
-        std::thread                                                     server_wait_thread_;
-        bool                                                            server_wait_is_Running;
+        std::mutex                                                                  client_mutex_;
+        std::string battery_topic_                                                  = "/pinky_battery_present";
+        std::condition_variable                                                     client_cv_;
+        std::map<std::string , CW::ClientWrapperBase::s_ptr>                        wait_clients_;
+        std::thread                                                                 server_wait_thread_;
+        bool                                                                        server_wait_is_Running;
+        int                                                                         arm_index_ =0;
         void async_server_wait();
         template<typename ServiceT>
         void AddWaitClient(const std::string& name, std::shared_ptr<rclcpp::Client<ServiceT>> client);
@@ -70,6 +106,13 @@ namespace interface
         void cbArmService(rclcpp::Client<ArmServiceType>::SharedFuture future);
         void cbarucoPoseArray(const ArucoPoseArray::ConstSharedPtr & msg);
         void publishNavGoal(int idx, const Commondefine::Position wp);
+<<<<<<< Updated upstream
+=======
+
+        void cbBattery(const int idx, const std_msgs::msg::Float32::SharedPtr msg);
+
+        void updatebattery(int idx, float percent);
+>>>>>>> Stashed changes
         // 요청·완료 서비스 콜백
         void cbCustomerRequest(const std::shared_ptr<CustomerServiceType::Request> request,
             std::shared_ptr<CustomerServiceType::Response> response);

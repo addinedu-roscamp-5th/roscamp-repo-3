@@ -1,6 +1,10 @@
 #include "Core.hpp"
 #include <sstream>
 #include <iomanip>  // for ostringstream
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 using namespace core;
 using namespace task;
 using namespace Integrated;
@@ -26,9 +30,18 @@ bool Core::Initialize()
     pdispatcher_ = make_uptr<Dispatcher>(_MAX_EXECUTOR_NUM_, log_);
     pRobotArmAdapter_ = make_uptr<RobotArmAdapter>(self, log_);
     pRequestManager_ = make_uptr<RequestManager>(self, log_);
+<<<<<<< Updated upstream
     // occupancyGrid_ = make_uptr<OccupancyGrid>();
     // occupancyGrid_->LoadOccupancyGrid(_YAML_PATH_,_YAML_FILE_);
     traffic_Planner_ = make_sptr<TrafficPlanner>(Commondefine::map, log_);
+=======
+    
+    // occupancyGrid_ = make_uptr<OccupancyGrid>();
+    // occupancyGrid_->LoadOccupancyGrid(_YAML_PATH_,_YAML_FILE_);
+
+    traffic_Planner_ = make_sptr<TrafficPlanner>(Commondefine::map, log_);
+    
+>>>>>>> Stashed changes
     // AMR 어댑터 생성
     for (int i = 0; i < _AMR_NUM_; ++i)
     {
@@ -41,7 +54,13 @@ bool Core::Initialize()
 bool Core::SetAmrNextStep(int idx, Commondefine::AmrStep step)
 {
     assignNewAmr_ = true;
+<<<<<<< Updated upstream
     PlanPaths();
+=======
+
+    PlanPaths();
+
+>>>>>>> Stashed changes
     switch (step)
     {
     case Commondefine::MoveTo_dest1:
@@ -178,7 +197,8 @@ bool Core::DoneCallback(const std::string& requester, const int& customer_id)
     else return false ;
 }
 bool Core::publishNavGoal(int idx, const Commondefine::Position wp)
-{
+
+{ 
     auto iface = Interface_.lock();
     if (!iface) return false;
     iface->publishNavGoal(idx, wp);
@@ -202,6 +222,7 @@ void Core::PlanPaths()
     {
         if(amr_adapters_[i]->GetTaskInfo().robot_state == RobotState::IDLE) continue;
         amr_adapters_[i]->updatePath(paths[i]);
+<<<<<<< Updated upstream
         assignNewAmr_ = false;
         path_cv_.notify_all();
         return;
@@ -214,6 +235,23 @@ void Core::PlanPaths()
         path_cv_.notify_all();
         return;
     }
+=======
+    
+        assignNewAmr_ = false;
+        path_cv_.notify_all();
+        
+        return;
+    }
+
+    auto iface = Interface_.lock();
+    if (!iface) 
+    {
+        log_->Log(Log::LogLevel::ERROR, "PlanPaths: Interface lock fail");
+        assignNewAmr_ = false;
+        path_cv_.notify_all();
+        return;
+    }
+>>>>>>> Stashed changes
 }
 void Core::waitNewPath()
 {
@@ -228,12 +266,21 @@ Commondefine::RobotState Core::GetAmrState(int idx)
 {
     if (idx < 0 || idx >= amr_adapters_.size()) return RobotState::INVALID;
     return amr_adapters_[idx]->GetTaskInfo().robot_state;
+    
 }
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 void Core::UpdateBattery(int idx, float percent)
 {
     if (idx < 0 || idx >= static_cast<int>(amr_adapters_.size())) return;
     std::lock_guard<std::mutex> lk(battery_mtx_);
     amr_adapters_[idx]->GetTaskInfo().battery = percent;
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
     log_->Log(Log::LogLevel::INFO, (std::ostringstream{} << "[BAT] Core::UpdateBattery AMR" << idx
                                                         << " = " << std::fixed << std::setprecision(1)
                                                         << percent << "%").str());
@@ -266,13 +313,40 @@ bool Core::UpdateShelfInfo(Commondefine::shoesproperty incoming_shoe, int shelf_
 {
     return true;
 }
+<<<<<<< Updated upstream
 // void Core::SendTestGoal(int robot_id, int cell_x, int cell_y, float yaw_rad)
+=======
+
+void Core::SendTestGoal(int robot_id, int cell_x, int cell_y, float yaw_rad)
+{
+    int idx = robot_id - 1;
+    if (idx < 0 || idx >= GetAmrVecSize()) {
+        log_->Log(Log::LogLevel::ERROR, "SendTestGoal: invalid robot id " + std::to_string(robot_id));
+        return;
+    }
+
+    amr_adapters_[robot_id]->SetAmrState(RobotState::BUSY);
+
+    Commondefine::Position wp{};
+    wp.x = cell_x;  // 1-based grid
+    wp.y = cell_y;  // 1-based grid
+    wp.yaw = yaw_rad;
+    publishNavGoal(idx, wp);
+    log_->Log(Log::LogLevel::INFO,
+              "SendTestGoal -> robot#" + std::to_string(robot_id) +
+              " grid(" + std::to_string(wp.x) + "," + std::to_string(wp.y) +
+              "), yaw=" + std::to_string(wp.yaw));
+}
+
+// void Core::SendTestGoal(int robot_id, const Commondefine::Position wp) 
+>>>>>>> Stashed changes
 // {
 //     int idx = robot_id - 1;
 //     if (idx < 0 || idx >= GetAmrVecSize()) {
 //         log_->Log(Log::LogLevel::ERROR, "SendTestGoal: invalid robot id " + std::to_string(robot_id));
 //         return;
 //     }
+<<<<<<< Updated upstream
 //     amr_adapters_[robot_id]->SetAmrState(RobotState::BUSY);
 //     Commondefine::Position wp{};
 //     wp.x = cell_x;  // 1-based grid
@@ -294,9 +368,21 @@ bool Core::UpdateShelfInfo(Commondefine::shoesproperty incoming_shoe, int shelf_
 //     amr_adapters_[idx]->robot_task_info_.dest.x  = static_cast<float>(wp.x);
 //     amr_adapters_[idx]->robot_task_info_.dest.y  = static_cast<float>(wp.y);
 //     PlanPaths();
+=======
+
+//     amr_adapters_[idx]->robot_task_info_.dest.x  = static_cast<float>(wp.x); 
+//     amr_adapters_[idx]->robot_task_info_.dest.y  = static_cast<float>(wp.y); 
+//     PlanPaths();
+
+>>>>>>> Stashed changes
 //     publishNavGoal(idx, wp);
 //     log_->Log(Log::LogLevel::INFO,
 //               "SendTestGoal(Pos) -> robot#" + std::to_string(robot_id) +
 //               " grid(" + std::to_string(wp.x) + "," + std::to_string(wp.y) +
+<<<<<<< Updated upstream
 //               "), \yaw=" + std::to_string(wp.yaw));
 // }
+=======
+//               "), yaw=" + std::to_string(wp.yaw));
+// }
+>>>>>>> Stashed changes

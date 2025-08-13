@@ -85,8 +85,8 @@ Integrated::vec<Integrated::vec<bool>> OccupancyGrid::GetBoolMap()
     // 행렬이 비었는지 확인
     if(Map_.empty()) return {};
 
-    int rows = Map_.rows;
-    int cols = Map_.cols;
+    int rows = Map_.rows / 10;
+    int cols = Map_.cols / 10;
 
     result.resize(rows, vector<bool>(cols, false));
 
@@ -110,7 +110,7 @@ Integrated::vec<Integrated::vec<bool>> OccupancyGrid::GetBoolMap()
                 value = 0;
             }
 
-            result[i][j] = (value != 0);
+            result[i][j] = (value == 0);
         }
     }
 

@@ -22,6 +22,10 @@ int main(int argc, char * argv[])
     pCore->Initialize();
     pInterface->Initialize(pCore);
 
+
+    // pCore->SendTestGoal(1, 2, 4, 0.0f);
+    
+
     rclcpp::executors::MultiThreadedExecutor executor;
     executor.add_node(pInterface);
     
