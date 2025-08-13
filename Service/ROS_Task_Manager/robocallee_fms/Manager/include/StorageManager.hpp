@@ -30,17 +30,24 @@ namespace Manager
             
             isEmpty_.store(true);
 
-            return std::move(storage_);
-            
+            return storage_;
         }
 
-        const bool empty(){ return isEmpty_.load();}
+        T snapshot() const
+        {
+            return storage_;
+        }
+
+        bool empty()const { return isEmpty_.load();}
 
         Storage* operator=(Storage& rhs)
         {
-            this->isEmpty_ = std::move(rhs.isEmpty_);
-            this->storage_ = std::move(rhs.storage_);
-            this->mtx_ = std::move(rhs.mtx_);
+            if (this != &rhs)
+            {
+                this->isEmpty_ = rhs.isEmpty_;
+                this->storage_ = std::move(rhs.storage_);
+            }
+            return this;
         }
     };
 

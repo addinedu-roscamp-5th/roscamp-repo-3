@@ -33,7 +33,7 @@ namespace Adapter
 
         void amrToBuffer();
 
-        void bufferToAmr();
+        void bufferToshelf();
     };
 
 };

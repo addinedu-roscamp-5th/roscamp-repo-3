@@ -1,6 +1,8 @@
 #include "AmrAdapter.hpp"
 
 using namespace Adapter;
+using namespace Commondefine;
+using namespace Integrated;
 
 AmrAdapter::AmrAdapter(Integrated::w_ptr<core::ICore> Icore, Logger::s_ptr log, const int id)
     :Icore_(Icore), log_(log), isOccupyWaypoint_(false)
@@ -8,6 +10,8 @@ AmrAdapter::AmrAdapter(Integrated::w_ptr<core::ICore> Icore, Logger::s_ptr log, 
     log_->Log(Log::LogLevel::INFO,"AmrAdapter 객체 생성");
 
     robot_task_info_.robot_id = id;
+    
+    current_wp_idx_.store(0);
 }
 
 AmrAdapter::~AmrAdapter()
@@ -28,6 +32,7 @@ void AmrAdapter::SetTaskInfo(const Commondefine::GUIRequest& request)
         robot_task_info_.shoes_property = request.shoes_property;
         robot_task_info_.requester = request.requester;
         robot_task_info_.customer_id = request.customer_id;
+        robot_task_info_.dest = request.dest2;
     }
 
     std::string msg = "color = " + robot_task_info_.shoes_property.color +
@@ -72,9 +77,11 @@ bool AmrAdapter::handleWaypointArrival(const Commondefine::pose2f& pos)
     Commondefine::Position p = getCurrentWayPoint();
     if(p.x == -1 || p.y ==-1) return false;
 
-    float dx = float(pos.x - static_cast<float>(p.x));
-    float dy = float(pos.y - static_cast<float>(p.y));
-    float dist = std::hypot(dx, dy);
+    Commondefine::pose2f wp = Commondefine::convertPositionToPose(p);
+    const float dx = static_cast<float>((pos.x - wp.x));
+    const float dy = static_cast<float>((pos.y - wp.y));
+
+    const float dist = std::hypot(dx, dy);
 
     if (dist <= _ARRIVAL_TOLERANCE_)
     {
@@ -83,13 +90,8 @@ bool AmrAdapter::handleWaypointArrival(const Commondefine::pose2f& pos)
 
         setOccupyWayPoint(true);
 
-        if (isGoal()){ return true; }
-
-        core->waitNewPath();
-
-        incrementWaypointIndex();
-
-        core->publishNavGoal(robot_task_info_.robot_id, getCurrentWayPoint());
+        //목적지에 도착했는지 판단 유무와 다음 웨이포인트 보냄.
+        sendNextpoint();
 
         setOccupyWayPoint(false);
     }
@@ -105,6 +107,7 @@ void AmrAdapter::updatePath(const std::vector<Commondefine::Position>& new_path)
         waypoints_ = new_path;
     }
 
+    //여기에서 웨이포인트 간 yaw 값을 계산한다.
     const int nextiter = 1;
     for (auto it = waypoints_.begin(); it + nextiter != waypoints_.end(); ++it)
     {
@@ -115,24 +118,6 @@ void AmrAdapter::updatePath(const std::vector<Commondefine::Position>& new_path)
     }
 
     setOccupyWayPoint(false);
-
-    if (auto core = Icore_.lock())
-    {
-        //여기서 일을 시킨다.
-        core->SetAmrNextStep(robot_task_info_.robot_id, Commondefine::AmrStep::MoveTo_dest1);
-    }
-
-}
-
-void AmrAdapter::MoveTo(Commondefine::Position dst)
-{
-    auto core = Icore_.lock();
-    if (core == nullptr) return;
-
-    core->publishNavGoal(robot_task_info_.robot_id, dst);
-
-    log_->Log(Log::LogLevel::INFO, "MoveTo st x: " + std::to_string(st.x) + ",y:" + std::to_string(st.y)
-    + " dst x: " + std::to_string(dst.x) + ",y:" + std::to_string(dst.y));
 }
 
 void AmrAdapter::setOccupyWayPoint(bool occupy)
@@ -143,11 +128,11 @@ void AmrAdapter::setOccupyWayPoint(bool occupy)
 }
 
 const bool AmrAdapter::isGoal()
-{ 
+{
     if(current_wp_idx_.load() == waypoints_.size())
     {
         {
-            std::lock_guard<std::mutex> lk(waypoint_mtx_);
+            std::lock_guard<std::mutex> lock(waypoint_mtx_);
             ResetWaypoint();
         }
 
@@ -157,36 +142,95 @@ const bool AmrAdapter::isGoal()
     return false;
 }
 
-void AmrAdapter::SetCurrentPosition(Commondefine::pose2f p)
+Commondefine::Position AmrAdapter::GetDestPoseToWp()
 {
-    {
-        std::lock_guard lock(current_position_mtx_);
-        robot_task_info_.current_position = std::move(p);
-    }
-
-    return;
-}
-
-Commondefine::Position AmrAdapter::GetCurrentPosition()
-{
-    Commondefine::Position p;
-    p.x = static_cast<float>(robot_task_info_.current_position.x);
-    p.y = static_cast<float>(robot_task_info_.current_position.y);
-
-    return p;
-}
-
-Commondefine::Position AmrAdapter::GetDestPosition()
-{
-    Commondefine::Position pose;
-    pose.x = static_cast<int>(robot_task_info_.dest.x);
-    pose.y = static_cast<int>(robot_task_info_.dest.y);
-
-    return pose;
+    return Commondefine::convertPoseToPosition(robot_task_info_.dest);
 }
 
 void AmrAdapter::ResetWaypoint()
 {
     current_wp_idx_.store(0);
     waypoints_.clear(); 
+}
+
+//첫번째 waypoint로 움직인다.
+void AmrAdapter::MoveTo()
+{
+    auto core = Icore_.lock();
+    if (core == nullptr) return;
+
+    if(waypoints_.empty()) return;
+
+    const int first = 0;
+    core->publishNavGoal(robot_task_info_.robot_id, waypoints_[first]);
+}
+
+void AmrAdapter::MoveToStorage()
+{
+    
+    auto core = Icore_.lock();
+    if (core == nullptr) return;
+
+    //픽업 위치에 다른 로봇이 있다면 대기 한다.
+    core->waitCriticalSection();
+
+    //항상 움직일때 첫번째 웨이포인트 하나만 보내주고 나머지는 handleWaypointArrival 에서 다음 웨이포인트를 보내준다.
+    MoveTo();
+}
+
+void AmrAdapter::MoveToChargingStation()
+{
+
+}
+
+
+
+void AmrAdapter::sendNextpoint()
+{
+    auto core = Icore_.lock();
+    if(core == nullptr) return;
+
+    if(isGoal())
+    {
+        MoveToDone();
+        return;
+    } 
+
+    core->waitNewPath();
+
+    incrementWaypointIndex();
+
+    Commondefine::Position wp = getCurrentWayPoint();
+    if(wp.x == -1 || wp.y ==-1) return;
+
+    core->publishNavGoal(robot_task_info_.robot_id, wp);
+}
+
+void AmrAdapter::MoveToDone()
+{
+    switch (step_.load())
+    {
+    case Commondefine::AmrStep::MoveTo_Storage:
+        SendPickupRequest();
+
+        break;
+    case Commondefine::AmrStep::MoveTo_charging_station:
+        //로봇의 상태를 리턴 형태로 변환 해준다.
+        state_.store(Commondefine::RobotState::RETURN);
+        break;
+    case Commondefine::AmrStep::MoveTo_dst:
+        break;
+    
+    default:
+        break;
+    }
+}
+
+void AmrAdapter::SendPickupRequest()
+{
+    auto core = Icore_.lock();
+    if(core == nullptr) return;
+
+    core->assignTask(Commondefine::RobotArmStep::buffer_to_Amr);
+    return;
 }

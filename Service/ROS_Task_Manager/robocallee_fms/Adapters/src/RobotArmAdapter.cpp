@@ -50,6 +50,7 @@ void RobotArmAdapter::bufferToAmr()
     core->getStorage(ContainerType::Buffer, request_);
     core->ArmRequestMakeCall(RobotArm::RobotArm2, request_.containerIndex, request_.robot_id, "buffer_to_pinky");
 }
+
 void RobotArmAdapter::amrToBuffer()
 {
     auto core = Icore_.lock();
@@ -61,7 +62,7 @@ void RobotArmAdapter::amrToBuffer()
 
     core->ArmRequestMakeCall(RobotArm::RobotArm2, request_.containerIndex, request_.robot_id, "pinky_to_buffer");
 }
-void RobotArmAdapter::bufferToAmr()
+void RobotArmAdapter::bufferToshelf()
 {
     auto core = Icore_.lock();
     if(core == nullptr) 

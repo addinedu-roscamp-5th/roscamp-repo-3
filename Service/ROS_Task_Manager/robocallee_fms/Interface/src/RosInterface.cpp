@@ -132,25 +132,21 @@ void RosInterface::cbArmService(rclcpp::Client<ArmServiceType>::SharedFuture fut
   auto res = future.get();
   auto icore = Icore_.lock();
 
-  if(icore == nullptr)
-  {
-      log_->Log(Log::LogLevel::INFO, "ICore expired");
-      return;
-  }
+  if(icore == nullptr) { log_->Log(Log::LogLevel::INFO, "ICore expired"); return;}
 
   if(!res->success) log_->Log(Log::INFO, "RobotArm 요청 실패 !");
   
-  // 다시 서랍에 넣는 신발 정보 업뎃
-  if(res->action == "buffer_to_shelf")
-  {
-    Commondefine::shoesproperty incoming_shoe;
-    incoming_shoe.size = res->size ;
-    incoming_shoe.model = res->model ;
-    incoming_shoe.color = res->color ;
-    int shelf_num = res->shelf_num ;
+  ArmRequest req;
+  req.robot_id = res->robot_id;
+  req.amr_id = res->amr_id;
+  req.action = res->action;
+  req.shoes.size = res->size ;
+  req.shoes.model = res->model ;
+  req.shoes.color = res->color ;
+  req.success = res->success;
 
-    icore->UpdateShelfInfo(incoming_shoe, shelf_num);
-  }
+  icore->ArmDoneCallback(req);
+
   log_->Log(Log::INFO, "RobotArm " + res->action + " 요청 성공 !");
   
 }
@@ -254,10 +250,8 @@ void RosInterface::cbEmployeeRequest(const std::shared_ptr<EmployeeServiceType::
 
 void RosInterface::cbarucoPoseArray(const ArucoPoseArray::ConstSharedPtr & msg)
 {
-  auto start = std::chrono::high_resolution_clock::now();
-
   {
-    std::lock_guard<std::mutex> lk(pose_mutex_);
+    std::lock_guard<std::mutex> lock(pose_mutex_);
     
     std::vector<Commondefine::pose2f> pos;
 
@@ -266,11 +260,10 @@ void RosInterface::cbarucoPoseArray(const ArucoPoseArray::ConstSharedPtr & msg)
       Commondefine::pose2f p;
       p.x = static_cast<float>(ap.x);
       p.y = static_cast<float>(ap.y);
-
       pos.push_back(p);
 
       nav_msgs::msg::Odometry odom;
-      odom.header    = msg->header;
+      odom.header = msg->header;
       odom.child_frame_id = "pinky_" + std::to_string(ap.id);
 
       odom.pose.pose.position.x = ap.x;
@@ -293,11 +286,6 @@ void RosInterface::cbarucoPoseArray(const ArucoPoseArray::ConstSharedPtr & msg)
       icore->PoseCallback(pos);
     }
   }
-  
-  auto end = std::chrono::high_resolution_clock::now();
-  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-
-  log_->Log(Log::LogLevel::INFO, "arucoPose function duration : " + std::to_string(duration.count()) + " ms");
 }
 
 void RosInterface::publishNavGoal(int idx, const Commondefine::Position wp)
@@ -310,11 +298,13 @@ void RosInterface::publishNavGoal(int idx, const Commondefine::Position wp)
 
     Commondefine::Quaternion q = Commondefine::toQuaternion(wp);
 
+    Commondefine::pose2f p2f = Commondefine::convertPositionToPose(wp);
+
     geometry_msgs::msg::PoseStamped ps;
     ps.header.stamp = rclcpp::Clock().now();
     ps.header.frame_id = "map";
-    ps.pose.position.x = ((wp.y - 1) * _MAP_RESOLUTION_) + (_MAP_RESOLUTION_ / 2.0);
-    ps.pose.position.y = ((wp.x - 1) * _MAP_RESOLUTION_) + (_MAP_RESOLUTION_ / 2.0);
+    ps.pose.position.x = p2f.x;
+    ps.pose.position.y = p2f.y;
     ps.pose.position.z = 0.0;
     ps.pose.orientation.x = q.x;
     ps.pose.orientation.y = q.y;
@@ -323,10 +313,5 @@ void RosInterface::publishNavGoal(int idx, const Commondefine::Position wp)
 
     nav_goal_pubs_[idx]->publish(ps);
 
-    log_->Log(Log::LogLevel::INFO,
-              "Published wp to goalpose" + std::to_string(idx+1) +
-              // ": (" + std::to_string(wp.pose.position.x) +
-              // ", " + std::to_string(wp.pose.position.y) + ")");
-              ": (" + std::to_string(wp.x) +
-              ", " + std::to_string(wp.y) + ")");
+    log_->Log(Log::LogLevel::INFO,"Published wp to goalpose" + std::to_string(idx+1) + ": (" + std::to_string(wp.x) +", " + std::to_string(wp.y) + ")");
 }

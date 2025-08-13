@@ -17,7 +17,7 @@ namespace Commondefine
 
     #define _ARRIVAL_TOLERANCE_ 0.05f
 
-    #define _MAP_RESOLUTION_ 0.1d
+    #define _MAP_RESOLUTION_ 0.01f
 
     #define _ARM_BUFFER_ 4
 
@@ -87,13 +87,21 @@ namespace Commondefine
         RobotArmStep command;
     }StorageRequest;
 
+    typedef struct ArmRequest
+    {
+        int robot_id;
+        int amr_id;
+        std::string action;
+        shoesproperty shoes;
+        bool success;
+    }ArmRequest;
+
     typedef struct Position
     {
         int x;
         int y;
         double yaw;
 
-        Position(int x_, int y_, double yaw_) : x(x_), y(y_), yaw(yaw_) {}
         bool operator==(const Position& other) const { return x == other.x && y == other.y && std::abs(yaw - other.yaw) < 1e-6;}
 
     }Position;
@@ -161,8 +169,6 @@ namespace Commondefine
         int                                 robot_id;
         int                                 battery = 100;
         shoesproperty                       shoes_property;
-        pose2f                              current_position;
-        pose2f                              start;
         pose2f                              dest;
         std::string                         requester;
         int                                 customer_id;
@@ -174,8 +180,6 @@ namespace Commondefine
                 this->robot_id = rhs.robot_id;
                 this->battery = rhs.battery;
                 this->shoes_property = rhs.shoes_property;
-                this->current_position = rhs.current_position;
-                this->current_position = rhs.current_position;
                 this->dest = rhs.dest;
                 this->requester = rhs.requester;
                 this->customer_id = rhs.customer_id;
@@ -200,6 +204,41 @@ namespace Commondefine
         
         return q;
     }
+
+    static pose2f convertPositionToPose(Position p)
+    {
+        pose2f pose;
+        pose.x = static_cast<float>((p.y - 1) * _MAP_RESOLUTION_ + _MAP_RESOLUTION_ / 2.0);
+        pose.y = static_cast<float>((p.x - 1) * _MAP_RESOLUTION_ + _MAP_RESOLUTION_ / 2.0);
+
+        return pose;
+    }
+
+    static Position convertPoseToPosition(pose2f pose)
+    {
+        Position p;
+        p.y = static_cast<int>((pose.x - _MAP_RESOLUTION_ / 2.0) / _MAP_RESOLUTION_ + 1);
+        p.x = static_cast<int>((pose.y - _MAP_RESOLUTION_ / 2.0) / _MAP_RESOLUTION_ + 1);
+
+        return p;
+    }
+
+
+    static std::vector<std::vector<bool>> map
+    {
+        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+        {1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,0,0,1,0,0,0,0,1,1,1,1,1,0,0,0,1},
+        {1,0,0,0,0,0,0,0,1,0,0,0,0,1,1,1,1,1,0,0,0,1},
+        {1,0,0,0,0,0,0,0,1,0,0,0,0,1,1,1,1,1,0,0,0,1},
+        {1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+    };
 };
 
 

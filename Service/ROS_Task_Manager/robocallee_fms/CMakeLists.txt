@@ -52,8 +52,6 @@ include_directories(
 
 # 서비스 메시지 생성
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "srv/ShoeRequest.srv"
-  "srv/DoneMsg.srv"
   "srv/RobotArmRequest.srv"
   "srv/CustomerRequest.srv"
   "srv/EmployeeRequest.srv"

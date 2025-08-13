@@ -25,15 +25,17 @@ namespace Adapter
         // Planner → Adapter 로 받은 웨이포인트
         std::mutex                            waypoint_mtx_;
         std::vector<Commondefine::Position>   waypoints_;
-        std::atomic<int>                      current_wp_idx_{0};
-        std::atomic<Commondefine::Position>   current_goal_;
+        std::atomic<int>                      current_wp_idx_;
+
+        std::atomic<Commondefine::Position>   current_waypoint_;
+        std::atomic<Commondefine::pose2f>     current_pose_;
 
         // Waypoint 점유 플래그
         std::atomic<bool>                     isOccupyWaypoint_;
         std::mutex                            occupy_mtx_;
         std::condition_variable               occupy_cv_;
 
-        std::mutex                            current_position_mtx_;
+        std::atomic<Commondefine::AmrStep>    step_;
 
         std::atomic<Commondefine::RobotState> state_;
 
@@ -45,10 +47,13 @@ namespace Adapter
 
         // Request → AMR task 정보 설정
         void SetTaskInfo(const Commondefine::GUIRequest& request);
-        
         Commondefine::RobotTaskInfo& GetTaskInfo();
 
-        // AMR 상태 변경
+        // step
+        void SetAmrStep(const Commondefine::AmrStep step){step_.store(step);}
+        const Commondefine::AmrStep GetAmrStep(){return step_.load();}
+
+        // AMR
         void SetAmrState(const Commondefine::RobotState state);
         const Commondefine::RobotState GetAmrState(){return state_.load();}
 
@@ -70,7 +75,7 @@ namespace Adapter
         
         Commondefine::Position getCurrentWayPoint() 
         { 
-            if(waypoints_.empty())
+            if(waypoints_.empty() || current_wp_idx_.load() > waypoints_.size())
             {
                 Commondefine::Position p = {-1,-1,-1};
                 return p;
@@ -79,23 +84,29 @@ namespace Adapter
             return waypoints_[current_wp_idx_];
         }
         Commondefine::Position getEndWayPoint(){ return *(waypoints_.end());}
-        
+
         const bool isGoal();
         
         void incrementWaypointIndex() { ++current_wp_idx_; }
 
-        void SetCurrentPosition(Commondefine::pose2f p);
-        Commondefine::Position GetCurrentPosition();
+        void SetCurrentPose(Commondefine::pose2f p){current_pose_.store(p);}
+        Commondefine::pose2f GetCurrentPose(){return current_pose_.load();}
+        Commondefine::Position GetCurrentPoseToWp(){return Commondefine::convertPoseToPosition(current_pose_.load());}
 
-        Commondefine::Position GetDestPosition();
+        Commondefine::Position GetDestPoseToWp();
+        Commondefine::pose2f GetDestPose(){return robot_task_info_.dest;}
 
-        void MoveTo(Commondefine::Position dst);
+        void MoveTo();
 
-        void MoveTo_dest1(int robot_id);
-        
-        void MoveTo_dest2(int robot_id);
-        
-        void MoveTo_dest3(int robot_id);
+        void MoveToStorage();
+
+        void MoveToChargingStation();
+
+        void sendNextpoint();
+
+        void SendPickupRequest();
+
+        void MoveToDone();
     };
 
-} // namespace Adapter
+}

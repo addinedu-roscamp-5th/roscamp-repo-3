@@ -28,7 +28,7 @@ bool Core::Initialize()
     auto self = shared_from_this();
 
     pdispatcher_ = make_uptr<Dispatcher>(_MAX_EXECUTOR_NUM_, log_);
-    pStorageManager_ = make_uptr<pStorageManager_>(self, log_);
+    pStorageManager_ = make_uptr<StorageManager>(self, log_);
     pRequestManager_ = make_uptr<RequestManager>(self, log_);
 
     for (int i = 0; i < RobotArm::RobotArmNum; ++i)
@@ -36,10 +36,7 @@ bool Core::Initialize()
         RobotArm_Adapters_.emplace_back(make_uptr<Adapter::RobotArmAdapter>(self,i ,log_));
     }
 
-    occupancyGrid_ = make_uptr<OccupancyGrid>();
-    occupancyGrid_->LoadOccupancyGrid(_YAML_PATH_,_YAML_FILE_);
-
-    traffic_Planner_ = make_sptr<TrafficPlanner>(occupancyGrid_->GetBoolMap(), log_);
+    traffic_Planner_ = make_uptr<TrafficPlanner>(Commondefine::map, log_);
     
     // AMR 어댑터 생성
     for (int i = 0; i < _AMR_NUM_; ++i)
@@ -52,89 +49,31 @@ bool Core::Initialize()
     return true;
 }
 
-bool Core::SetAmrNextStep(int idx, Commondefine::AmrStep step)
-{
-    if(amr_adapters_.size() < idx)
-    {
-        log_->Log(Log::LogLevel::INFO, "Index가 넘었습니다.");
-        return false;
-    } 
-
-    switch (step)
-    {
-    case Commondefine::MoveTo_dest1:
-        assignTask(std::bind(&Adapter::AmrAdapter::MoveTo_dest1,
-                             amr_adapters_[idx].get(), idx));
-        break;
-
-    case Commondefine::MoveTo_dest2:
-        assignTask(std::bind(&Adapter::AmrAdapter::MoveTo_dest2,
-                             amr_adapters_[idx].get(), idx));
-        break;
-
-    case Commondefine::MoveTo_dest3:
-        assignTask(std::bind(&Adapter::AmrAdapter::MoveTo_dest3,
-                             amr_adapters_[idx].get(), idx));
-        break;
-
-    default:
-        break;
-    }    
-    return true;
-}
-
-bool Core::SetRobotArmNextStep(Commondefine::RobotArmStep step, Commondefine::shoesproperty shoes, int robot_id)
-{
-    log_->Log(Log::LogLevel::INFO, "assignTask 직전 step은" + std::to_string(step));
-
-    switch (step) 
-    {
-        case RobotArmStep::shelf_to_buffer:
-            log_->Log(Log::LogLevel::INFO, "assignTask shelf_to_buffer");
-            assignTask(std::bind(&Adapter::RobotArmAdapter::arm1_shelf_to_buffer, pRobotArmAdapter_.get(), shoes, robot_id));
-            break;
-
-        case RobotArmStep::buffer_to_pinky:
-            log_->Log(Log::LogLevel::INFO, "assignTask buffer_to_pinky");
-            assignTask(std::bind(&Adapter::RobotArmAdapter::arm2_buffer_to_pinky, pRobotArmAdapter_.get(), robot_id));
-            break;
-
-        case RobotArmStep::pinky_to_buffer:
-            log_->Log(Log::LogLevel::INFO, "assignTask pinky_to_buffer");
-            assignTask(std::bind(&Adapter::RobotArmAdapter::arm2_pinky_to_buffer, pRobotArmAdapter_.get(), robot_id));
-            break;
-
-        case RobotArmStep::buffer_to_shelf:
-            log_->Log(Log::LogLevel::INFO, "assignTask buffer_to_shelf");
-            assignTask(std::bind(&Adapter::RobotArmAdapter::arm1_buffer_to_shelf, pRobotArmAdapter_.get(), robot_id));
-            break;
-
-        default:
-            break;
-    }
-
-    return true;
-}
-
 bool Core::assignTask(int idx, Commondefine::AmrStep step)
 {
     if(idx > amr_adapters_.size()) return false;
-    auto arm = amr_adapters_[idx];
+    
+    amr_adapters_[idx]->SetAmrStep(step);
 
     switch (step)
     {
-    case constant expression:
-        /* code */
+    case AmrStep::MoveTo_Storage:
+        log_->Log(Log::LogLevel::INFO, "assignTask MoveTo_Storage");
+        assignTask(std::bind(&Adapter::AmrAdapter::MoveToStorage, amr_adapters_[idx].get()));
         break;
-    
-
 
     case AmrStep::MoveTo_charging_station:
-    
+        log_->Log(Log::LogLevel::INFO, "assignTask MoveTo_charging_station");
+        assignTask(std::bind(&Adapter::AmrAdapter::MoveToChargingStation, amr_adapters_[idx].get()));
+        break;
+
+    case AmrStep::MoveTo_dst:
+        log_->Log(Log::LogLevel::INFO, "assignTask MoveTo_dst");
+        assignTask(std::bind(&Adapter::AmrAdapter::MoveTo, amr_adapters_[idx].get()));
         break;
 
     default:
-        log_->Log(ERROR,"정의 되지 않은 RobotArm Step 입니다.")
+        log_->Log(ERROR,"정의 되지 않은 RobotArm Step 입니다.");
         return false;
     }
 
@@ -152,26 +91,26 @@ bool Core::assignTask(Commondefine::RobotArmStep step)
     
     case shelf_to_buffer:
         log_->Log(Log::LogLevel::INFO, "assignTask shelf_to_buffer");
-        assignTask(std::bind(&Adapter::RobotArmAdapter::shelfToBuffer, amr_adapters_[RobotArm::RobotArm1].get()));
+        assignTask(std::bind(&Adapter::RobotArmAdapter::shelfToBuffer, RobotArm_Adapters_[RobotArm::RobotArm1].get()));
         break;
 
     case buffer_to_Amr:
         log_->Log(Log::LogLevel::INFO, "assignTask buffer_to_Amr");
-        assignTask(std::bind(&Adapter::RobotArmAdapter::bufferToAmr, amr_adapters_[RobotArm::RobotArm2].get()));
+        assignTask(std::bind(&Adapter::RobotArmAdapter::bufferToAmr, RobotArm_Adapters_[RobotArm::RobotArm2].get()));
         break;
 
     case Amr_to_buffer:
         log_->Log(Log::LogLevel::INFO, "assignTask Amr_to_buffer");
-        assignTask(std::bind(&Adapter::RobotArmAdapter::amrToBuffer, amr_adapters_[RobotArm::RobotArm2].get()));
+        assignTask(std::bind(&Adapter::RobotArmAdapter::amrToBuffer, RobotArm_Adapters_[RobotArm::RobotArm2].get()));
         break;
 
     case buffer_to_shelf:
         log_->Log(Log::LogLevel::INFO, "assignTask buffer_to_shelf");
-        assignTask(std::bind(&Adapter::RobotArmAdapter::bufferToAmr, amr_adapters_[RobotArm::RobotArm1].get()));
+        assignTask(std::bind(&Adapter::RobotArmAdapter::bufferToshelf, RobotArm_Adapters_[RobotArm::RobotArm1].get()));
         break;
 
     default:
-        log_->Log(ERROR,"정의 되지 않은 RobotArm Step 입니다.")
+        log_->Log(ERROR,"정의 되지 않은 RobotArm Step 입니다.");
         return false;
     }
 
@@ -183,11 +122,11 @@ bool Core::ArmRequestMakeCall(Commondefine::RobotArm arm, int shelf_num, int rob
     auto iface = Interface_.lock();
     if(iface == nullptr) 
     {
-        log_->Log(Log::LogLevel::ERROR,"RosInterface가 유효하지 않습니다!");
+        log_->Log(Log::LogLevel::ERROR,"RosInterface is nullptr");
         return false;
     }
 
-    switch (arm_num)
+    switch (arm)
     {
     case RobotArm::RobotArm1:
         iface->arm1_send_request(shelf_num, robot_id, action);
@@ -217,7 +156,7 @@ bool Core::PoseCallback(const std::vector<Commondefine::pose2f> &pos)
     size_t size = pos.size();
     for(size_t robot_id = 0 ; robot_id < size; ++robot_id)
     {
-        amr_adapters_[robot_id]->SetCurrentPosition(pos[robot_id]);
+        amr_adapters_[robot_id]->SetCurrentPose(pos[robot_id]);
 
         if(amr_adapters_[robot_id]->GetAmrState() == RobotState::IDLE) continue;
 
@@ -231,26 +170,24 @@ bool Core::PoseCallback(const std::vector<Commondefine::pose2f> &pos)
     return true;
 }
 
-bool Core::ArmDoneCallback(int id, std::string action, bool success)
+bool Core::ArmDoneCallback(ArmRequest request)
 {
-    if(id > RobotArm_Adapters_.size()) return false;
+    if(request.robot_id > RobotArm_Adapters_.size()) return false;
 
-    if(success)
-    {
-        RobotArm_Adapters_[id]->setState(RobotState::IDLE);
-    }
+    if(!request.success) return false;
+    RobotArm_Adapters_[request.robot_id]->setState(RobotState::IDLE);
 
-    if(action == "buffer_to_shelf")
+    if(request.action == "buffer_to_shelf")
     {
         Commondefine::StorageRequest storage;
         storage.robot_id = Commondefine::RobotArm::RobotArm1;
         storage.command = RobotArmStep::buffer_to_shelf;
+        storage.shoes = request.shoes;
 
-        pStorageManager_->StorageRequest(storage)
+        pStorageManager_->StorageRequest(storage);
     }
-    
-    return true;
 
+    return true;
 }
 
 int Core::RequestCallback(const Commondefine::GUIRequest& request)
@@ -324,12 +261,12 @@ void Core::PlanPaths()
 
     for(const auto& amr : amr_adapters_)
     {
-        if(amr->GetTaskInfo().GetAmrState() == RobotState::IDLE) continue;
+        if(amr->GetAmrState() == RobotState::IDLE) continue;
         
         amr->WaitUntilWaypointOccupied();
         
-        starts.push_back(amr->GetCurrentPosition());
-        goals.push_back(amr->GetDestPosition());
+        starts.push_back(amr->GetCurrentPoseToWp());
+        goals.push_back(amr->GetDestPoseToWp());
     }
 
     auto paths = traffic_Planner_->planPaths(starts, goals);
@@ -393,7 +330,7 @@ void Core::SetTaskInfo(int idx, const Commondefine::GUIRequest& request)
 
 void Core::assignWork(int amr, Commondefine::GUIRequest r)
 {
-    if(amr_adapters_ < amr) return;
+    if(amr_adapters_.size() < amr) return;
 
     //1. 로봇에게 일을 할당 하기 때문에 BUSY 상태가 된다.
     amr_adapters_[amr]->SetAmrState(Commondefine::RobotState::BUSY);
@@ -404,30 +341,26 @@ void Core::assignWork(int amr, Commondefine::GUIRequest r)
     //3. 새로운 로봇이 추가됬다는 flag 추가
     SetAssignNewAmr(true);
 
-    //5. 로봇팔에 명령 추가
+    //4. 로봇팔에 명령 추가
     StorageRequest req;
     req.robot_id = amr;
     req.shoes = r.shoes_property;
-    req.command = RobotArmStep::check_critical_section;
-
-    //6. 로봇팔의 명령 추가
+    req.command = RobotArmStep::shelf_to_buffer;
     pStorageManager_->StorageRequest(req);
-    pStorageManager_->waitCriticalSection();
 
-    SetAmrNextStep(best_amr, Commondefine::AmrStep::MoveTo_dest1);
+    //5. 로봇의 경로 생성
+    PlanPaths();
 
-    // 베스트 핑키 구분을 해야하는 이유가 있다. 로봇팔이 작업을 안할떄 불리우면 안된다. 수거 요청 불렸을때, 수거위치 까지 가는것
-    // if (req.requester == "customer")
-    // {
-    //     Commondefine::shoesproperty shoe_info = req.shoes_property;
-    //     core->SetRobotArmNextStep(Commondefine::RobotArmStep::shelf_to_buffer , dummy_shoe , best_amr );
-    //     log_->Log(Log::LogLevel::INFO, "로봇팔 작업 지정: " + shoe_info.model + ", " + shoe_info.color + ", " + std::to_string(shoe_info.size) + ", 핑키 번호: " + std::to_string(best_amr));
-    // }
+    //6. 창고의 픽업 위치가 비어 있는지 체크
+    assignTask(RobotArmStep::check_critical_section);
 
+    //6. AMR의 창고 이동 명령
+    assignTask(amr, AmrStep::MoveTo_Storage);
+    
     return;
 }
 
-bool setStorageRequest(Commondefine::StorageRequest& Request)
+bool Core::setStorageRequest(Commondefine::StorageRequest& Request)
 {
     if(Request.robot_id > RobotArm_Adapters_.size()) return false;
 
@@ -459,7 +392,12 @@ bool Core::getStorage(Commondefine::ContainerType Container , Commondefine::Stor
     return pStorageManager_->getStorage(Container,Request);
 }
 
-int findEmptyStorage(Commondefine::ContainerType Container)
+int Core::findEmptyStorage(Commondefine::ContainerType Container)
 {
     return pStorageManager_->findEmptyStorage(Container);
+}
+
+void Core::waitCriticalSection()
+{
+    pStorageManager_->waitCriticalSection();
 }

@@ -12,6 +12,7 @@
 #include "AmrAdapter.hpp"
 #include "RobotArmAdapter.hpp"
 #include "RequestManager.hpp"
+#include "StorageManager.hpp"
 #include "OccupancyGrid.hpp"
 #include "TrafficPlanner.hpp"
 
@@ -36,7 +37,7 @@ namespace core
         
         
         Integrated::vec<Integrated::u_ptr<Adapter::AmrAdapter>>         amr_adapters_;
-        Integrated::s_ptr<traffic::TrafficPlanner>                      traffic_Planner_;
+        Integrated::u_ptr<traffic::TrafficPlanner>                      traffic_Planner_;
         Integrated::u_ptr<OG::OccupancyGrid>                            occupancyGrid_;
         std::atomic<bool>                                               assignNewAmr_;
 
@@ -56,10 +57,6 @@ namespace core
         bool assignTask(int idx, Commondefine::AmrStep step) override;
 
         bool assignTask(Commondefine::RobotArmStep step) override;
-
-        bool SetAmrNextStep(int idx, Commondefine::AmrStep step) override;
-        
-        bool SetRobotArmNextStep(Commondefine::RobotArmStep step, Commondefine::shoesproperty shoes, int robot_id) override;
         
         bool ArmRequestMakeCall(Commondefine::RobotArm arm, int shelf_num, int robot_id, std::string action) override ;
 
@@ -69,7 +66,7 @@ namespace core
 
         bool PoseCallback(const std::vector<Commondefine::pose2f> &pos) override;
 
-        bool ArmDoneCallback(int id, std::string action, bool success) override;
+        bool ArmDoneCallback(Commondefine::ArmRequest request) override;
 
         bool publishNavGoal(int idx, const Commondefine::Position wp) override;
 
@@ -103,7 +100,7 @@ namespace core
 
         int findEmptyStorage(Commondefine::ContainerType Container) override;
 
-        void 
+        void waitCriticalSection() override;
     };
 
     // Template implementation

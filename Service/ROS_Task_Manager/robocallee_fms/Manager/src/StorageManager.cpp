@@ -21,14 +21,12 @@ void StorageManager::InitContainer()
 {
     for(int i = 0 ; i < _ARM_SHELF_ ; ++i)
     {
-        shoesStorage s;
-        shelf_info_[i] = s;
+        shelf_info_[i];
     }
 
     for(int i = 0 ; i < _ARM_BUFFER_ ; ++i)
     {
-        shoesStorage s;
-        buffer_info_[i] = s;
+        buffer_info_[i];
     }
 
 }
@@ -44,7 +42,7 @@ bool StorageManager::StorageRequest(Commondefine::StorageRequest storage)
     if(core == nullptr)
     {
         log_->Log(ERROR,"core pointer is nullptr");
-        return;
+        return false;
     }
 
     core->assignTask(RobotArmStep::resolve_Request);
@@ -70,7 +68,7 @@ bool StorageManager::resolveRequest()
     if(core == nullptr)
     {
         log_->Log(ERROR,"core pointer is nullptr");
-        return;
+        return false;
     }
 
     if(storageRequest_.empty()){ return false;}
@@ -104,7 +102,7 @@ bool StorageManager::checkCriticalSection()
     if(!criticalSection_.load())
     {
         //너무 빠른 속도로 폴링을 하게 되면, 변화가 없는데 무분별하게 thread queue에 쌓일 수 있기 때문에 약간의 sleep
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
         
         core->assignTask(RobotArmStep::check_critical_section);
         return false;
@@ -113,14 +111,9 @@ bool StorageManager::checkCriticalSection()
     setCriticalSection(false);
 
     //이제 진짜 다음 스텝으로 넘어 간다.
-    core->assignTask(RobotArmStep::shelf_to_buffer);
+    core->assignTask(RobotArmStep::buffer_to_Amr);
 
     return true;
-}
-
-bool StorageManager::resolveRequest()
-{
-    
 }
 
 void StorageManager::setCriticalSection(bool flag)
@@ -204,9 +197,9 @@ int StorageManager::findStorage(Commondefine::ContainerType container, Commondef
 
     auto it = std::find_if(table.begin(), table.end(), [&](const auto& pair) 
     { 
-        return pair.second.storage_.size == shoes.size &&
-        pair.second.storage_.model == shoes.model &&
-        pair.second.storage_.color == shoes.color
+        return pair.second.snapshot().size == shoes.size &&
+        pair.second.snapshot().model == shoes.model &&
+        pair.second.snapshot().color == shoes.color;
     });
 
     if (it != table.end())

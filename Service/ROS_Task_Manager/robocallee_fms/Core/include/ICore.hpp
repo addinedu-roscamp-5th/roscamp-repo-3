@@ -29,7 +29,7 @@ public:
 
     virtual bool DoneCallback(const std::string &requester, const int &customer_id) = 0;
 
-    virtual bool ArmDoneCallback(int id, std::string action, bool success) = 0;
+    virtual bool ArmDoneCallback(Commondefine::ArmRequest request) = 0;
 
     //--------------------------AMR STATE--------------------------
     virtual Commondefine::RobotState GetAmrState(int idx) = 0;
@@ -64,6 +64,8 @@ public:
     virtual bool getStorage(Commondefine::ContainerType Container , Commondefine::StorageRequest& Request) = 0;
 
     virtual int findEmptyStorage(Commondefine::ContainerType Container) = 0;
+
+    virtual void waitCriticalSection() = 0;
 };
 
 } // namespace core
