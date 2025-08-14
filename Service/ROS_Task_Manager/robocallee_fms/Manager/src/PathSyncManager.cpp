@@ -25,7 +25,7 @@ void PathSyncManager::ArriveAtSyncOnce(int robot_id)
     auto core = icore_.lock();
     if(core ==nullptr) return;
 
-    core->assignTask([this, robot_id]{ arrive_impl(robot_id); });
+    core->assignPath([this, robot_id]{ arrive_impl(robot_id); });
 #else
     arrive_impl(robot_id); 
 #endif
@@ -38,7 +38,7 @@ void PathSyncManager::ShrinkExpectedAsync(int new_expected)
     auto core = icore_.lock();
     if(core ==nullptr) return;
 
-    core->assignTask([this, new_expected]{ shrink_impl(new_expected); });
+    core->assignPath([this, new_expected]{ shrink_impl(new_expected); });
 #else
     shrink_impl(new_expected);
 #endif
@@ -72,7 +72,7 @@ void PathSyncManager::open_impl()
     if (trigger)
     {
         // ★ 반드시 락 밖에서 replan 호출 스케줄
-        core->assignTask([this] { replan_and_close_impl(); });
+        core->assignPath([this] { replan_and_close_impl(); });
     }
 }
 
@@ -101,7 +101,7 @@ void PathSyncManager::arrive_impl(int robot_id)
         auto core = icore_.lock();
         if(core ==nullptr) return;
 
-        core->assignTask([this]{ replan_and_close_impl(); });
+        core->assignPath([this]{ replan_and_close_impl(); });
     }
 }
 
@@ -148,7 +148,7 @@ void PathSyncManager::shrink_impl(int new_expected)
         auto core = icore_.lock();
         if(core ==nullptr) return;
 
-        core->assignTask([this]{ replan_and_close_impl(); });
+        core->assignPath([this]{ replan_and_close_impl(); });
     }
 }
 

@@ -9,6 +9,7 @@ StorageManager::StorageManager(Integrated::w_ptr<core::ICore> icore, Log::Logger
 {
     //가장 처음에는 true 로 되어 있어서 바로 점유해서 사용할수 있도록 한다.
     criticalSection_.store(true);
+    workOnlyOnce_.store(true);
 
     InitContainer();
 }
@@ -59,7 +60,7 @@ bool StorageManager::StorageRequest(Commondefine::StorageRequest storage)
         return false;
     }
 
-    core->assignTask(RobotArmStep::resolve_Request);
+    core->assignTask(RobotArm::RobotArmNum, RobotArmStep::resolve_Request);
     return true;
 }
 
@@ -93,39 +94,17 @@ bool StorageManager::resolveRequest()
     //바로 실제 수행해야 하는 작업이 된다.
     popRequest(req);
     core->setStorageRequest(req);
-    core->assignTask(RobotArmStep::check_work_only_once);
+    core->assignTask(req.robot_id, RobotArmStep::check_work_only_once);
 
     // 큐가 빌때 까지 일해야 하기 때문에... 여기 아니면 일다 하고 나면 불러도 된다.
     if(storageRequest_.empty()) 
     {
         //일단 넣어보고 부하가 그리 안걸린다면 빼도된다..
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        core->assignTask(RobotArmStep::resolve_Request);
+        core->assignTask(RobotArm::RobotArmNum, RobotArmStep::resolve_Request);
         
         return true;
     }
-}
-
-bool StorageManager::checkCriticalSection()
-{
-    auto core = icore_.lock();
-    if(core == nullptr)
-    {
-        log_->Log(ERROR,"core pointer is nullptr");
-        return false;
-    }
-
-    //pick up place 가 누군가 사용하고 있을때는 계속 계속 찾는다.
-    if(!criticalSection_.load())
-    {
-        //너무 빠른 속도로 폴링을 하게 되면, 변화가 없는데 무분별하게 thread queue에 쌓일 수 있기 때문에 약간의 sleep
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        
-        core->assignTask(RobotArmStep::check_critical_section);
-        return false;
-    }
-
-    setCriticalSection(false);
 
     return true;
 }
@@ -168,6 +147,8 @@ bool StorageManager::setStorage(Commondefine::ContainerType container, Commondef
     shoes.containerIndex = index;
 
     s.setStorage(shoes.shoes);
+
+    return true;
 }
 
 bool StorageManager::getStorage(Commondefine::ContainerType container, Commondefine::StorageRequest& shoes)
@@ -184,6 +165,8 @@ bool StorageManager::getStorage(Commondefine::ContainerType container, Commondef
     
     shoes.container = container;
     shoes.containerIndex = index;
+
+    return true;
 }
 
 int StorageManager::findEmptyStorage(Commondefine::ContainerType container)

@@ -157,10 +157,14 @@ void AmrAdapter::checkPathUpdate()
     if (core == nullptr) return;
 
     //항상 움직이기 전에 새로운 경로가 있는지 확인 하고 출발한다.
-    bool timeout = core->waitNewPath(10ms);
+    bool timeout = core->waitNewPath(100ms);
 
     //timeout 되면 다시 checkPathUpdate를 추가해서 해당 함수가 실행 되도록 한다.
-    if(!timeout) core->assignTask(robot_task_info_.robot_id, AmrStep::check_path_update);
+    if(!timeout)
+    {
+        core->assignTask(robot_task_info_.robot_id, AmrStep::check_path_update);
+        return;
+    }
 
     //lock 이 풀리면 진짜 움직이는 스텝으로 이동하게 된다.
     core->assignTask(robot_task_info_.robot_id, step_);
@@ -189,8 +193,12 @@ void AmrAdapter::MoveToStorage()
     if (core == nullptr) return;
 
     //픽업 위치에 다른 로봇이 있다면 대기 한다.
-    bool timeout = core->waitCriticalSection(10ms);
-    if(!timeout) core->assignTask(robot_task_info_.robot_id, AmrStep::MoveTo_Storage);
+    bool timeout = core->waitCriticalSection(100ms);
+    if(!timeout)
+    {
+        core->assignTask(robot_task_info_.robot_id, AmrStep::MoveTo_Storage);
+        return;
+    }
 
     //픽업 위치가 점유되어 있지 않다면 움직임 이동 시작
     MoveTo();
@@ -241,9 +249,12 @@ void AmrAdapter::MoveToDone()
     {
         //창고에 도착한 경우 로봇팔에게 픽업작업 요청을 하고, 상태를 실제 목적지로 변경하고 
     case Commondefine::AmrStep::MoveTo_Storage:
-        SendPickupRequest();
-        SetAmrStep(Commondefine::AmrStep::MoveTo_dst);
-        current_dst = Commondefine::convertPoseToPosition(robot_task_info_.dest);
+        SendPickupRequest();    
+        {
+            std::lock_guard lock(current_mtx_);
+            SetAmrStep(Commondefine::AmrStep::MoveTo_dst);
+            current_dst = Commondefine::convertPoseToPosition(robot_task_info_.dest);
+        }
         break;
         
         //
@@ -253,6 +264,8 @@ void AmrAdapter::MoveToDone()
             std::lock_guard lock(current_mtx_);
             SetAmrState(Commondefine::RobotState::IDLE);
             SetAmrStep(Commondefine::AmrStep::AmrStep_num);
+
+            //로봇이 완료 됬기 때문에 일이 있는지 확인하는 역할을 한다.
             core->assignBestRobotSelector();
         }    
         break;    
@@ -268,6 +281,6 @@ void AmrAdapter::SendPickupRequest()
     auto core = Icore_.lock();
     if(core == nullptr) return;
 
-    core->assignTask(Commondefine::RobotArmStep::buffer_to_Amr);
+    core->assignTask(RobotArm::RobotArm2, Commondefine::RobotArmStep::buffer_to_Amr);
     return;
 }

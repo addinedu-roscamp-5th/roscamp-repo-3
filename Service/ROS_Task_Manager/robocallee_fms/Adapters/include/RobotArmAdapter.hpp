@@ -17,7 +17,7 @@ namespace Adapter
         Commondefine::StorageRequest              request_;
         std::mutex                                request_mtx_;
 
-        std::atomic<Commondefine::RobotArmStep>     step_;
+        std::atomic<Commondefine::RobotArmStep>    step_;
     public:
         using u_ptr = Integrated::u_ptr<RobotArmAdapter>;
 

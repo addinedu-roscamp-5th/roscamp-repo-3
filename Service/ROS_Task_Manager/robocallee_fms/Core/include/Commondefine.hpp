@@ -21,7 +21,7 @@ namespace Commondefine
 
     enum AmrStep {check_path_update = 0, MoveTo_Storage, MoveTo_dst, MoveTo_charging_station, AmrStep_num};
 
-    enum RobotArmStep {check_critical_section = 0, check_work_only_once, resolve_Request , shelf_to_buffer, buffer_to_Amr, Amr_to_buffer, buffer_to_shelf, RobotArmStep_num };
+    enum RobotArmStep {check_work_only_once = 0,  resolve_Request , shelf_to_buffer, buffer_to_Amr, Amr_to_buffer, buffer_to_shelf, RobotArmStep_num };
 
     enum RobotState {IDLE = 0, BUSY, RETURN, STOP , INVALID};
 
@@ -77,6 +77,7 @@ namespace Commondefine
         ContainerType container;
         int containerIndex;
         int robot_id;
+        int amr_id;
         RobotArmStep command;
     }StorageRequest;
 

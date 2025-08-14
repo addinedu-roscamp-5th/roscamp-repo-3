@@ -111,7 +111,7 @@ void RosInterface::arm1_send_request(int shelf_num, int robot_id , std::string a
     log_->Log(Log::INFO, "arm1_send_request 진입. action: " + action);
 
     auto request = std::make_shared<ArmServiceType::Request>();
-    request->robot_id = robot_id;
+    request->amr_id = robot_id;
     request->action = action;
     request->shelf_num = shelf_num;
 

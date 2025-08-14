@@ -59,9 +59,9 @@ namespace core
 
         bool assignTask(int idx, Commondefine::AmrStep step) override;
 
-        bool assignTask(Commondefine::RobotArmStep step) override;
+        bool assignTask(int idx, Commondefine::RobotArmStep step) override;
 
-        bool assignTask(Integrated::Task task) override;
+        bool assignPath(Integrated::Task task) override;
 
         void assignWork(int amr, Commondefine::GUIRequest r) override;
 
@@ -111,6 +111,8 @@ namespace core
         bool setStorageRequest(Commondefine::StorageRequest& Request) override;
 
         void assignBestRobotSelector() override;
+
+        bool waitWorkOnlyOnce(std::chrono::milliseconds ms);
         
         //----------------Storage--------------------------
         

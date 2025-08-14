@@ -13,9 +13,9 @@ public:
 
     virtual bool assignTask(int idx, Commondefine::AmrStep step) = 0;
 
-    virtual bool assignTask(Commondefine::RobotArmStep step) = 0;
+    virtual bool assignTask(int idx, Commondefine::RobotArmStep step) = 0;
 
-    virtual bool assignTask(Integrated::Task task) = 0;
+    virtual bool assignPath(Integrated::Task task) = 0;
 
     // 팔 서비스 호출
     virtual bool ArmRequestMakeCall(Commondefine::RobotArm arm, int shelf_num, int robot_id, std::string action) = 0;
@@ -59,6 +59,8 @@ public:
     virtual bool GetRequestNewPath() = 0;
 
     virtual void assignBestRobotSelector() = 0;
+
+    virtual bool waitWorkOnlyOnce(std::chrono::milliseconds ms) = 0;
 
     //--------------------------StorageManager--------------------------
     virtual bool setStorageRequest(Commondefine::StorageRequest& Request) = 0;
