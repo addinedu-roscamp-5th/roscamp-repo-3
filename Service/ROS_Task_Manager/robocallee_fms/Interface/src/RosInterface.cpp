@@ -126,7 +126,7 @@ void RosInterface::arm2_send_request(int robot_id , std::string action )
     log_->Log(Log::INFO, "arm2_send_request 진입. action: " + action);
 
     auto request = std::make_shared<ArmServiceType::Request>();
-    request->robot_id = robot_id;
+    request->amr_id = robot_id;
     request->action = action;
     request->shelf_num = -1;
     
@@ -263,16 +263,17 @@ void RosInterface::cbarucoPoseArray(const ArucoPoseArray::ConstSharedPtr & msg)
   {
     std::lock_guard<std::mutex> lock(pose_mutex_);
     
-    std::vector<Commondefine::pose2f> pos;
+    std::vector<Commondefine::pose2f> pos(msg->poses.size());
 
     for (const auto & ap : msg->poses)
     {
       int idx = ap.id -1;
+      if (idx < 0 || idx > static_cast<int>(pos.size())) return;
 
       Commondefine::pose2f p;
       p.x = static_cast<float>(ap.x);
       p.y = static_cast<float>(ap.y);
-      pos.push_back(p);
+      pos[idx] = p;
 
       nav_msgs::msg::Odometry odom;
       odom.header = msg->header;
@@ -288,7 +289,7 @@ void RosInterface::cbarucoPoseArray(const ArucoPoseArray::ConstSharedPtr & msg)
 
       odom.twist.twist = geometry_msgs::msg::Twist();
 
-      if (idx < 0 && idx > static_cast<int>(odom_pubs_.size())) return;
+      if (idx < 0 || idx > static_cast<int>(odom_pubs_.size())) return;
      
       odom_pubs_[idx]->publish(odom);
     }

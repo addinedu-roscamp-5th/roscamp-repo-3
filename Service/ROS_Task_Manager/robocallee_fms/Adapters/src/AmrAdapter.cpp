@@ -12,7 +12,7 @@ AmrAdapter::AmrAdapter(Integrated::w_ptr<core::ICore> Icore, Logger::s_ptr log, 
 
     robot_task_info_.robot_id = id;
     
-    current_wp_idx_.store(0);
+    current_wp_idx_ = (0);
 }
 
 AmrAdapter::~AmrAdapter()
@@ -22,6 +22,11 @@ AmrAdapter::~AmrAdapter()
 
 
 Commondefine::RobotTaskInfo& AmrAdapter::GetTaskInfo()
+{
+    return robot_task_info_;
+}
+
+const Commondefine::RobotTaskInfo& AmrAdapter::GetTaskInfo() const
 {
     return robot_task_info_;
 }
@@ -61,11 +66,11 @@ void AmrAdapter::WaitUntilWaypointOccupied()
     //할당된 waypoint가 없으면 바로 return 해서 데드락 문제 해결
     if(waypoints_.empty()) return;
 
-    if (!isOccupyWaypoint_.load())
+    if (!isOccupyWaypoint_)
     {
         occupy_cv_.wait(lock, [&]()
         {
-            return isOccupyWaypoint_.load();
+            return isOccupyWaypoint_;
         });
     }
 }
@@ -84,14 +89,14 @@ bool AmrAdapter::handleWaypointArrival(const Commondefine::pose2f& pos)
     if (dist <= _ARRIVAL_TOLERANCE_)
     {
         log_->Log(Log::LogLevel::INFO, "핑키 "+ std::to_string(robot_task_info_.robot_id) + "가 waypoint "
-        + std::to_string(current_wp_idx_.load()) + "에 도달했습니다.");
+        + std::to_string(current_wp_idx_) + "에 도달했습니다.");
 
-        setOccupyWayPoint(true);
+        //setOccupyWayPoint(true);
 
         //목적지에 도착했는지 판단 유무와 다음 웨이포인트 보냄.
         sendNextpoint();
 
-        setOccupyWayPoint(false);
+        //setOccupyWayPoint(false);
     }
 }
 
@@ -104,6 +109,8 @@ void AmrAdapter::updatePath(const std::vector<Commondefine::Position>& new_path)
         
         waypoints_ = new_path;
     }
+
+    if(waypoints_.empty()) return;
 
     //여기에서 웨이포인트 간 yaw 값을 계산한다.
     const int nextiter = 1;
@@ -120,14 +127,19 @@ void AmrAdapter::updatePath(const std::vector<Commondefine::Position>& new_path)
 
 void AmrAdapter::setOccupyWayPoint(bool occupy)
 {
-    isOccupyWaypoint_.store(occupy);
-
+    {
+        std::lock_guard lock(occupy_mtx_);
+        isOccupyWaypoint_ = occupy;
+    }
+    
     if(occupy) occupy_cv_.notify_one();
+
+    return;
 }
 
 const bool AmrAdapter::isGoal()
 {
-    if(current_wp_idx_.load() == waypoints_.size())
+    if(current_wp_idx_ == waypoints_.size())
     {
         {
             std::lock_guard<std::mutex> lock(waypoint_mtx_);
@@ -147,7 +159,7 @@ Commondefine::Position AmrAdapter::GetDestPoseToWp()
 
 void AmrAdapter::ResetWaypoint()
 {
-    current_wp_idx_.store(0);
+    current_wp_idx_ = (0);
     waypoints_.clear(); 
 }
 
@@ -283,4 +295,16 @@ void AmrAdapter::SendPickupRequest()
 
     core->assignTask(RobotArm::RobotArm2, Commondefine::RobotArmStep::buffer_to_Amr);
     return;
+}
+
+void AmrAdapter::SetBattery(float battery)
+{
+    std::lock_guard<std::mutex> lock(Task_mtx_);
+    robot_task_info_.battery = battery;
+}
+
+float AmrAdapter::GetBattery() const
+{
+    std::lock_guard<std::mutex> lock(Task_mtx_);
+    return robot_task_info_.battery;
 }

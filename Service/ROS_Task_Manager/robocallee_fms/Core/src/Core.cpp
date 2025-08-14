@@ -286,7 +286,7 @@ bool Core::DoneCallback(const std::string& requester, const int& customer_id)
             {
                 //로봇의 상태를 RETURN 으로 처리하고 충전 위치로 보낸다.
                 amr_adapters_[i]->SetAmrState(RobotState::RETURN);
-                amr_adapters_[i]->SetCurrentDst(Commondefine::wpChargingStation[i])
+                amr_adapters_[i]->SetCurrentDst(Commondefine::wpChargingStation[i]);
                 amr_adapters_[i]->SetAmrStep(Commondefine::AmrStep::MoveTo_charging_station);
 
                 assignTask(i,Commondefine::AmrStep::MoveTo_charging_station);
@@ -325,30 +325,33 @@ void Core::PlanPaths()
 {
     vector<Commondefine::Position> starts;
     vector<Commondefine::Position> goals;
+    std::vector<size_t> active_indices;
+    active_indices.reserve(amr_adapters_.size());
 
-    for(const auto& amr : amr_adapters_)
+    for(size_t i = 0 ; i < amr_adapters_.size(); ++i)
     {
+        auto& amr = amr_adapters_[i];
+
         if(amr->GetAmrState() == RobotState::IDLE) continue;
         
         starts.push_back(amr->GetCurrentPoseToWp());
         goals.push_back(amr->GetCurrentDst());
+
+        active_indices.push_back(i);
     }
 
     auto paths = traffic_Planner_->planPaths(starts, goals);
 
-    size_t size = amr_adapters_.size();
-
-    if(paths.empty())
+    if(paths.empty() || paths.size() != active_indices.size())
     {
-        log_->Log(ERROR,"paths is empty");
+        log_->Log(ERROR,"path is empty");
         return;
     }
-    
-    for(size_t i = 0 ; i < size; ++i)
-    {
-        if(amr_adapters_[i]->GetAmrState() == RobotState::IDLE) continue;
 
-        amr_adapters_[i]->updatePath(paths[i]);
+    for(size_t i = 0 ; i < paths.size(); ++i)
+    {
+        size_t idx = active_indices[i];
+        amr_adapters_[idx]->updatePath(paths[i]);
     }
 
     SetRequestNewPath(false);
@@ -473,9 +476,15 @@ int Core::CurrentActiveRobotCount()
     return count;
 }
 
+//#define _USE_ASSIGN_
 void Core::ReplanAndBroadcast()
 {
+#ifdef _USE_ASSIGN_
     assignPlanPaths();
+#else
+    PlanPaths();
+#endif
+   
 }
 
 bool Core::IsSyncOpen()

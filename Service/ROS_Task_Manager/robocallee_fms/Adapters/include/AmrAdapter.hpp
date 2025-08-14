@@ -20,12 +20,13 @@ namespace Adapter
         Integrated::w_ptr<core::ICore>        Icore_;
         Logger::s_ptr                         log_;
         Commondefine::RobotTaskInfo           robot_task_info_;
-        std::mutex                            Task_mtx_;
+        // std::mutex                            Task_mtx_;
+        mutable std::mutex                    Task_mtx_;
 
         // Planner → Adapter 로 받은 웨이포인트
         std::mutex                            waypoint_mtx_;
         std::vector<Commondefine::Position>   waypoints_;
-        std::atomic<int>                      current_wp_idx_;
+        int                                   current_wp_idx_;
 
         std::mutex                            current_mtx_;
         Commondefine::Position                current_waypoint_;
@@ -33,7 +34,7 @@ namespace Adapter
         Commondefine::Position                current_dst;
 
         // Waypoint 점유 플래그
-        std::atomic<bool>                     isOccupyWaypoint_;
+        bool                                  isOccupyWaypoint_;
         std::mutex                            occupy_mtx_;
         std::condition_variable               occupy_cv_;
 
@@ -50,6 +51,8 @@ namespace Adapter
         void SetTaskInfo(const Commondefine::GUIRequest& request);
         Commondefine::RobotTaskInfo& GetTaskInfo();
 
+        const Commondefine::RobotTaskInfo& GetTaskInfo() const;
+
         // step
         void SetAmrStep(const Commondefine::AmrStep step){step_.store(step);}
         const Commondefine::AmrStep GetAmrStep(){return step_.load();}
@@ -57,6 +60,11 @@ namespace Adapter
         // AMR
         void SetAmrState(const Commondefine::RobotState state);
         const Commondefine::RobotState GetAmrState(){return state_.load();}
+
+        void SetBattery(float battery);
+    
+        float GetBattery() const;
+    
 
         // Waypoint 로직
         bool handleWaypointArrival(const Commondefine::pose2f& pos);
@@ -76,7 +84,9 @@ namespace Adapter
         
         Commondefine::Position getCurrentWayPoint() 
         { 
-            if(waypoints_.empty() || current_wp_idx_.load() > waypoints_.size())
+            std::lock_guard lock(current_mtx_);
+
+            if(waypoints_.empty() || current_wp_idx_ > waypoints_.size())
             {
                 Commondefine::Position p = {-1,-1,-1};
                 return p;
@@ -88,7 +98,11 @@ namespace Adapter
 
         const bool isGoal();
         
-        void incrementWaypointIndex() { ++current_wp_idx_; }
+        void incrementWaypointIndex() 
+        {
+            std::lock_guard lock(current_mtx_);
+            ++current_wp_idx_;
+        }
 
         void SetCurrentPose(Commondefine::pose2f p)
         {

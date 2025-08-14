@@ -13,7 +13,7 @@ namespace Commondefine
 
     #define _ARRIVAL_TOLERANCE_ 0.05f
 
-    #define _MAP_RESOLUTION_ 0.01f
+    #define _MAP_RESOLUTION_ 0.1f
 
     #define _ARM_BUFFER_ 4
 
@@ -202,8 +202,8 @@ namespace Commondefine
     static pose2f convertPositionToPose(Position p)
     {
         pose2f pose;
-        pose.x = static_cast<float>((p.y - 1) * _MAP_RESOLUTION_ + _MAP_RESOLUTION_ / 2.0);
-        pose.y = static_cast<float>((p.x - 1) * _MAP_RESOLUTION_ + _MAP_RESOLUTION_ / 2.0);
+        pose.x = static_cast<float>((p.x - 1) * _MAP_RESOLUTION_ + _MAP_RESOLUTION_ / 2.0);
+        pose.y = static_cast<float>((p.y - 1) * _MAP_RESOLUTION_ + _MAP_RESOLUTION_ / 2.0);
 
         return pose;
     }
@@ -211,8 +211,8 @@ namespace Commondefine
     static Position convertPoseToPosition(pose2f pose)
     {
         Position p;
-        p.y = static_cast<int>((pose.x - _MAP_RESOLUTION_ / 2.0) / _MAP_RESOLUTION_ + 1);
-        p.x = static_cast<int>((pose.y - _MAP_RESOLUTION_ / 2.0) / _MAP_RESOLUTION_ + 1);
+        p.x = static_cast<int>((pose.x - _MAP_RESOLUTION_ / 2.0) / _MAP_RESOLUTION_ + 1);
+        p.y = static_cast<int>((pose.y - _MAP_RESOLUTION_ / 2.0) / _MAP_RESOLUTION_ + 1);
 
         return p;
     }
