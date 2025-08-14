@@ -27,8 +27,10 @@ namespace Adapter
         std::vector<Commondefine::Position>   waypoints_;
         std::atomic<int>                      current_wp_idx_;
 
-        std::atomic<Commondefine::Position>   current_waypoint_;
-        std::atomic<Commondefine::pose2f>     current_pose_;
+        std::mutex                            current_mtx_;
+        Commondefine::Position                current_waypoint_;
+        Commondefine::pose2f                  current_pose_;
+        Commondefine::Position                current_dst;
 
         // Waypoint 점유 플래그
         std::atomic<bool>                     isOccupyWaypoint_;
@@ -36,7 +38,6 @@ namespace Adapter
         std::condition_variable               occupy_cv_;
 
         std::atomic<Commondefine::AmrStep>    step_;
-
         std::atomic<Commondefine::RobotState> state_;
 
     public:
@@ -89,12 +90,29 @@ namespace Adapter
         
         void incrementWaypointIndex() { ++current_wp_idx_; }
 
-        void SetCurrentPose(Commondefine::pose2f p){current_pose_.store(p);}
-        Commondefine::pose2f GetCurrentPose(){return current_pose_.load();}
-        Commondefine::Position GetCurrentPoseToWp(){return Commondefine::convertPoseToPosition(current_pose_.load());}
+        void SetCurrentPose(Commondefine::pose2f p)
+        {
+            std::lock_guard lock(current_mtx_);
+            current_pose_ = p;
+        }
+        Commondefine::pose2f GetCurrentPose(){return current_pose_;}
+        Commondefine::Position GetCurrentPoseToWp()
+        {
+            std::lock_guard lock(current_mtx_);
+            return Commondefine::convertPoseToPosition(current_pose_);
+        }
 
         Commondefine::Position GetDestPoseToWp();
         Commondefine::pose2f GetDestPose(){return robot_task_info_.dest;}
+
+        void SetCurrentDst(Commondefine::Position p)
+        {
+            std::lock_guard lock(current_mtx_);
+            current_dst = p;
+        }
+        Commondefine::Position GetCurrentDst(){return current_dst;}
+
+        void checkPathUpdate();
 
         void MoveTo();
 

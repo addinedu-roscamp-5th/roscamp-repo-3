@@ -13,7 +13,7 @@
 #include "RobotArmAdapter.hpp"
 #include "RequestManager.hpp"
 #include "StorageManager.hpp"
-#include "OccupancyGrid.hpp"
+#include "PathSyncManager.hpp"
 #include "TrafficPlanner.hpp"
 
 namespace core
@@ -26,6 +26,8 @@ namespace core
         
         Manager::RequestManager::u_ptr                                  pRequestManager_;
         Manager::StorageManager::u_ptr                                  pStorageManager_;
+        Manager::PathSyncManager::u_ptr                                 pPathSyncManager_;
+        
         
         interface::RosInterface::w_ptr                                  Interface_;
 
@@ -38,8 +40,7 @@ namespace core
         
         Integrated::vec<Integrated::u_ptr<Adapter::AmrAdapter>>         amr_adapters_;
         Integrated::u_ptr<traffic::TrafficPlanner>                      traffic_Planner_;
-        Integrated::u_ptr<OG::OccupancyGrid>                            occupancyGrid_;
-        std::atomic<bool>                                               assignNewAmr_;
+        std::atomic<bool>                                               requestNewPath_;
 
         std::mutex                                                      battery_mtx_;
 
@@ -51,15 +52,21 @@ namespace core
         Core(Logger::s_ptr log , interface::RosInterface::w_ptr Interface_);
         ~Core();
 
+        bool Initialize();
+
         template<typename F, typename... Args>
         auto assignTask(F&& f, Args&&... args)-> std::future<typename std::invoke_result<F, Args...>::type>;
-
-        bool Initialize();
 
         bool assignTask(int idx, Commondefine::AmrStep step) override;
 
         bool assignTask(Commondefine::RobotArmStep step) override;
-        
+
+        bool assignTask(Integrated::Task task) override;
+
+        void assignWork(int amr, Commondefine::GUIRequest r) override;
+
+        //----------------Call Back function
+
         bool ArmRequestMakeCall(Commondefine::RobotArm arm, int shelf_num, int robot_id, std::string action) override ;
 
         int RequestCallback(const Commondefine::GUIRequest& request) override;
@@ -69,6 +76,8 @@ namespace core
         bool PoseCallback(const std::vector<Commondefine::pose2f> &pos) override;
 
         bool ArmDoneCallback(Commondefine::ArmRequest request) override;
+
+        //----------------Call Back function
 
         bool publishNavGoal(int idx, const Commondefine::Position wp) override;
 
@@ -84,18 +93,27 @@ namespace core
 
         void SetTaskInfo(int idx, const Commondefine::GUIRequest& request) override;
 
-        void PlanPaths() override;
+        void PlanPaths();
 
-        void waitNewPath() override;
+        void assignPlanPaths() override;
 
-        void SetAssignNewAmr(bool assign) override { assignNewAmr_.store(assign); }
+        bool waitNewPath(std::chrono::milliseconds ms) override;
 
-        bool GetAssignNewAmr() override { return assignNewAmr_.load(); }
+        void SetRequestNewPath(bool Request) override
+        { 
+            requestNewPath_.store(Request);
 
-        void assignWork(int amr, Commondefine::GUIRequest r) override;
+            if(!Request) path_cv_.notify_all();
+        }
+        
+        bool GetRequestNewPath() override{ return requestNewPath_.load(); }
 
         bool setStorageRequest(Commondefine::StorageRequest& Request) override;
 
+        void assignBestRobotSelector() override;
+        
+        //----------------Storage--------------------------
+        
         bool findStorage(Commondefine::ContainerType Container , Commondefine::StorageRequest& Request) override;
 
         bool setStorage(Commondefine::ContainerType Container , Commondefine::StorageRequest Request) override;
@@ -104,7 +122,19 @@ namespace core
 
         int findEmptyStorage(Commondefine::ContainerType Container) override;
 
-        void waitCriticalSection() override;
+        bool waitCriticalSection(std::chrono::milliseconds ms) override;
+
+        //--------------------------PathSyncManager--------------------------
+
+        int CurrentActiveRobotCount() override;
+
+        void ReplanAndBroadcast() override;
+
+        bool IsSyncOpen() override;
+        
+        void ArriveAtSyncOnce(int robot_id) override;
+
+        void OpenSyncWindow() override;
     };
 
     // Template implementation

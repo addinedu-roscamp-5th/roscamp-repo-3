@@ -11,10 +11,6 @@ namespace Commondefine
 
     #define _AMR_NUM_ 3
 
-    #define _YAML_PATH_ "Map"
-
-    #define _YAML_FILE_ "test_map.yaml"
-
     #define _ARRIVAL_TOLERANCE_ 0.05f
 
     #define _MAP_RESOLUTION_ 0.01f
@@ -23,18 +19,15 @@ namespace Commondefine
 
     #define _ARM_SHELF_ 9
 
-    enum AmrStep {MoveTo_Storage = 0, MoveTo_dst, MoveTo_charging_station, AmrStep_num};
+    enum AmrStep {check_path_update = 0, MoveTo_Storage, MoveTo_dst, MoveTo_charging_station, AmrStep_num};
 
-    // enum RobotArmStep {RobotArmStep_num = 0};
-    enum RobotArmStep {check_critical_section = 0, resolve_Request , shelf_to_buffer, buffer_to_Amr, Amr_to_buffer, buffer_to_shelf, RobotArmStep_num };
+    enum RobotArmStep {check_critical_section = 0, check_work_only_once, resolve_Request , shelf_to_buffer, buffer_to_Amr, Amr_to_buffer, buffer_to_shelf, RobotArmStep_num };
 
     enum RobotState {IDLE = 0, BUSY, RETURN, STOP , INVALID};
 
     enum RobotArm { RobotArm1 = 0 ,RobotArm2 , RobotArmNum};
 
     enum ContainerType { Buffer, Shelf };
-
-    // enum Requester {CUSTOMER = 0, EMPLOYEE};
 
     typedef struct pose2f
     {
@@ -239,6 +232,10 @@ namespace Commondefine
         {1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1},
         {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
     };
+
+    static Position wpStorage = {4, 1, 0};
+
+    static std::vector<Position> wpChargingStation{ {8,8,0},{8,6,0},{8,4,0}};
 };
 
 

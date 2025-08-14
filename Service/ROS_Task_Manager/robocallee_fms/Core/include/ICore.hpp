@@ -15,6 +15,8 @@ public:
 
     virtual bool assignTask(Commondefine::RobotArmStep step) = 0;
 
+    virtual bool assignTask(Integrated::Task task) = 0;
+
     // 팔 서비스 호출
     virtual bool ArmRequestMakeCall(Commondefine::RobotArm arm, int shelf_num, int robot_id, std::string action) = 0;
 
@@ -45,16 +47,18 @@ public:
     // 작업 정보 저장
     virtual void SetTaskInfo(int idx, const Commondefine::GUIRequest &request) = 0;
 
-    virtual void waitNewPath() = 0;
+    virtual bool waitNewPath(std::chrono::milliseconds ms) = 0;
 
-    virtual void PlanPaths() = 0;
+    virtual void assignPlanPaths() = 0;
 
     //Request 에서 일을 할당 할때 호출
     virtual void assignWork(int amr, Commondefine::GUIRequest r) = 0;
 
-    virtual void SetAssignNewAmr(bool assign) = 0;
+    virtual void SetRequestNewPath(bool Request) = 0;
 
-    virtual bool GetAssignNewAmr() = 0;
+    virtual bool GetRequestNewPath() = 0;
+
+    virtual void assignBestRobotSelector() = 0;
 
     //--------------------------StorageManager--------------------------
     virtual bool setStorageRequest(Commondefine::StorageRequest& Request) = 0;
@@ -67,7 +71,20 @@ public:
 
     virtual int findEmptyStorage(Commondefine::ContainerType Container) = 0;
 
-    virtual void waitCriticalSection() = 0;
+    virtual bool waitCriticalSection(std::chrono::milliseconds ms) = 0;
+
+    //--------------------------PathSyncManager--------------------------
+
+    virtual int CurrentActiveRobotCount() = 0;
+
+    virtual void ReplanAndBroadcast() = 0;
+
+    virtual bool IsSyncOpen() = 0;
+
+    virtual void ArriveAtSyncOnce(int robot_id) = 0;
+
+    virtual void OpenSyncWindow() = 0;
+
 };
 
 } // namespace core

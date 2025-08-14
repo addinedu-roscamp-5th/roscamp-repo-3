@@ -9,7 +9,8 @@ using namespace Adapter;
 using namespace std;
 using namespace Manager;
 using namespace traffic;
-using namespace OG;
+
+using namespace std::chrono_literals;
 
 Core::Core(Logger::s_ptr log, interface::RosInterface::w_ptr Interface)
     : log_(log), Interface_(Interface)
@@ -30,6 +31,7 @@ bool Core::Initialize()
     pdispatcher_ = make_uptr<Dispatcher>(_MAX_EXECUTOR_NUM_, log_);
     pStorageManager_ = make_uptr<StorageManager>(self, log_);
     pRequestManager_ = make_uptr<RequestManager>(self, log_);
+    pPathSyncManager_ = make_uptr<PathSyncManager>(self, _AMR_NUM_, log_);
 
     for (int i = 0; i < RobotArm::RobotArmNum; ++i)
     {
@@ -117,6 +119,44 @@ bool Core::assignTask(Commondefine::RobotArmStep step)
     return true;
 }
 
+bool Core::assignTask(Integrated::Task task)
+{
+    assignTask(task);
+}
+
+void Core::assignWork(int amr, Commondefine::GUIRequest r)
+{
+    if(amr_adapters_.size() < amr) return;
+
+    //2. 로봇에게 요청 들어온 정보를 할당한다.
+    amr_adapters_[amr]->SetTaskInfo(r);
+
+    //3. 창고로 실제 목적지 및 현재 스텝 설정
+    amr_adapters_[amr]->SetCurrentDst(Commondefine::wpStorage);
+    amr_adapters_[amr]->SetAmrStep(AmrStep::MoveTo_Storage);
+    
+    //4. 새로운 경로를 생성하기 위해 윈도우 오픈
+    pPathSyncManager_->OpenSyncWindow();
+
+    //1. 로봇에게 일을 할당 하기 때문에 BUSY 상태가 된다.
+    amr_adapters_[amr]->SetAmrState(Commondefine::RobotState::BUSY);
+
+    //5. 로봇팔에 명령 추가
+    StorageRequest req;
+    req.robot_id = amr;
+    req.shoes = r.shoes_property;
+    req.command = RobotArmStep::shelf_to_buffer;
+    pStorageManager_->StorageRequest(req);
+
+    //6. 창고의 픽업 위치가 비어 있는지 체크
+    assignTask(RobotArmStep::check_critical_section);
+
+    //7. AMR의 창고 이동 명령
+    assignTask(amr, AmrStep::check_path_update);
+    
+    return;
+}
+
 bool Core::ArmRequestMakeCall(Commondefine::RobotArm arm, int shelf_num, int robot_id, std::string action)
 {
     auto iface = Interface_.lock();
@@ -176,7 +216,10 @@ bool Core::ArmDoneCallback(ArmRequest request)
 
     if(!request.success) return false;
     RobotArm_Adapters_[request.robot_id]->setState(RobotState::IDLE);
+    pStorageManager_->SetWorkOnlyOnce(true);
 
+    if(request.robot_id == RobotArm::RobotArm1) pStorageManager_->setCriticalSection(true);
+    
     if(request.action == "buffer_to_shelf")
     {
         Commondefine::StorageRequest storage;
@@ -219,11 +262,13 @@ bool Core::DoneCallback(const std::string& requester, const int& customer_id)
         {
             if (GetAmrCustID(i) == customer_id)
             {
-                amr_adapters_[i]->SetAmrState(RobotState::IDLE);
-                log_->Log(Log::LogLevel::INFO, string("핑키가 고객ID: ") + to_string(customer_id) + "에게 배달 완료");
+                //로봇의 상태를 RETURN 으로 처리하고 충전 위치로 보낸다.
+                amr_adapters_[i]->SetAmrState(RobotState::RETURN);
+                amr_adapters_[i]->SetAmrStep(Commondefine::AmrStep::MoveTo_charging_station);
 
-                pRequestManager_->BestRobotSelector();
-                
+                assignTask(i,Commondefine::AmrStep::MoveTo_charging_station);
+
+                log_->Log(Log::LogLevel::INFO, string("핑키가 고객ID: ") + to_string(customer_id) + "에게 배달 완료");                
                 log_->Log(Log::LogLevel::INFO, "DoneCallback true");
         
                 return true;
@@ -236,8 +281,7 @@ bool Core::DoneCallback(const std::string& requester, const int& customer_id)
     }
     else if (requester == "employee")
     {
-        // 관리자가 수거함에서 누르기 때문에 수거함 -> 창고
-        // SetAmrNextStep(best_amr, Commondefine::AmrStep::MoveTo_dest2);
+        //만들어야 함 ^^
         return true;
     }
     
@@ -246,7 +290,7 @@ bool Core::DoneCallback(const std::string& requester, const int& customer_id)
        
 bool Core::publishNavGoal(int idx, const Commondefine::Position wp)
 {
-    auto iface = Interface_.lock();
+    auto iface =  Interface_.lock();
     if (!iface) return false;
 
     iface->publishNavGoal(idx, wp);
@@ -263,10 +307,8 @@ void Core::PlanPaths()
     {
         if(amr->GetAmrState() == RobotState::IDLE) continue;
         
-        amr->WaitUntilWaypointOccupied();
-        
         starts.push_back(amr->GetCurrentPoseToWp());
-        goals.push_back(amr->GetDestPoseToWp());
+        goals.push_back(amr->GetCurrentDst());
     }
 
     auto paths = traffic_Planner_->planPaths(starts, goals);
@@ -280,19 +322,21 @@ void Core::PlanPaths()
         amr_adapters_[i]->updatePath(paths[i]);
     }
 
-    assignNewAmr_ = false;
-    path_cv_.notify_all();
+    SetRequestNewPath(false);
 }
 
-void Core::waitNewPath()
+void Core::assignPlanPaths()
 {
-    if(!assignNewAmr_) return;
+    assignTask(std::bind(&core::Core::PlanPaths,this));
+}
+
+bool Core::waitNewPath(std::chrono::milliseconds ms)
+{
+    if(!IsSyncOpen()) return true;
 
     std::unique_lock lock(path_mtx_);
-    path_cv_.wait(lock,[&]()
-    {
-        return !assignNewAmr_;
-    });
+
+    return path_cv_.wait_for(lock, ms,[&](){ return !requestNewPath_; });
 }
 
 Commondefine::RobotState Core::GetAmrState(int idx)
@@ -327,11 +371,6 @@ int Core::GetAmrCustID(int idx)
     return amr_adapters_[idx]->GetTaskInfo().customer_id;
 }
 
-int Core::GetAmrVecSize()
-{
-    return amr_adapters_.size();
-}
-
 void Core::SetTaskInfo(int idx, const Commondefine::GUIRequest& request)
 {
     if (idx < 0 || idx >= amr_adapters_.size()) return;
@@ -339,36 +378,9 @@ void Core::SetTaskInfo(int idx, const Commondefine::GUIRequest& request)
     amr_adapters_[idx]->SetTaskInfo(request);
 }
 
-void Core::assignWork(int amr, Commondefine::GUIRequest r)
+int Core::GetAmrVecSize()
 {
-    if(amr_adapters_.size() < amr) return;
-
-    //1. 로봇에게 일을 할당 하기 때문에 BUSY 상태가 된다.
-    amr_adapters_[amr]->SetAmrState(Commondefine::RobotState::BUSY);
-
-    //2. 로봇에게 요청 들어온 정보를 할당한다.
-    SetTaskInfo(amr, r);
-    
-    //3. 새로운 로봇이 추가됬다는 flag 추가
-    SetAssignNewAmr(true);
-
-    //4. 로봇팔에 명령 추가
-    StorageRequest req;
-    req.robot_id = amr;
-    req.shoes = r.shoes_property;
-    req.command = RobotArmStep::shelf_to_buffer;
-    pStorageManager_->StorageRequest(req);
-
-    //5. 로봇의 경로 생성
-    PlanPaths();
-
-    //6. 창고의 픽업 위치가 비어 있는지 체크
-    assignTask(RobotArmStep::check_critical_section);
-
-    //6. AMR의 창고 이동 명령
-    assignTask(amr, AmrStep::MoveTo_Storage);
-    
-    return;
+    return amr_adapters_.size();
 }
 
 bool Core::setStorageRequest(Commondefine::StorageRequest& Request)
@@ -378,6 +390,11 @@ bool Core::setStorageRequest(Commondefine::StorageRequest& Request)
     RobotArm_Adapters_[Request.robot_id]->setStorageRequest(Request);
 
     return true;
+}
+
+void Core::assignBestRobotSelector()
+{
+    assignTask(std::bind(&Manager::RequestManager::BestRobotSelector,pRequestManager_.get()));
 }
 
 bool Core::findStorage(Commondefine::ContainerType Container , Commondefine::StorageRequest& Request)
@@ -408,7 +425,38 @@ int Core::findEmptyStorage(Commondefine::ContainerType Container)
     return pStorageManager_->findEmptyStorage(Container);
 }
 
-void Core::waitCriticalSection()
+bool Core::waitCriticalSection(std::chrono::milliseconds ms)
 {
-    pStorageManager_->waitCriticalSection();
+    return pStorageManager_->waitCriticalSection(ms);
+}
+
+int Core::CurrentActiveRobotCount()
+{
+    int count = 0;
+    for(auto& p : amr_adapters_)
+    {
+        if(p->GetAmrState() == RobotState::BUSY) ++count;
+    }
+
+    return count;
+}
+
+void Core::ReplanAndBroadcast()
+{
+    assignPlanPaths();
+}
+
+bool Core::IsSyncOpen()
+{
+    return pPathSyncManager_->IsSyncOpen();
+}
+        
+void Core::ArriveAtSyncOnce(int robot_id)
+{
+    pPathSyncManager_->ArriveAtSyncOnce(robot_id);
+}
+
+void Core::OpenSyncWindow()
+{
+    pPathSyncManager_->OpenSyncWindow();
 }

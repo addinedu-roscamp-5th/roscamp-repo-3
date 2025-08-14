@@ -3,6 +3,7 @@
 using namespace Adapter;
 using namespace Commondefine;
 using namespace Integrated;
+using namespace std::chrono_literals;
 
 RobotArmAdapter::RobotArmAdapter(Integrated::w_ptr<core::ICore> Icore, int id ,Logger::s_ptr log)
     :Icore_(Icore),log_(log)
@@ -21,6 +22,7 @@ void RobotArmAdapter::setStorageRequest(Commondefine::StorageRequest request)
     {
         std::lock_guard lock(request_mtx_);
         request_ = request;
+        step_ = request.command;
 
         setState(RobotState::BUSY);
     }
@@ -83,6 +85,24 @@ void RobotArmAdapter::bufferToshelf()
     core->ArmRequestMakeCall(RobotArm::RobotArm1, shelf_num, request_.robot_id, "buffer_to_shelf");
 }
 
+void RobotArmAdapter::checkWorkOnlyOnce()
+{
+    auto core = Icore_.lock();
+    if(core == nullptr) 
+    {
+        log_->Log(Log::LogLevel::ERROR, "core pointer is nullptr");
+        return;
+    }
+
+    //항상 움직이기 전에 새로운 경로가 있는지 확인 하고 출발한다.
+    bool timeout = core->waitNewPath(10ms);
+
+    //timeout 되면 다시 checkPathUpdate를 추가해서 해당 함수가 실행 되도록 한다.
+    if(!timeout) core->assignTask(RobotArmStep::check_work_only_once);
+
+    //lock 이 풀리면 진짜 움직이는 스텝으로 이동하게 된다.
+    core->assignTask(step_);
+}
 
 
         

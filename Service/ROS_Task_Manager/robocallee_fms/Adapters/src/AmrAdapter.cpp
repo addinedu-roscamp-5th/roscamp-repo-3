@@ -3,6 +3,7 @@
 using namespace Adapter;
 using namespace Commondefine;
 using namespace Integrated;
+using namespace std::chrono_literals;
 
 AmrAdapter::AmrAdapter(Integrated::w_ptr<core::ICore> Icore, Logger::s_ptr log, const int id)
     :Icore_(Icore), log_(log), isOccupyWaypoint_(false)
@@ -71,9 +72,6 @@ void AmrAdapter::WaitUntilWaypointOccupied()
 
 bool AmrAdapter::handleWaypointArrival(const Commondefine::pose2f& pos)
 {
-    auto core = Icore_.lock();
-    if(core == nullptr) return false;
-
     Commondefine::Position p = getCurrentWayPoint();
     if(p.x == -1 || p.y ==-1) return false;
 
@@ -153,34 +151,54 @@ void AmrAdapter::ResetWaypoint()
     waypoints_.clear(); 
 }
 
-//첫번째 waypoint로 움직인다.
+void AmrAdapter::checkPathUpdate()
+{
+    auto core = Icore_.lock();
+    if (core == nullptr) return;
+
+    //항상 움직이기 전에 새로운 경로가 있는지 확인 하고 출발한다.
+    bool timeout = core->waitNewPath(10ms);
+
+    //timeout 되면 다시 checkPathUpdate를 추가해서 해당 함수가 실행 되도록 한다.
+    if(!timeout) core->assignTask(robot_task_info_.robot_id, AmrStep::check_path_update);
+
+    //lock 이 풀리면 진짜 움직이는 스텝으로 이동하게 된다.
+    core->assignTask(robot_task_info_.robot_id, step_);
+}
+
 void AmrAdapter::MoveTo()
 {
     auto core = Icore_.lock();
     if (core == nullptr) return;
 
-    if(waypoints_.empty()) return;
+    if(waypoints_.empty())
+    {
+        log_->Log(INFO,"Amr id :" + std::to_string(robot_task_info_.robot_id)+ " waypoints_ is empty");
+        return;
+    } 
 
     const int first = 0;
+
+    //항상 움직일때 첫번째 웨이포인트 하나만 보내주고 나머지는 handleWaypointArrival 에서 다음 웨이포인트를 보내준다.
     core->publishNavGoal(robot_task_info_.robot_id, waypoints_[first]);
 }
 
 void AmrAdapter::MoveToStorage()
 {
-    
     auto core = Icore_.lock();
     if (core == nullptr) return;
 
     //픽업 위치에 다른 로봇이 있다면 대기 한다.
-    core->waitCriticalSection();
+    bool timeout = core->waitCriticalSection(10ms);
+    if(!timeout) core->assignTask(robot_task_info_.robot_id, AmrStep::MoveTo_Storage);
 
-    //항상 움직일때 첫번째 웨이포인트 하나만 보내주고 나머지는 handleWaypointArrival 에서 다음 웨이포인트를 보내준다.
+    //픽업 위치가 점유되어 있지 않다면 움직임 이동 시작
     MoveTo();
 }
 
 void AmrAdapter::MoveToChargingStation()
 {
-
+    
 }
 
 
@@ -190,14 +208,21 @@ void AmrAdapter::sendNextpoint()
     auto core = Icore_.lock();
     if(core == nullptr) return;
 
-    if(isGoal())
+    //1. 목적지에 도착한 것인가를 확인한다.
+    if(isGoal())//목적지에 도착하면 경로들 모두 Reset 한다.
     {
         MoveToDone();
         return;
-    } 
+    }
 
-    core->waitNewPath();
+    //2. 새로운 로봇이 할당 되어 있는지 확인한다.
+    if(core->IsSyncOpen())
+    {
+        core->ArriveAtSyncOnce(robot_task_info_.robot_id);
+        return;
+    }
 
+    //3 목적지에 도착하지도 않고 새로운 로봇이 할당되어 있지도 않으면 다음 웨이포인트를 전달한다.
     incrementWaypointIndex();
 
     Commondefine::Position wp = getCurrentWayPoint();
@@ -208,22 +233,34 @@ void AmrAdapter::sendNextpoint()
 
 void AmrAdapter::MoveToDone()
 {
+    //여기는 각각 모든 스텝이 완료 되었을때를 의미하기 때문에 해당 스텝에서 다음 스텝을 부를때 준비 해야하는 코드들이 작성되어야 한다.
+    auto core = Icore_.lock();
+    if(core == nullptr) return;
+
     switch (step_.load())
     {
+        //창고에 도착한 경우 로봇팔에게 픽업작업 요청을 하고, 상태를 실제 목적지로 변경하고 
     case Commondefine::AmrStep::MoveTo_Storage:
         SendPickupRequest();
-
+        SetAmrStep(Commondefine::AmrStep::MoveTo_dst);
+        current_dst = Commondefine::convertPoseToPosition(robot_task_info_.dest);
         break;
+        
+        //
     case Commondefine::AmrStep::MoveTo_charging_station:
-        //로봇의 상태를 리턴 형태로 변환 해준다.
-        state_.store(Commondefine::RobotState::RETURN);
-        break;
-    case Commondefine::AmrStep::MoveTo_dst:
-        break;
-    
+        {
+            //충전 위치에 도달 했기 때문에 IDLE 상태로 변경하고 
+            std::lock_guard lock(current_mtx_);
+            SetAmrState(Commondefine::RobotState::IDLE);
+            SetAmrStep(Commondefine::AmrStep::AmrStep_num);
+            core->assignBestRobotSelector();
+        }    
+        break;    
     default:
         break;
     }
+
+    return;
 }
 
 void AmrAdapter::SendPickupRequest()

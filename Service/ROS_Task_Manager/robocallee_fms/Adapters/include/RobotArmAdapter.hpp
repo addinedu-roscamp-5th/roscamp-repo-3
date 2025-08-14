@@ -16,6 +16,8 @@ namespace Adapter
         std::atomic<Commondefine::RobotState>     state_;
         Commondefine::StorageRequest              request_;
         std::mutex                                request_mtx_;
+
+        std::atomic<Commondefine::RobotArmStep>     step_;
     public:
         using u_ptr = Integrated::u_ptr<RobotArmAdapter>;
 
@@ -24,6 +26,9 @@ namespace Adapter
 
         void setState(Commondefine::RobotState state){ state_.store(state); }
         Commondefine::RobotState getState() { return state_.load(); }
+
+        void setStep(Commondefine::RobotArmStep step){ step_.store(step); }
+        Commondefine::RobotArmStep getStep() { return step_.load(); }
 
         void setStorageRequest(Commondefine::StorageRequest request);
 
@@ -34,6 +39,8 @@ namespace Adapter
         void amrToBuffer();
 
         void bufferToshelf();
+
+        void checkWorkOnlyOnce();
     };
 
 };

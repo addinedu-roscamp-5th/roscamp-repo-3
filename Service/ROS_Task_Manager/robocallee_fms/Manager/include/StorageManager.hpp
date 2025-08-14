@@ -59,14 +59,16 @@ namespace Manager
         Log::Logger::s_ptr                                 log_;
         Integrated::w_ptr<core::ICore>                     icore_;
         std::atomic<bool>                                  criticalSection_;//true 일때 사용 가능 , false 일때 사용 불가
+        std::atomic<bool>                                  workOnlyOnce_; //true 일때 사용 가능 , false 일때 사용 불가
+        std::condition_variable                            workOnlyOnce_cv_;
+        std::mutex                                         workOnlyOnce_mtx_;
+
         std::queue<Commondefine::StorageRequest>           storageRequest_;
         Commondefine::StorageRequest                       currentRequest_;
-
 
         std::mutex                                         Request_mtx_;
         std::condition_variable                            Request_cv_;
         
-
         std::map<int, shoesStorage>                        shelf_info_;
         std::mutex                                         storage_mtx_;
         
@@ -80,13 +82,19 @@ namespace Manager
         StorageManager(Integrated::w_ptr<core::ICore> icore, Log::Logger::s_ptr log);
         ~StorageManager();
 
+        void SetWorkOnlyOnce(bool flag);
+
+        bool getWorkOnlyOnce(){return workOnlyOnce_.load();}
+
+        bool waitWorkOnlyOnce(std::chrono::milliseconds ms);
+
         void InitContainer();
 
         void setCriticalSection(bool flag);
         
         bool getCriticalSection() { return criticalSection_.load(); }
         
-        void waitCriticalSection();
+        bool waitCriticalSection(std::chrono::milliseconds ms);
 
         bool StorageRequest(Commondefine::StorageRequest storage);
 
@@ -105,7 +113,5 @@ namespace Manager
         int findStorage(Commondefine::ContainerType container, Commondefine::shoesproperty& shoes);
 
         int findEmptyStorage(Commondefine::ContainerType container);
-
-        
     };
 };
