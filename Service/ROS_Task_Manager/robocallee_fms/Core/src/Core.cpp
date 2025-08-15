@@ -237,6 +237,8 @@ bool Core::ArmDoneCallback(ArmRequest request)
 
         OpenSyncWindow(); // 완료가 된 시점에 새로운 경로 생성을 요청하고, path가 업데이트 되도록 기다린다.
 
+        ArriveAtSyncOnce(request.amr_id);
+        
         //핑키에게 다음 번 주행 명령을 보낸다. 실제 목적지로 간다.
         assignTask(request.amr_id,AmrStep::check_path_update);
     }
@@ -357,6 +359,18 @@ void Core::PlanPaths()
     SetRequestNewPath(false);
 }
 
+bool Core::SendPickupRequest(int idx)
+{
+    Commondefine::StorageRequest storage;
+    storage.robot_id = RobotArm::RobotArm2;
+    storage.amr_id = idx; 
+    storage.command = RobotArmStep::buffer_to_Amr;
+
+    pStorageManager_->StorageRequest(storage);
+
+    return true;
+}
+
 void Core::assignPlanPaths()
 {
     assignTask(std::bind(&core::Core::PlanPaths,this));
@@ -427,11 +441,6 @@ void Core::assignBestRobotSelector()
     assignTask(std::bind(&Manager::RequestManager::BestRobotSelector,pRequestManager_.get()));
 }
 
-bool Core::waitWorkOnlyOnce(std::chrono::milliseconds ms)
-{
-    return pStorageManager_->waitWorkOnlyOnce(ms);
-}
-
 bool Core::findStorage(Commondefine::ContainerType Container , Commondefine::StorageRequest& Request)
 {
     const int err = -1; 
@@ -500,4 +509,14 @@ void Core::ArriveAtSyncOnce(int robot_id)
 void Core::OpenSyncWindow()
 {
     pPathSyncManager_->OpenSyncWindow();
+}
+
+bool Core::waitWorkOnlyOnce(std::chrono::milliseconds ms)
+{
+    return pStorageManager_->waitWorkOnlyOnce(ms);
+}
+
+void Core::setWorkOnlyOnce(bool flag)
+{
+    pStorageManager_->SetWorkOnlyOnce(flag);
 }

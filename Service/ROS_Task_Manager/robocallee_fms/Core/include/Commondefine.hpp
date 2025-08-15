@@ -234,7 +234,7 @@ namespace Commondefine
         {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
     };
 
-    static Position wpStorage = {4, 1, 0};
+    static Position wpStorage = {5, 2, 0};
 
     static std::vector<Position> wpChargingStation{ {8,8,0},{8,6,0},{8,4,0}};
 };

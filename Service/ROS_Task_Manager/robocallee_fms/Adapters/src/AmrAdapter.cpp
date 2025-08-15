@@ -91,13 +91,15 @@ bool AmrAdapter::handleWaypointArrival(const Commondefine::pose2f& pos)
         log_->Log(Log::LogLevel::INFO, "핑키 "+ std::to_string(robot_task_info_.robot_id) + "가 waypoint "
         + std::to_string(current_wp_idx_) + "에 도달했습니다.");
 
-        //setOccupyWayPoint(true);
+        setOccupyWayPoint(true);
 
         //목적지에 도착했는지 판단 유무와 다음 웨이포인트 보냄.
         sendNextpoint();
 
-        //setOccupyWayPoint(false);
+        setOccupyWayPoint(false);
     }
+
+    return true;
 }
 
 void AmrAdapter::updatePath(const std::vector<Commondefine::Position>& new_path)
@@ -139,12 +141,14 @@ void AmrAdapter::setOccupyWayPoint(bool occupy)
 
 const bool AmrAdapter::isGoal()
 {
-    if(current_wp_idx_ == waypoints_.size())
+    if(current_wp_idx_ == waypoints_.size()-1)
     {
         {
             std::lock_guard<std::mutex> lock(waypoint_mtx_);
             ResetWaypoint();
         }
+
+        log_->Log(INFO,"AMR ID : "+ std::to_string(robot_task_info_.robot_id) +" 목적지 도착 완료");
 
         return true;
     }
@@ -249,6 +253,8 @@ void AmrAdapter::sendNextpoint()
     if(wp.x == -1 || wp.y ==-1) return;
 
     core->publishNavGoal(robot_task_info_.robot_id, wp);
+
+    return;
 }
 
 void AmrAdapter::MoveToDone()
@@ -261,7 +267,7 @@ void AmrAdapter::MoveToDone()
     {
         //창고에 도착한 경우 로봇팔에게 픽업작업 요청을 하고, 상태를 실제 목적지로 변경하고 
     case Commondefine::AmrStep::MoveTo_Storage:
-        SendPickupRequest();    
+        core->SendPickupRequest(robot_task_info_.robot_id);    
         {
             std::lock_guard lock(current_mtx_);
             SetAmrStep(Commondefine::AmrStep::MoveTo_dst);

@@ -83,6 +83,7 @@ void RequestManager::BestRobotSelector()
     // 요청 POP
     PopRequest(req);
 
-    core->assignWork(best_amr, req);
+    core->assignWork(1, req);
+    // core->assignWork(best_amr, req);
     return;
 }

@@ -147,7 +147,7 @@ void RosInterface::cbArmService(rclcpp::Client<ArmServiceType>::SharedFuture fut
   if(!res->success) log_->Log(Log::INFO, "RobotArm 요청 실패 !");
   
   ArmRequest req;
-  req.robot_id = res->robot_id;
+  req.robot_id = res->robot_id - 1;
   req.amr_id = res->amr_id;
   req.action = res->action;
   req.shoes.size = res->size ;

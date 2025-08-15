@@ -60,7 +60,7 @@ public:
 
     virtual void assignBestRobotSelector() = 0;
 
-    virtual bool waitWorkOnlyOnce(std::chrono::milliseconds ms) = 0;
+    virtual bool SendPickupRequest(int idx) = 0;
 
     //--------------------------StorageManager--------------------------
     virtual bool setStorageRequest(Commondefine::StorageRequest& Request) = 0;
@@ -74,6 +74,10 @@ public:
     virtual int findEmptyStorage(Commondefine::ContainerType Container) = 0;
 
     virtual bool waitCriticalSection(std::chrono::milliseconds ms) = 0;
+
+    virtual bool waitWorkOnlyOnce(std::chrono::milliseconds ms) = 0;
+
+    virtual void setWorkOnlyOnce(bool flag) = 0;
 
     //--------------------------PathSyncManager--------------------------
 

@@ -112,7 +112,9 @@ namespace core
 
         void assignBestRobotSelector() override;
 
-        bool waitWorkOnlyOnce(std::chrono::milliseconds ms);
+        bool waitWorkOnlyOnce(std::chrono::milliseconds ms) override;
+
+        void setWorkOnlyOnce(bool flag) override;
         
         //----------------Storage--------------------------
         
@@ -125,6 +127,8 @@ namespace core
         int findEmptyStorage(Commondefine::ContainerType Container) override;
 
         bool waitCriticalSection(std::chrono::milliseconds ms) override;
+
+        bool SendPickupRequest(int idx) override;
 
         //--------------------------PathSyncManager--------------------------
 
