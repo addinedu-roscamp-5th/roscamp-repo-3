@@ -25,7 +25,7 @@ namespace Commondefine
 
     enum RobotState {IDLE = 0, BUSY, RETURN, STOP , INVALID};
 
-    enum RobotArm { RobotArm1 = 0 ,RobotArm2 , RobotArmNum};
+    enum RobotArm { RobotArm1 = 0 ,RobotArm2 , StorageManager, RobotArmNum};
 
     enum ContainerType { Buffer, Shelf };
 

@@ -140,21 +140,21 @@ void Core::assignWork(int amr, Commondefine::GUIRequest r)
 {
     if(amr_adapters_.size() < amr) return;
 
-    //2. 로봇에게 요청 들어온 정보를 할당한다.
+    //1. 로봇에게 요청 들어온 정보를 할당한다.
     amr_adapters_[amr]->SetTaskInfo(r);
 
-    //3. 창고로 실제 목적지 및 현재 스텝 설정
+    //2. 창고로 실제 목적지 및 현재 스텝 설정
     amr_adapters_[amr]->SetCurrentDst(Commondefine::wpStorage);
     amr_adapters_[amr]->SetAmrStep(AmrStep::MoveTo_Storage);
     
-    //4. 새로운 경로를 생성하기 위해 윈도우 오픈
+    //3. 새로운 경로를 생성하기 위해 윈도우 오픈
     pPathSyncManager_->OpenSyncWindow();
 
-    //1. 로봇에게 일을 할당 하기 때문에 BUSY 상태가 된다.
+    //4. 로봇에게 일을 할당 하기 때문에 BUSY 상태가 된다.
     amr_adapters_[amr]->SetAmrState(Commondefine::RobotState::BUSY);
 
     //5. 로봇팔에 명령 추가
-    StorageRequest req;
+    Commondefine::StorageRequest req;
     req.robot_id = RobotArm::RobotArm1;
     req.amr_id = amr;
     req.shoes = r.shoes_property;
@@ -163,7 +163,7 @@ void Core::assignWork(int amr, Commondefine::GUIRequest r)
 
     //6. AMR의 창고 이동 명령
     assignTask(amr, AmrStep::check_path_update);
-    
+
     return;
 }
 
@@ -199,7 +199,7 @@ bool Core::PoseCallback(const std::vector<Commondefine::pose2f> &pos)
 {
     if(pos.size() > amr_adapters_.size()) 
     {
-        log_->Log(Log::LogLevel::ERROR, "Pinky pos is not invalid");
+        log_->Log(Log::LogLevel::ERROR, "수신된 pos의 갯수가 현재 AMR 갯수보다 많습니다.");
         return false;
     }
 
@@ -237,10 +237,13 @@ bool Core::ArmDoneCallback(ArmRequest request)
 
         OpenSyncWindow(); // 완료가 된 시점에 새로운 경로 생성을 요청하고, path가 업데이트 되도록 기다린다.
 
+        //현재 세대에 참여하는 로봇의 갯수는 BUSY 상태의 로봇들이기 때문에 본인 까지 포함이 되어 있는 상태이다.
+        //이때 handleWaypointArrival() 내부에서 도착 완료 여부를 카운트 하는데, 지금 함수에서는 이미 도착한 상태이기 때문에
+        //그냥 바로 윈도우를 오픈 하고 
         ArriveAtSyncOnce(request.amr_id);
         
         //핑키에게 다음 번 주행 명령을 보낸다. 실제 목적지로 간다.
-        assignTask(request.amr_id,AmrStep::check_path_update);
+        assignTask(request.amr_id, AmrStep::check_path_update);
     }
 
     //수거 요청이 들어오면 수거 하도록 한다.
@@ -293,7 +296,8 @@ bool Core::DoneCallback(const std::string& requester, const int& customer_id)
 
                 assignTask(i,Commondefine::AmrStep::MoveTo_charging_station);
 
-                log_->Log(Log::LogLevel::INFO, string("핑키가 고객ID: ") + to_string(customer_id) + "에게 배달 완료");                
+                log_->Log(Log::LogLevel::INFO, string("핑키가 고객ID: ") + to_string(customer_id) + "에게 배달 완료");
+                           
                 log_->Log(Log::LogLevel::INFO, "DoneCallback true");
         
                 return true;
@@ -342,11 +346,12 @@ void Core::PlanPaths()
         active_indices.push_back(i);
     }
 
+    //실제 경로 작성
     auto paths = traffic_Planner_->planPaths(starts, goals);
 
     if(paths.empty() || paths.size() != active_indices.size())
     {
-        log_->Log(ERROR,"path is empty");
+        log_->Log(ERROR,"path가 비어있거나, path의 크기와 실제 요청한 로봇의 갯수가 맞지 않습니다.");
         return;
     }
 
@@ -355,16 +360,16 @@ void Core::PlanPaths()
         size_t idx = active_indices[i];
         amr_adapters_[idx]->updatePath(paths[i]);
     }
-
-    SetRequestNewPath(false);
 }
 
 bool Core::SendPickupRequest(int idx)
 {
+    // 요청또한 스케줄링이 필요하기 때문에 StorageManager
     Commondefine::StorageRequest storage;
     storage.robot_id = RobotArm::RobotArm2;
     storage.amr_id = idx; 
     storage.command = RobotArmStep::buffer_to_Amr;
+    storage.container = ContainerType::Shelf;
 
     pStorageManager_->StorageRequest(storage);
 
@@ -393,19 +398,15 @@ Commondefine::RobotState Core::GetAmrState(int idx)
 void Core::UpdateBattery(int idx, float percent)
 {
     if (idx < 0 || idx >= static_cast<int>(amr_adapters_.size())) return;
-    std::lock_guard<std::mutex> lk(battery_mtx_);
-    amr_adapters_[idx]->GetTaskInfo().battery = percent;
 
-    log_->Log(Log::LogLevel::INFO, (std::ostringstream{} << "[BAT] Core::UpdateBattery AMR" << idx + 1
-                                                        << " = " << std::fixed << std::setprecision(1)
-                                                        << percent << "%").str());
+    amr_adapters_[idx]->SetBattery(percent);
 }
 
 int Core::GetAmrBattery(int idx)
 {
     if (idx < 0 || idx >= amr_adapters_.size()) return -1;
 
-    return amr_adapters_[idx]->GetTaskInfo().battery;
+    return amr_adapters_[idx]->GetBattery();
 }
 
 int Core::GetAmrCustID(int idx)
@@ -431,9 +432,7 @@ bool Core::setStorageRequest(Commondefine::StorageRequest& Request)
 {
     if(Request.robot_id > RobotArm_Adapters_.size()) return false;
 
-    RobotArm_Adapters_[Request.robot_id]->setStorageRequest(Request);
-
-    return true;
+    return RobotArm_Adapters_[Request.robot_id]->setStorageRequest(Request);
 }
 
 void Core::assignBestRobotSelector()

@@ -60,7 +60,8 @@ bool StorageManager::StorageRequest(Commondefine::StorageRequest storage)
         return false;
     }
 
-    core->assignTask(RobotArm::RobotArmNum, RobotArmStep::resolve_Request);
+    core->assignTask(RobotArm::StorageManager, RobotArmStep::resolve_Request);
+
     return true;
 }
 
@@ -97,13 +98,13 @@ bool StorageManager::resolveRequest()
     core->assignTask(req.robot_id, RobotArmStep::check_work_only_once);
 
     // 큐가 빌때 까지 일해야 하기 때문에... 여기 아니면 일다 하고 나면 불러도 된다.
-    if(storageRequest_.empty()) 
+    if(!storageRequest_.empty()) 
     {
         //일단 넣어보고 부하가 그리 안걸린다면 빼도된다..
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        core->assignTask(RobotArm::RobotArmNum, RobotArmStep::resolve_Request);
+        core->assignTask(RobotArm::StorageManager, RobotArmStep::resolve_Request);
         
-        return true;
+        return false;
     }
 
     return true;
@@ -115,18 +116,18 @@ void StorageManager::setCriticalSection(bool flag)
 
     if(flag)
     {
-        Request_cv_.notify_one();
+        workOnlyOnce_cv_.notify_one();
     }
+    
     return;
 }
 
 bool StorageManager::waitCriticalSection(std::chrono::milliseconds ms)
 {
     //ture 일때 사용 가능이고 false 일때 사용 불가
-    std::unique_lock lock(Request_mtx_);
+    std::unique_lock lock(workOnlyOnce_mtx_);
 
-    return Request_cv_.wait_for(lock, ms, [&]() { return criticalSection_.load(); });
-
+    return workOnlyOnce_cv_.wait_for(lock, ms, [&]() { return criticalSection_.load(); });
 }
 
 bool StorageManager::setStorage(Commondefine::ContainerType container, Commondefine::StorageRequest shoes)

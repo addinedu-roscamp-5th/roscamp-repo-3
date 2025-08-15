@@ -54,8 +54,6 @@ public:
     //Request 에서 일을 할당 할때 호출
     virtual void assignWork(int amr, Commondefine::GUIRequest r) = 0;
 
-    virtual void SetRequestNewPath(bool Request) = 0;
-
     virtual bool GetRequestNewPath() = 0;
 
     virtual void assignBestRobotSelector() = 0;

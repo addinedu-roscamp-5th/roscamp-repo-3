@@ -20,7 +20,6 @@ namespace Adapter
         Integrated::w_ptr<core::ICore>        Icore_;
         Logger::s_ptr                         log_;
         Commondefine::RobotTaskInfo           robot_task_info_;
-        // std::mutex                            Task_mtx_;
         mutable std::mutex                    Task_mtx_;
 
         // Planner → Adapter 로 받은 웨이포인트
@@ -31,12 +30,7 @@ namespace Adapter
         std::mutex                            current_mtx_;
         Commondefine::Position                current_waypoint_;
         Commondefine::pose2f                  current_pose_;
-        Commondefine::Position                current_dst;
-
-        // Waypoint 점유 플래그
-        bool                                  isOccupyWaypoint_;
-        std::mutex                            occupy_mtx_;
-        std::condition_variable               occupy_cv_;
+        Commondefine::Position                current_dst_;
 
         std::atomic<Commondefine::AmrStep>    step_;
         std::atomic<Commondefine::RobotState> state_;
@@ -68,8 +62,6 @@ namespace Adapter
 
         // Waypoint 로직
         bool handleWaypointArrival(const Commondefine::pose2f& pos);
-
-        void WaitUntilWaypointOccupied();
 
         void updatePath(const std::vector<Commondefine::Position>& new_path);
 
@@ -119,12 +111,9 @@ namespace Adapter
         Commondefine::Position GetDestPoseToWp();
         Commondefine::pose2f GetDestPose(){return robot_task_info_.dest;}
 
-        void SetCurrentDst(Commondefine::Position p)
-        {
-            std::lock_guard lock(current_mtx_);
-            current_dst = p;
-        }
-        Commondefine::Position GetCurrentDst(){return current_dst;}
+        void SetCurrentDst(Commondefine::Position p){ std::lock_guard lock(current_mtx_); current_dst_ = p;}
+        
+        Commondefine::Position GetCurrentDst(){return current_dst_;}
 
         void checkPathUpdate();
 

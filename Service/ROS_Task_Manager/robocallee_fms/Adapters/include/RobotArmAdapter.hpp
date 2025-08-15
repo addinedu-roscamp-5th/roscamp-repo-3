@@ -32,6 +32,8 @@ namespace Adapter
 
         void setStorageRequest(Commondefine::StorageRequest request);
 
+        void checkWorkOnlyOnce();
+        
         void shelfToBuffer();
 
         void bufferToAmr();
@@ -39,8 +41,6 @@ namespace Adapter
         void amrToBuffer();
 
         void bufferToshelf();
-
-        void checkWorkOnlyOnce();
     };
 
 };

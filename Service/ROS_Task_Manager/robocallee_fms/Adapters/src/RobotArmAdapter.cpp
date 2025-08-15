@@ -28,6 +28,29 @@ void RobotArmAdapter::setStorageRequest(Commondefine::StorageRequest request)
     return;
 }
 
+void RobotArmAdapter::checkWorkOnlyOnce()
+{
+    auto core = Icore_.lock();
+    if(core == nullptr) 
+    {
+        log_->Log(Log::LogLevel::ERROR, "core pointer is nullptr");
+        return;
+    }
+
+    //항상 움직이기 전에 새로운 경로가 있는지 확인 하고 출발한다.
+    bool timeout = core->waitWorkOnlyOnce(100ms);
+
+    //timeout 되면 다시 checkWorkOnlyOnce() 추가해서 해당 함수가 실행 되도록 한다.
+    if(!timeout)
+    {
+        core->assignTask(request_.robot_id,RobotArmStep::check_work_only_once);
+        return;
+    }
+
+    //lock 이 풀리면 진짜 움직이는 스텝으로 이동하게 된다.
+    core->assignTask(request_.robot_id, request_.command);
+}
+
 void RobotArmAdapter::shelfToBuffer()
 {
     auto core = Icore_.lock();
@@ -37,17 +60,6 @@ void RobotArmAdapter::shelfToBuffer()
         return;
     }
 
-    bool flag = core->waitWorkOnlyOnce(100ms);
-    if(!flag)
-    {
-        core->assignTask(RobotArm::RobotArm1,RobotArmStep::shelf_to_buffer);
-        return;
-    }
-
-    core->setWorkOnlyOnce(false);
-
-    log_->Log(Log::LogLevel::INFO, "Run shelf_to_buffer");
-    
     //core->getStorage(ContainerType::Shelf, request_);
     core->ArmRequestMakeCall(RobotArm::RobotArm1, 1, request_.amr_id + 1, "shelf_to_buffer");
 }
@@ -61,17 +73,7 @@ void RobotArmAdapter::bufferToAmr()
         return;
     }
 
-    bool flag = core->waitWorkOnlyOnce(100ms);
-    if(!flag)
-    {
-        core->assignTask(RobotArm::RobotArm2,RobotArmStep::buffer_to_Amr);
-        return;
-    }
-
-    core->setWorkOnlyOnce(false);
-    
-    log_->Log(Log::LogLevel::INFO, "Run buffer_to_pinky");
-
+    //하드코딩 했음....
     //core->getStorage(ContainerType::Buffer, request_);
     core->ArmRequestMakeCall(RobotArm::RobotArm2, 1, request_.amr_id + 1, "buffer_to_pinky");
 }
@@ -106,30 +108,6 @@ void RobotArmAdapter::bufferToshelf()
     }
 
     core->ArmRequestMakeCall(RobotArm::RobotArm1, shelf_num, request_.amr_id, "buffer_to_shelf");
-}
-
-void RobotArmAdapter::checkWorkOnlyOnce()
-{
-    auto core = Icore_.lock();
-    if(core == nullptr) 
-    {
-        log_->Log(Log::LogLevel::ERROR, "core pointer is nullptr");
-        return;
-    }
-
-    //항상 움직이기 전에 새로운 경로가 있는지 확인 하고 출발한다.
-    bool timeout = core->waitWorkOnlyOnce(100ms);
-
-    //timeout 되면 다시 checkPathUpdate를 추가해서 해당 함수가 실행 되도록 한다.
-    if(!timeout)
-    {
-        core->assignTask(request_.robot_id,RobotArmStep::check_work_only_once);
-        return;
-    }
-
-    // 
-    //lock 이 풀리면 진짜 움직이는 스텝으로 이동하게 된다.
-    core->assignTask(request_.robot_id, request_.command);
 }
 
 

@@ -40,10 +40,6 @@ namespace core
         
         Integrated::vec<Integrated::u_ptr<Adapter::AmrAdapter>>         amr_adapters_;
         Integrated::u_ptr<traffic::TrafficPlanner>                      traffic_Planner_;
-        std::atomic<bool>                                               requestNewPath_;
-
-        std::mutex                                                      battery_mtx_;
-
     public:
         using s_ptr = std::shared_ptr<Core>;
         using u_ptr = std::unique_ptr<Core>;
@@ -98,15 +94,6 @@ namespace core
         void assignPlanPaths() override;
 
         bool waitNewPath(std::chrono::milliseconds ms) override;
-
-        void SetRequestNewPath(bool Request) override
-        { 
-            requestNewPath_.store(Request);
-
-            if(!Request) path_cv_.notify_all();
-        }
-        
-        bool GetRequestNewPath() override{ return requestNewPath_.load(); }
 
         bool setStorageRequest(Commondefine::StorageRequest& Request) override;
 

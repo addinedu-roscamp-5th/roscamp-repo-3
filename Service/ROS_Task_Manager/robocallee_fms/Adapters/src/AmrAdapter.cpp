@@ -59,22 +59,6 @@ void AmrAdapter::SetAmrState(const Commondefine::RobotState state)
     }
 }
 
-void AmrAdapter::WaitUntilWaypointOccupied()
-{
-    std::unique_lock<std::mutex> lock(occupy_mtx_);
-
-    //할당된 waypoint가 없으면 바로 return 해서 데드락 문제 해결
-    if(waypoints_.empty()) return;
-
-    if (!isOccupyWaypoint_)
-    {
-        occupy_cv_.wait(lock, [&]()
-        {
-            return isOccupyWaypoint_;
-        });
-    }
-}
-
 bool AmrAdapter::handleWaypointArrival(const Commondefine::pose2f& pos)
 {
     Commondefine::Position p = getCurrentWayPoint();
@@ -88,15 +72,10 @@ bool AmrAdapter::handleWaypointArrival(const Commondefine::pose2f& pos)
 
     if (dist <= _ARRIVAL_TOLERANCE_)
     {
-        log_->Log(Log::LogLevel::INFO, "핑키 "+ std::to_string(robot_task_info_.robot_id) + "가 waypoint "
-        + std::to_string(current_wp_idx_) + "에 도달했습니다.");
-
-        setOccupyWayPoint(true);
+        log_->Log(Log::LogLevel::INFO, "AMR "+ std::to_string(robot_task_info_.robot_id) + " waypoint step" + std::to_string(current_wp_idx_) + "에 도달했습니다.");
 
         //목적지에 도착했는지 판단 유무와 다음 웨이포인트 보냄.
         sendNextpoint();
-
-        setOccupyWayPoint(false);
     }
 
     return true;
@@ -127,17 +106,7 @@ void AmrAdapter::updatePath(const std::vector<Commondefine::Position>& new_path)
     setOccupyWayPoint(false);
 }
 
-void AmrAdapter::setOccupyWayPoint(bool occupy)
-{
-    {
-        std::lock_guard lock(occupy_mtx_);
-        isOccupyWaypoint_ = occupy;
-    }
-    
-    if(occupy) occupy_cv_.notify_one();
 
-    return;
-}
 
 const bool AmrAdapter::isGoal()
 {
@@ -148,7 +117,7 @@ const bool AmrAdapter::isGoal()
             ResetWaypoint();
         }
 
-        log_->Log(INFO,"AMR ID : "+ std::to_string(robot_task_info_.robot_id) +" 목적지 도착 완료");
+        log_->Log(INFO,"AMR "+ std::to_string(robot_task_info_.robot_id) +" ID 목적지 도착 완료");
 
         return true;
     }
@@ -225,8 +194,6 @@ void AmrAdapter::MoveToChargingStation()
     
 }
 
-
-
 void AmrAdapter::sendNextpoint()
 {
     auto core = Icore_.lock();
@@ -267,15 +234,14 @@ void AmrAdapter::MoveToDone()
     {
         //창고에 도착한 경우 로봇팔에게 픽업작업 요청을 하고, 상태를 실제 목적지로 변경하고 
     case Commondefine::AmrStep::MoveTo_Storage:
-        core->SendPickupRequest(robot_task_info_.robot_id);    
-        {
-            std::lock_guard lock(current_mtx_);
-            SetAmrStep(Commondefine::AmrStep::MoveTo_dst);
-            current_dst = Commondefine::convertPoseToPosition(robot_task_info_.dest);
-        }
+        //1. 창고에 도착하고 픽업 요청을 보낸다.
+        core->SendPickupRequest(robot_task_info_.robot_id);
+
+        SetCurrentDst(Commondefine::convertPoseToPosition(robot_task_info_.dest));
+        
+        SetAmrStep(Commondefine::AmrStep::MoveTo_dst);
         break;
         
-        //
     case Commondefine::AmrStep::MoveTo_charging_station:
         {
             //충전 위치에 도달 했기 때문에 IDLE 상태로 변경하고 
@@ -283,7 +249,7 @@ void AmrAdapter::MoveToDone()
             SetAmrState(Commondefine::RobotState::IDLE);
             SetAmrStep(Commondefine::AmrStep::AmrStep_num);
 
-            //로봇이 완료 됬기 때문에 일이 있는지 확인하는 역할을 한다.
+            //로봇이 완료 됬기 때문에 다음일을 할당 한다.
             core->assignBestRobotSelector();
         }    
         break;    

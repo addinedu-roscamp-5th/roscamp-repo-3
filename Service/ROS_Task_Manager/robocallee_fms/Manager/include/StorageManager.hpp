@@ -59,12 +59,14 @@ namespace Manager
         Log::Logger::s_ptr                                 log_;
         Integrated::w_ptr<core::ICore>                     icore_;
         std::atomic<bool>                                  criticalSection_;//true 일때 사용 가능 , false 일때 사용 불가
+        std::condition_variable                            criticalSection_cv_;
+        std::mutex                                         criticalSection_mtx_;
+        
         std::atomic<bool>                                  workOnlyOnce_; //true 일때 사용 가능 , false 일때 사용 불가
         std::condition_variable                            workOnlyOnce_cv_;
         std::mutex                                         workOnlyOnce_mtx_;
 
         std::queue<Commondefine::StorageRequest>           storageRequest_;
-        Commondefine::StorageRequest                       currentRequest_;
 
         std::mutex                                         Request_mtx_;
         std::condition_variable                            Request_cv_;
