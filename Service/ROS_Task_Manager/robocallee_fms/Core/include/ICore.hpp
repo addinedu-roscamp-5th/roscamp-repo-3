@@ -17,23 +17,29 @@ public:
 
     virtual bool assignPath(Integrated::Task task) = 0;
 
+    //Request 에서 일을 할당 할때 호출
+    virtual void assignWork(int amr, Commondefine::GUIRequest r) = 0;
+    
+    //----------------Call Back function
+
     // 팔 서비스 호출
     virtual bool ArmRequestMakeCall(Commondefine::RobotArm arm, int shelf_num, int robot_id, std::string action) = 0;
-
-    // 위치 콜백 (Aruco 또는 LM 위치)
-    virtual bool PoseCallback(const std::vector<Commondefine::pose2f> &pos) =0;
 
     // 요청 및 완료 콜백
     virtual int RequestCallback(const Commondefine::GUIRequest &request) = 0;
 
-    // WayPoint를 를 실제 통신으로 내보내주는 Code
-    virtual bool publishNavGoal(int idx, const Commondefine::Position wp) = 0;
-
     virtual bool DoneCallback(const std::string &requester, const int &customer_id) = 0;
+    
+    // 위치 콜백 (Aruco 또는 LM 위치)
+    virtual bool PoseCallback(const std::vector<Commondefine::pose2f> &pos) =0;
 
     virtual bool ArmDoneCallback(Commondefine::ArmRequest request) = 0;
 
     //--------------------------AMR STATE--------------------------
+
+    // WayPoint를 를 실제 통신으로 내보내주는 Code
+    virtual bool publishNavGoal(int idx, const Commondefine::Position wp) = 0;
+
     virtual Commondefine::RobotState GetAmrState(int idx) = 0;
 
     virtual void UpdateBattery(int idx, float percent) = 0;
@@ -47,14 +53,9 @@ public:
     // 작업 정보 저장
     virtual void SetTaskInfo(int idx, const Commondefine::GUIRequest &request) = 0;
 
-    virtual bool waitNewPath(std::chrono::milliseconds ms) = 0;
-
     virtual void assignPlanPaths() = 0;
 
-    //Request 에서 일을 할당 할때 호출
-    virtual void assignWork(int amr, Commondefine::GUIRequest r) = 0;
-
-    virtual bool GetRequestNewPath() = 0;
+    virtual bool waitNewPath(std::chrono::milliseconds ms) = 0;
 
     virtual void assignBestRobotSelector() = 0;
 

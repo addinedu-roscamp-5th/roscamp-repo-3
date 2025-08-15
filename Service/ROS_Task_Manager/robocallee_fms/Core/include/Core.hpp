@@ -95,15 +95,13 @@ namespace core
 
         bool waitNewPath(std::chrono::milliseconds ms) override;
 
-        bool setStorageRequest(Commondefine::StorageRequest& Request) override;
-
         void assignBestRobotSelector() override;
 
-        bool waitWorkOnlyOnce(std::chrono::milliseconds ms) override;
-
-        void setWorkOnlyOnce(bool flag) override;
+        bool SendPickupRequest(int idx) override;
         
         //----------------Storage--------------------------
+
+        bool setStorageRequest(Commondefine::StorageRequest& Request) override;
         
         bool findStorage(Commondefine::ContainerType Container , Commondefine::StorageRequest& Request) override;
 
@@ -115,7 +113,9 @@ namespace core
 
         bool waitCriticalSection(std::chrono::milliseconds ms) override;
 
-        bool SendPickupRequest(int idx) override;
+        bool waitWorkOnlyOnce(std::chrono::milliseconds ms) override;
+
+        void setWorkOnlyOnce(bool flag) override;
 
         //--------------------------PathSyncManager--------------------------
 

@@ -29,9 +29,9 @@ bool Core::Initialize()
     auto self = shared_from_this();
 
     pdispatcher_ = make_uptr<Dispatcher>(_MAX_EXECUTOR_NUM_, log_);
-    pStorageManager_ = make_uptr<StorageManager>(self, log_);
-    pRequestManager_ = make_uptr<RequestManager>(self, log_);
-    pPathSyncManager_ = make_uptr<PathSyncManager>(self, _AMR_NUM_, log_);
+    pStorageManager_ = make_uptr<Manager::StorageManager>(self, log_);
+    pRequestManager_ = make_uptr<Manager::RequestManager>(self, log_);
+    pPathSyncManager_ = make_uptr<Manager::PathSyncManager>(self, _AMR_NUM_, log_);
 
     for (int i = 0; i < RobotArm::RobotArmNum; ++i)
     {
@@ -235,6 +235,7 @@ bool Core::ArmDoneCallback(ArmRequest request)
     {
         pStorageManager_->setCriticalSection(true);
 
+
         OpenSyncWindow(); // 완료가 된 시점에 새로운 경로 생성을 요청하고, path가 업데이트 되도록 기다린다.
 
         //현재 세대에 참여하는 로봇의 갯수는 BUSY 상태의 로봇들이기 때문에 본인 까지 포함이 되어 있는 상태이다.
@@ -294,7 +295,9 @@ bool Core::DoneCallback(const std::string& requester, const int& customer_id)
                 amr_adapters_[i]->SetCurrentDst(Commondefine::wpChargingStation[i]);
                 amr_adapters_[i]->SetAmrStep(Commondefine::AmrStep::MoveTo_charging_station);
 
-                assignTask(i,Commondefine::AmrStep::MoveTo_charging_station);
+                OpenSyncWindow(); // 완료가 된 시점에 새로운 경로 생성을 요청하고, path가 업데이트 되도록 기다린다.
+
+                assignTask(i,Commondefine::AmrStep::check_path_update);
 
                 log_->Log(Log::LogLevel::INFO, string("핑키가 고객ID: ") + to_string(customer_id) + "에게 배달 완료");
                            
@@ -432,7 +435,9 @@ bool Core::setStorageRequest(Commondefine::StorageRequest& Request)
 {
     if(Request.robot_id > RobotArm_Adapters_.size()) return false;
 
-    return RobotArm_Adapters_[Request.robot_id]->setStorageRequest(Request);
+    RobotArm_Adapters_[Request.robot_id]->setStorageRequest(Request);
+
+    return true;
 }
 
 void Core::assignBestRobotSelector()

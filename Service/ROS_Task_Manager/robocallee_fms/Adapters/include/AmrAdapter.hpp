@@ -59,7 +59,6 @@ namespace Adapter
     
         float GetBattery() const;
     
-
         // Waypoint 로직
         bool handleWaypointArrival(const Commondefine::pose2f& pos);
 
@@ -67,9 +66,7 @@ namespace Adapter
 
         void ResetWaypoint();
 
-        int  GetCurrentWpIndex() const;  
-
-        void setOccupyWayPoint(bool occupy);
+        int  GetCurrentWpIndex() const;
 
         // 경로 조회
         const std::vector<Commondefine::Position>& getWaypoints() const;

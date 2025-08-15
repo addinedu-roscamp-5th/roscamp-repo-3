@@ -47,6 +47,8 @@ void RobotArmAdapter::checkWorkOnlyOnce()
         return;
     }
 
+    core->setWorkOnlyOnce(false);
+
     //lock 이 풀리면 진짜 움직이는 스텝으로 이동하게 된다.
     core->assignTask(request_.robot_id, request_.command);
 }
@@ -61,7 +63,7 @@ void RobotArmAdapter::shelfToBuffer()
     }
 
     //core->getStorage(ContainerType::Shelf, request_);
-    core->ArmRequestMakeCall(RobotArm::RobotArm1, 1, request_.amr_id + 1, "shelf_to_buffer");
+    core->ArmRequestMakeCall(RobotArm::RobotArm1, 1, request_.amr_id, "shelf_to_buffer");
 }
 
 void RobotArmAdapter::bufferToAmr()
@@ -75,7 +77,7 @@ void RobotArmAdapter::bufferToAmr()
 
     //하드코딩 했음....
     //core->getStorage(ContainerType::Buffer, request_);
-    core->ArmRequestMakeCall(RobotArm::RobotArm2, 1, request_.amr_id + 1, "buffer_to_pinky");
+    core->ArmRequestMakeCall(RobotArm::RobotArm2, 1, request_.amr_id, "buffer_to_pinky");
 }
 
 void RobotArmAdapter::amrToBuffer()

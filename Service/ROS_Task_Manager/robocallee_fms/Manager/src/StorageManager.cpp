@@ -60,7 +60,7 @@ bool StorageManager::StorageRequest(Commondefine::StorageRequest storage)
         return false;
     }
 
-    core->assignTask(RobotArm::StorageManager, RobotArmStep::resolve_Request);
+    core->assignTask(RobotArm::RobotArmNum, RobotArmStep::resolve_Request);
 
     return true;
 }
@@ -102,7 +102,7 @@ bool StorageManager::resolveRequest()
     {
         //일단 넣어보고 부하가 그리 안걸린다면 빼도된다..
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        core->assignTask(RobotArm::StorageManager, RobotArmStep::resolve_Request);
+        core->assignTask(RobotArm::RobotArmNum, RobotArmStep::resolve_Request);
         
         return false;
     }

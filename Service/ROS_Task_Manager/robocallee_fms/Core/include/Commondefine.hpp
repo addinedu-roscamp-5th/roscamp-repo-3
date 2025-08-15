@@ -25,7 +25,7 @@ namespace Commondefine
 
     enum RobotState {IDLE = 0, BUSY, RETURN, STOP , INVALID};
 
-    enum RobotArm { RobotArm1 = 0 ,RobotArm2 , StorageManager, RobotArmNum};
+    enum RobotArm { RobotArm1 = 0 ,RobotArm2 , RobotArmNum};
 
     enum ContainerType { Buffer, Shelf };
 
@@ -227,14 +227,16 @@ namespace Commondefine
         {1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1},
         {1,0,0,0,0,0,0,0,1,0,0,0,0,1,1,1,1,1,0,0,0,1},
         {1,0,0,0,0,0,0,0,1,0,0,0,0,1,1,1,1,1,0,0,0,1},
-        {1,0,0,0,0,0,0,0,1,0,0,0,0,1,1,1,1,1,0,0,0,1},
+        {1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1},
         {1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1},
         {1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1},
         {1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1},
         {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
     };
 
-    static Position wpStorage = {5, 2, 0};
+    // static Position wpStorage = {5, 2, 0};
+
+    static Position wpStorage = {6, 2, 0};
 
     static std::vector<Position> wpChargingStation{ {8,8,0},{8,6,0},{8,4,0}};
 };

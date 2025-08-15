@@ -111,7 +111,7 @@ void RosInterface::arm1_send_request(int shelf_num, int robot_id , std::string a
     log_->Log(Log::INFO, "arm1_send_request 진입. action: " + action);
 
     auto request = std::make_shared<ArmServiceType::Request>();
-    request->amr_id = robot_id;
+    request->amr_id = robot_id + 1;
     request->action = action;
     request->shelf_num = shelf_num;
 
@@ -126,7 +126,7 @@ void RosInterface::arm2_send_request(int robot_id , std::string action )
     log_->Log(Log::INFO, "arm2_send_request 진입. action: " + action);
 
     auto request = std::make_shared<ArmServiceType::Request>();
-    request->amr_id = robot_id;
+    request->amr_id = robot_id + 1;
     request->action = action;
     request->shelf_num = -1;
     
@@ -147,8 +147,8 @@ void RosInterface::cbArmService(rclcpp::Client<ArmServiceType>::SharedFuture fut
   if(!res->success) log_->Log(Log::INFO, "RobotArm 요청 실패 !");
   
   ArmRequest req;
-  req.robot_id = res->robot_id - 1;
-  req.amr_id = res->amr_id;
+  req.robot_id = res->robot_id -1;
+  req.amr_id = res->amr_id - 1;
   req.action = res->action;
   req.shoes.size = res->size ;
   req.shoes.model = res->model ;

@@ -103,6 +103,8 @@ namespace interface
 
         void updatebattery(int idx, float percent);
 
+        // void publishPath(std::vector<std::vector<Position> paths){}
+
         // 요청·완료 서비스 콜백
         void cbCustomerRequest(const std::shared_ptr<CustomerServiceType::Request> request, 
             std::shared_ptr<CustomerServiceType::Response> response);

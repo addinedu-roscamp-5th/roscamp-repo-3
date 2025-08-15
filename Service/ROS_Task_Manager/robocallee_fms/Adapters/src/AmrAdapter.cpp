@@ -6,13 +6,13 @@ using namespace Integrated;
 using namespace std::chrono_literals;
 
 AmrAdapter::AmrAdapter(Integrated::w_ptr<core::ICore> Icore, Logger::s_ptr log, const int id)
-    :Icore_(Icore), log_(log), isOccupyWaypoint_(false)
+    :Icore_(Icore), log_(log)
 {
     log_->Log(Log::LogLevel::INFO,"AmrAdapter 객체 생성");
 
     robot_task_info_.robot_id = id;
     
-    current_wp_idx_ = (0);
+    current_wp_idx_ = 0;
 }
 
 AmrAdapter::~AmrAdapter()
@@ -102,8 +102,6 @@ void AmrAdapter::updatePath(const std::vector<Commondefine::Position>& new_path)
 
         cur.yaw = Commondefine::yaw(cur, next);
     }
-
-    setOccupyWayPoint(false);
 }
 
 
@@ -191,7 +189,7 @@ void AmrAdapter::MoveToStorage()
 
 void AmrAdapter::MoveToChargingStation()
 {
-    
+    MoveTo();
 }
 
 void AmrAdapter::sendNextpoint()
@@ -237,7 +235,10 @@ void AmrAdapter::MoveToDone()
         //1. 창고에 도착하고 픽업 요청을 보낸다.
         core->SendPickupRequest(robot_task_info_.robot_id);
 
-        SetCurrentDst(Commondefine::convertPoseToPosition(robot_task_info_.dest));
+        Commondefine::Position pos;
+        pos.x = static_cast<float>(robot_task_info_.dest.x);
+        pos.y = static_cast<float>(robot_task_info_.dest.y);
+        SetCurrentDst(pos);
         
         SetAmrStep(Commondefine::AmrStep::MoveTo_dst);
         break;
