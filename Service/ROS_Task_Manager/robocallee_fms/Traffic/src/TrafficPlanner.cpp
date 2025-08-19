@@ -1,12 +1,7 @@
-#include "TrafficPlanner.hpp"
-
-using namespace Commondefine;
-using namespace Integrated;
-using namespace traffic;
+#include "traffic_planner/TrafficPlanner.hpp"
 
 // AStarPlanner 구현
-AStarPlanner::AStarPlanner(const std::vector<std::vector<bool>>& map) : map_(map)
-{
+AStarPlanner::AStarPlanner(const std::vector<std::vector<bool>>& map) : map_(map) {
     directions_ = {{0,1},{1,0},{0,-1},{-1,0},{0,0}};
 }
 
@@ -16,17 +11,14 @@ bool AStarPlanner::isConstrained(
     int timestep,
     int agent,
     const std::vector<Constraint>& constraints
-) const
-{
-    for (const auto& c : constraints)
-    {
+) const {
+    for (const auto& c : constraints) {
         if (c.agent != agent) continue;
-        
         if (c.timestep != timestep) continue;
-        
-        if (c.loc.size() == 1 && c.loc[0] == next) return true;
-
-        if (c.loc.size() == 2 && c.loc[0] == curr && c.loc[1] == next) return true;
+        if (c.loc.size() == 1 && c.loc[0] == next)
+            return true;
+        if (c.loc.size() == 2 && c.loc[0] == curr && c.loc[1] == next)
+            return true;
     }
     return false;
 }
@@ -37,36 +29,30 @@ std::vector<Position> AStarPlanner::findPath(
     const std::vector<std::vector<int>>& heuristics,
     int agent_id,
     const std::vector<Constraint>& constraints
-) 
-{
+) {
     auto cmp = [](Node* a, Node* b) { return a->f_val() > b->f_val(); };
     std::priority_queue<Node*, std::vector<Node*>, decltype(cmp)> open_list(cmp);
 
     std::unordered_map<std::string, Node*> visited;
 
-    auto to_key = [](const Position& p, int t)
-    {
-        return std::to_string(p.x) + "," + std::to_string(p.y) + "," + std::to_string(t);
+    auto to_key = [](const Position& p, int t) {
+        return std::to_string(p.first) + "," + std::to_string(p.second) + "," + std::to_string(t);
     };
 
-    Node* root = new Node{start, 0, heuristics[start.x][start.y], 0, nullptr};
+    Node* root = new Node{start, 0, heuristics[start.first][start.second], 0, nullptr};
     open_list.push(root);
 
-    while (!open_list.empty())
-    {
+    while (!open_list.empty()) {
         Node* curr = open_list.top(); 
         open_list.pop();
         
-        if (curr->pos == goal && !isConstrained(curr->pos, curr->pos, curr->timestep + 1, agent_id, constraints))
-        {
+        if (curr->pos == goal && !isConstrained(curr->pos, curr->pos, curr->timestep + 1, agent_id, constraints)) {
             std::vector<Position> path;
-            while (curr)
-            {
+            while (curr) {
                 path.push_back(curr->pos);
                 curr = curr->parent;
             }
             std::reverse(path.begin(), path.end());
-            
             return path;
         }
 
@@ -74,23 +60,17 @@ std::vector<Position> AStarPlanner::findPath(
         if (visited.count(key)) continue;
         visited[key] = curr;
 
-        for (const auto& dir : directions_)
-        {
-            Position next = {curr->pos.x + dir.x, curr->pos.y + dir.y};
-
-            if (next.x < 0 || next.y < 0 ||
-                static_cast<size_t>(next.x) >= map_.size() ||
-                static_cast<size_t>(next.y) >= map_[0].size()) continue;
-            
-            if (map_[next.x][next.y]) continue;
-            
+        for (const auto& dir : directions_) {
+            Position next = {curr->pos.first + dir.first, curr->pos.second + dir.second};
+            if (next.first < 0 || next.second < 0 ||
+                static_cast<size_t>(next.first) >= map_.size() ||
+                static_cast<size_t>(next.second) >= map_[0].size()) continue;
+            if (map_[next.first][next.second]) continue;
             if (isConstrained(curr->pos, next, curr->timestep + 1, agent_id, constraints)) continue;
 
             int g = curr->g_val + 1;
-            int h = heuristics[next.x][next.y];
-            
+            int h = heuristics[next.first][next.second];
             Node* child = new Node{next, g, h, curr->timestep + 1, curr};
-            
             open_list.push(child);
         }
     }
@@ -99,48 +79,39 @@ std::vector<Position> AStarPlanner::findPath(
 }
 
 // TrafficPlanner 구현
-TrafficPlanner::TrafficPlanner(const std::vector<std::vector<bool>>& map, Log::Logger::s_ptr log)
-    : map_(map), log_(log)
-{
-    std::string msg = "TrafficPlanner 초기화 완료. 맵 크기: " + std::to_string(map_.size()) + "X : " + std::to_string(map_[0].size());
-    log_->Log(INFO,msg);
-
+TrafficPlanner::TrafficPlanner(const std::vector<std::vector<bool>>& map) : map_(map) {
+    std::cout << "TrafficPlanner 초기화 완료. 맵 크기: " 
+              << map_.size() << "x" << map_[0].size() << std::endl;
 }
 
 std::vector<std::vector<Position>> TrafficPlanner::planPaths(
     const std::vector<Position>& starts,
     const std::vector<Position>& goals,
-    bool use_disjoint_splitting
+    bool use_disjoint_splitting,
+    const std::vector<Constraint>& initial_constraints
 ) {
-    if (starts.size() != goals.size())
-    {
-        log_->Log(ERROR, "시작점과 목표점의 개수가 일치하지 않습니다!");
+    if (starts.size() != goals.size()) {
+        std::cerr << "시작점과 목표점의 개수가 일치하지 않습니다!" << std::endl;
         return {};
     }
 
-    std::string msg = "CBS 경로 계획 시작 - " + std::to_string( starts.size()) + "개 에이전트";
-    log_->Log(INFO,msg);
+    std::cout << "CBS 경로 계획 시작 - " << starts.size() << "개 에이전트" << std::endl;
 
     AStarPlanner planner(map_);
     std::priority_queue<CBSNode, std::vector<CBSNode>, std::greater<>> open;
     CBSNode root;
     root.cost = 0;
     root.id = 0;
-
+    root.constraints.insert(root.constraints.end(), initial_constraints.begin(), initial_constraints.end());
     // 초기 경로 계산
-    for (size_t i = 0; i < starts.size(); ++i)
-    {
+    for (size_t i = 0; i < starts.size(); ++i) {
         std::vector<Constraint> empty;
         auto heuristics = calculateManhattanHeuristics(goals[i]);
         auto path = planner.findPath(starts[i], goals[i], heuristics, i, empty);
-        
-        if (path.empty())
-        {
-            std::string msg = "에이전트 " + std::to_string(i) + "의 초기 경로를 찾을 수 없습니다!";
-            log_->Log(ERROR,msg);
+        if (path.empty()) {
+            std::cerr << "에이전트 " << i << "의 초기 경로를 찾을 수 없습니다!" << std::endl;
             return {};
         }
-        
         root.paths.push_back(path);
         root.cost += path.size();
     }
@@ -151,23 +122,17 @@ std::vector<std::vector<Position>> TrafficPlanner::planPaths(
     int node_id = 1;
     int iteration = 0;
 
-    while (!open.empty())
-    {
+    while (!open.empty()) {
         CBSNode curr = open.top(); 
         open.pop();
         iteration++;
 
-        if (iteration % 100 == 0)
-        {
-            std::string msg = "CBS 반복 "  + std::to_string(iteration) + ", 충돌 개수: " + std::to_string(curr.conflicts.size());
-            log_->Log(ERROR,msg);
+        if (iteration % 100 == 0) {
+            std::cout << "CBS 반복 " << iteration << ", 충돌 개수: " << curr.conflicts.size() << std::endl;
         }
 
-        if (curr.conflicts.empty())
-        {
-            std::string msg = "CBS 성공! "  + std::to_string(iteration) + "번의 반복으로 해결";
-            log_->Log(INFO,msg);
-            
+        if (curr.conflicts.empty()) {
+            std::cout << "CBS 성공! " << iteration << "번의 반복으로 해결" << std::endl;
             return curr.paths;
         }
 
@@ -176,8 +141,7 @@ std::vector<std::vector<Position>> TrafficPlanner::planPaths(
                           disjointSplitting(conflict) : 
                           standardSplitting(conflict);
 
-        for (const auto& constr : constraints)
-        {
+        for (const auto& constr : constraints) {
             CBSNode child = curr;
             child.id = node_id++;
             child.constraints.push_back(constr);
@@ -201,53 +165,42 @@ std::vector<std::vector<Position>> TrafficPlanner::planPaths(
         }
     }
 
-    log_->Log(ERROR,"CBS 실패 - 해결책을 찾을 수 없습니다!");
-    
+    std::cerr << "CBS 실패 - 해결책을 찾을 수 없습니다!" << std::endl;
     return {};
 }
 
-void TrafficPlanner::updateMap(const std::vector<std::vector<bool>>& new_map)
-{
+void TrafficPlanner::updateMap(const std::vector<std::vector<bool>>& new_map) {
     map_ = new_map;
-
-    log_->Log(INFO,"맵 업데이트 완료");
+    std::cout << "맵 업데이트 완료" << std::endl;
 }
 
-bool TrafficPlanner::validatePaths(const std::vector<std::vector<Position>>& paths) const
-{
+bool TrafficPlanner::validatePaths(const std::vector<std::vector<Position>>& paths) const {
     // 경로 유효성 검사 로직
     auto conflicts = detectCollisions(paths);
     return conflicts.empty();
 }
 
-std::vector<Conflict> TrafficPlanner::detectCollisions(const std::vector<std::vector<Position>>& paths) const
-{
+std::vector<Conflict> TrafficPlanner::detectCollisions(const std::vector<std::vector<Position>>& paths) const {
     std::vector<Conflict> conflicts;
     size_t max_t = 0;
-    for (const auto& p : paths)
-    {
+    for (const auto& p : paths) {
         if (p.size() > max_t) max_t = p.size();
     }
     
-    for (size_t t = 0; t < max_t; ++t)
-    {
-        for (size_t i = 0; i < paths.size(); ++i)
-        {
+    for (size_t t = 0; t < max_t; ++t) {
+        for (size_t i = 0; i < paths.size(); ++i) {
             Position pi = (t < paths[i].size()) ? paths[i][t] : paths[i].back();
-            for (size_t j = i + 1; j < paths.size(); ++j)
-            {
+            for (size_t j = i + 1; j < paths.size(); ++j) {
                 Position pj = (t < paths[j].size()) ? paths[j][t] : paths[j].back();
                 
                 // Vertex conflict
-                if (pi == pj)
-                {
+                if (pi == pj) {
                     conflicts.push_back(Conflict{static_cast<int>(i), static_cast<int>(j), 
                                                static_cast<int>(t), {pi}});
                 }
                 
                 // Edge conflict
-                if (t > 0)
-                {
+                if (t > 0) {
                     Position pi_prev = (t-1 < paths[i].size()) ? paths[i][t-1] : paths[i].back();
                     Position pj_prev = (t-1 < paths[j].size()) ? paths[j][t-1] : paths[j].back();
                     if (pi_prev == pj && pj_prev == pi) {
@@ -261,8 +214,7 @@ std::vector<Conflict> TrafficPlanner::detectCollisions(const std::vector<std::ve
     return conflicts;
 }
 
-std::vector<Constraint> TrafficPlanner::standardSplitting(const Conflict& conflict) const
-{
+std::vector<Constraint> TrafficPlanner::standardSplitting(const Conflict& conflict) const {
     std::vector<Constraint> constraints;
     
     // Vertex conflict: loc.size() == 1
@@ -280,19 +232,17 @@ std::vector<Constraint> TrafficPlanner::standardSplitting(const Conflict& confli
     return constraints;
 }
 
-std::vector<Constraint> TrafficPlanner::disjointSplitting(const Conflict& conflict) const 
-{
+std::vector<Constraint> TrafficPlanner::disjointSplitting(const Conflict& conflict) const {
     // 간단하게 표준 분할과 동일하게 구현 (실제로는 더 복잡한 로직 가능)
     return standardSplitting(conflict);
 }
 
-std::vector<std::vector<int>> TrafficPlanner::calculateManhattanHeuristics(const Position& goal) const 
-{
+std::vector<std::vector<int>> TrafficPlanner::calculateManhattanHeuristics(const Position& goal) const {
     std::vector<std::vector<int>> heuristics(map_.size(), std::vector<int>(map_[0].size(), 0));
     for (size_t y = 0; y < map_.size(); ++y) {
         for (size_t x = 0; x < map_[0].size(); ++x) {
-            heuristics[y][x] = std::abs(goal.x - static_cast<int>(y))
-                             + std::abs(goal.y - static_cast<int>(x));
+            heuristics[y][x] = std::abs(goal.first - static_cast<int>(y))
+                             + std::abs(goal.second - static_cast<int>(x));
         }
     }
     return heuristics;
