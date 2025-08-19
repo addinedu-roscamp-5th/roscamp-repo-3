@@ -46,6 +46,7 @@ bool RosInterface::Initialize(Integrated::w_ptr<core::ICore> Icore)
   odom_pubs_.clear();
   nav_goal_pubs_.clear();
   battery_subs_.clear();
+  path_pubs_.clear();
 
   for (int i = 0; i < _AMR_NUM_; ++i)
   {
@@ -61,6 +62,11 @@ bool RosInterface::Initialize(Integrated::w_ptr<core::ICore> Icore)
     auto func = [this, i](const std_msgs::msg::Float32::SharedPtr msg) {this->cbBattery(i, msg);};
     battery_subs_.push_back(create_subscription<std_msgs::msg::Float32>(topic, 10, func));
     log_->Log(Log::LogLevel::INFO, "Subscribed battery for:" + topic);
+
+    topic = "/path" + std::to_string(i+1);
+    path_pubs_.push_back(create_publisher<nav_msgs::msg::Path>(topic, 10));
+    log_->Log(Log::LogLevel::INFO, "Created publisher for:" + topic);
+
   }
   return true;
 }
@@ -330,6 +336,32 @@ void RosInterface::publishNavGoal(int idx, const Commondefine::Position wp)
 
     log_->Log(Log::LogLevel::INFO,"Published wp to goalpose" + std::to_string(idx+1) + ": (" + std::to_string(wp.x) +", " + std::to_string(wp.y) + ")");
 }
+
+void RosInterface::PublishPath(int idx, std::vector<Commondefine::Position>& path) 
+{
+  if (idx < 0 || idx >= static_cast<int>(path_pubs_.size()) || path.empty()) return;
+
+  nav_msgs::msg::Path msg;
+  msg.header.frame_id = "map";
+  msg.header.stamp    = rclcpp::Clock().now();
+
+  for(auto& wp : path)
+  {
+    Commondefine::pose2f p2f = Commondefine::convertPositionToPose(wp);
+    geometry_msgs::msg::PoseStamped ps;
+    ps.header = msg.header;
+    ps.pose.position.x = p2f.x;
+    ps.pose.position.y = p2f.y;
+    ps.pose.position.z = 0.0;
+    ps.pose.orientation.z = std::sin(wp.yaw / 2.0);
+    ps.pose.orientation.w = std::cos(wp.yaw / 2.0);
+
+    msg.poses.push_back(ps);
+  }
+
+  path_pubs_[idx]->publish(msg);
+}
+
 
 void RosInterface::cbBattery(const int idx, const std_msgs::msg::Float32::SharedPtr msg)
 {

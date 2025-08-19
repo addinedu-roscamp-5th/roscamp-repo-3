@@ -233,15 +233,17 @@ bool Core::ArmDoneCallback(ArmRequest request)
     //로봇팔 2번에 완료 됬다는 신호를 보내주면 공유 자원을 사용가능 하게 설정한다.
     if(request.robot_id == RobotArm::RobotArm2) 
     {
-        pStorageManager_->setCriticalSection(true);
-
-
-        OpenSyncWindow(); // 완료가 된 시점에 새로운 경로 생성을 요청하고, path가 업데이트 되도록 기다린다.
-
+        // if(IsSyncOpen())
+        //     ArriveAtSyncOnce(request.amr_id);
+        // else
+        {
+            OpenSyncWindow(); // 완료가 된 시점에 새로운 경로 생성을 요청하고, path가 업데이트 되도록 기다린다.
+            ArriveAtSyncOnce(request.amr_id);
+        }
         //현재 세대에 참여하는 로봇의 갯수는 BUSY 상태의 로봇들이기 때문에 본인 까지 포함이 되어 있는 상태이다.
         //이때 handleWaypointArrival() 내부에서 도착 완료 여부를 카운트 하는데, 지금 함수에서는 이미 도착한 상태이기 때문에
         //그냥 바로 윈도우를 오픈 하고 
-        ArriveAtSyncOnce(request.amr_id);
+        
         
         //핑키에게 다음 번 주행 명령을 보낸다. 실제 목적지로 간다.
         assignTask(request.amr_id, AmrStep::check_path_update);
@@ -286,6 +288,8 @@ bool Core::DoneCallback(const std::string& requester, const int& customer_id)
     
     if (requester == "customer")
     {
+        pStorageManager_->setCriticalSection(true);
+
         for (int i = 0; i < _AMR_NUM_; ++i)
         {
             if (GetAmrCustID(i) == customer_id)
@@ -295,6 +299,9 @@ bool Core::DoneCallback(const std::string& requester, const int& customer_id)
                 amr_adapters_[i]->SetCurrentDst(Commondefine::wpChargingStation[i]);
                 amr_adapters_[i]->SetAmrStep(Commondefine::AmrStep::MoveTo_charging_station);
 
+                // if(IsSyncOpen())
+                //     ArriveAtSyncOnce(i);
+                // else
                 OpenSyncWindow(); // 완료가 된 시점에 새로운 경로 생성을 요청하고, path가 업데이트 되도록 기다린다.
 
                 assignTask(i,Commondefine::AmrStep::check_path_update);
@@ -352,16 +359,36 @@ void Core::PlanPaths()
     //실제 경로 작성
     auto paths = traffic_Planner_->planPaths(starts, goals);
 
-    if(paths.empty() || paths.size() != active_indices.size())
+    if (paths.empty() || paths.size() != active_indices.size())
     {
         log_->Log(ERROR,"path가 비어있거나, path의 크기와 실제 요청한 로봇의 갯수가 맞지 않습니다.");
         return;
     }
 
+    auto iface = Interface_.lock();
+    if (!iface)
+    {
+        log_->Log(Log::LogLevel::ERROR, "RosInterface is nullptr");
+        return;
+    }
+
+    const int nextiter = 1;
     for(size_t i = 0 ; i < paths.size(); ++i)
     {
         size_t idx = active_indices[i];
+        auto& wp = paths[i];
+
+        for (auto it = wp.begin(); it + nextiter != wp.end(); ++it)
+        {
+            auto& cur = *it;
+            auto& next = *(it + nextiter);
+
+            cur.yaw = Commondefine::yaw(cur, next);
+        }
+
         amr_adapters_[idx]->updatePath(paths[i]);
+
+        iface->PublishPath(static_cast<int>(idx), paths[i]);
     }
 }
 

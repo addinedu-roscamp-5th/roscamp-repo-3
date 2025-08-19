@@ -23,7 +23,7 @@ namespace Manager
 
         int EnqueueRequest(const Commondefine::GUIRequest& r);
 
-        void PopRequest(Commondefine::GUIRequest& r);
+        bool PopRequest(Commondefine::GUIRequest& r);
 
         void BestRobotSelector();
         

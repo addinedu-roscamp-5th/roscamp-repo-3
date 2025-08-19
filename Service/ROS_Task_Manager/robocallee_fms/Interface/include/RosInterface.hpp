@@ -27,6 +27,7 @@
 #include "robocallee_fms/msg/aruco_pose.hpp"
 
 #include "nav_msgs/msg/odometry.hpp"
+#include "nav_msgs/msg/path.hpp"
 
 #include <mutex>
 #include <vector>
@@ -60,6 +61,8 @@ namespace interface
         rclcpp::Subscription<ArucoPoseArray>::SharedPtr                             aurco_array_sub_;
 
         std::vector<rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr>        battery_subs_;
+
+        std::vector<rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr>              path_pubs_;
 
         // poseStamped publish
         std::vector<rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr>  nav_goal_pubs_;
@@ -103,7 +106,7 @@ namespace interface
 
         void updatebattery(int idx, float percent);
 
-        // void publishPath(std::vector<std::vector<Position> paths){}
+        void PublishPath(int idx, std::vector<Commondefine::Position>& path);
 
         // 요청·완료 서비스 콜백
         void cbCustomerRequest(const std::shared_ptr<CustomerServiceType::Request> request, 

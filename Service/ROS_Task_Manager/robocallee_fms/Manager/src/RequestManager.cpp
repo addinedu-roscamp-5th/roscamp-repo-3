@@ -28,9 +28,9 @@ int RequestManager::EnqueueRequest(const Commondefine::GUIRequest& r)
     return wait_list;
 }
 
-void RequestManager::PopRequest(Commondefine::GUIRequest& r)
+bool RequestManager::PopRequest(Commondefine::GUIRequest& r)
 {
-    if (request_queue_.empty()) return;
+    if (request_queue_.empty()) return false;
     
     {
         std::lock_guard<std::mutex> lock(mtx_);
@@ -39,6 +39,8 @@ void RequestManager::PopRequest(Commondefine::GUIRequest& r)
     }
 
     log_->Log(Log::LogLevel::INFO, "PopRequest 완료");
+
+    return true;
 }
 
 void RequestManager::BestRobotSelector()
@@ -57,7 +59,7 @@ void RequestManager::BestRobotSelector()
     int best_amr = err;
     int max_battery = err;
 
-    for (int i = 0; i < amrs_num; ++i)
+    for (int i = 0; i < amrs_num-1; ++i)
     {
         Commondefine::RobotState status = core->GetAmrState(i);
         int battery = core->GetAmrBattery(i);
@@ -81,9 +83,9 @@ void RequestManager::BestRobotSelector()
     log_->Log(Log::INFO, "선택된 AMR: AMR" + std::to_string(best_amr));
 
     // 요청 POP
-    PopRequest(req);
+    if(!PopRequest(req)) return;
 
-    core->assignWork(1, req);
-    // core->assignWork(best_amr, req);
+    //core->assignWork(0, req);
+    core->assignWork(best_amr, req);
     return;
 }

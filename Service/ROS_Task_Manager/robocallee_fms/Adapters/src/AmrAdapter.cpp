@@ -92,16 +92,6 @@ void AmrAdapter::updatePath(const std::vector<Commondefine::Position>& new_path)
     }
 
     if(waypoints_.empty()) return;
-
-    //여기에서 웨이포인트 간 yaw 값을 계산한다.
-    const int nextiter = 1;
-    for (auto it = waypoints_.begin(); it + nextiter != waypoints_.end(); ++it)
-    {
-        auto& cur = *it;
-        auto& next = *(it + nextiter);
-
-        cur.yaw = Commondefine::yaw(cur, next);
-    }
 }
 
 
