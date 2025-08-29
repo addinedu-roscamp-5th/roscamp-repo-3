@@ -49,24 +49,24 @@
 
 ### 로봇팔 수행
 
-<p align="center">
-  <figure style="display:inline-block; margin:10px;">
+<div style="display:flex; justify-content:center; flex-wrap:wrap;">
+  <div style="margin:10px; text-align:center;">
     <img src="./docs/images/slide_23_img_1.gif" width="200"/>
-    <figcaption align="center">상품 리스트 화면</figcaption>
-  </figure>
-  <figure style="display:inline-block; margin:10px;">
+    <div>Shelf → Buffer</div>
+  </div>
+  <div style="margin:10px; text-align:center;">
     <img src="./docs/images/slide_24_img_0.gif" width="200"/>
-    <figcaption align="center">상품 상세 화면</figcaption>
-  </figure>
-  <figure style="display:inline-block; margin:10px;">
+    <div>Buffer → Robot</div>
+  </div>
+  <div style="margin:10px; text-align:center;">
     <img src="./docs/images/slide_25_img_0.gif" width="200"/>
-    <figcaption align="center">주문 진행 화면</figcaption>
-  </figure>
-  <figure style="display:inline-block; margin:10px;">
+    <div>Robot → Buffer</div>
+  </div>
+  <div style="margin:10px; text-align:center;">
     <img src="./docs/images/slide_26_img_1.gif" width="200"/>
-    <figcaption align="center">품절 상품 화면</figcaption>
-  </figure>
-</p>
+    <div>Buffer → Shelf</div>
+  </div>
+</div>
 
 ### OCR
 ![이미지1](./docs/images/slide_27_img_17.gif)
