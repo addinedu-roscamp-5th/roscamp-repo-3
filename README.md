@@ -108,6 +108,9 @@ roscamp-repo-3/
 | ![이미지1](./docs/images/DQN_waypoint_following.gif) | ![이미지2](./docs/images/DQN_collision_avoidance_failed.gif) |
 |:--------------------------------------------:|:--------------------------------------------:|
 | DQN Navigation                               | DQN collision avoidance(failed)               |
+
+### ● PID vs Nav2 (DQN)
+[Performance Comparison Video](https://youtu.be/zxgvcNaVX5w)
 ### ● Vision 기반 주행
 
 #### □ vision tracker
