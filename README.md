@@ -1,9 +1,10 @@
 # roscamp-repo-3
+# roscamp-repo-3
 
 # RoboCallee (Robot + Callee)
 
 <p align="center">
-  <img src="./images/logo.png" alt="RoboCallee Logo" width="200"/>
+  <img src="./docs/images/logo.png" alt="RoboCallee Logo" width="200"/>
 </p>
 
 스마트 매장에서 **로봇팔 + 자율 주행 로봇**을 활용해 신발 재고 운반과 고객 응대를 자동화하는 프로젝트입니다.  
@@ -12,43 +13,43 @@
 ---
 
 ## 1. 프로젝트 개요
-![프로젝트 개요](./images/project_overview.gif)
+![프로젝트 개요](./docs/images/slide_4_img_4.png)
 
 ---
 
 ## 2. SW 아키텍처
-![소프트웨어 아키텍처](./images/software_architecture.png)
+![소프트웨어 아키텍처](./docs/images/slide_4_img_5.png)
 
 ---
 
 ## 3. FMS (Fleet Management System)
 ### 배달 시나리오
-![FMS 배달 시나리오](./images/fms_delivery.gif)
+![FMS 배달 시나리오](./docs/images/fms_delivery.gif)
 
 ### 수거 시나리오
-![FMS 수거 시나리오](./images/fms_collection.gif)
+![FMS 수거 시나리오](./docs/images/slide_19_img_1.gif)
 
 ---
 
 ## 4. Control Service
-![Control Service](./images/control_service.gif)
+![Control Service](./docs/images/control_service.gif)
 
 ---
 
 ## 5. 로봇팔 제어
-![로봇팔 제어](./images/robot_arm_pickplace.gif)
+![로봇팔 제어](./docs/images/slide_27_img_17.gif)
 
 ---
 
 ## 6. 자율 주행 로봇
 ### PID 제어
-![PID 주행](./images/mobile_pid.gif)
+![PID 주행](./docs/images/mobile_pid.gif)
 
 ### 강화학습 주행 (DQN)
-![강화학습 주행](./images/mobile_dqn.gif)
+![강화학습 주행](./docs/images/mobile_dqn.gif)
 
 ### Vision 기반 주행
-![사람 추종](./images/follow_mode.gif)  
-![장애물 회피](./images/obstacle_avoidance.gif)
+![사람 추종](./docs/images/follow_mode.gif)  
+![장애물 회피](./docs/images/obstacle_avoidance.gif)
 
 ---
