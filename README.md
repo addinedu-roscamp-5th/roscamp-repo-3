@@ -22,14 +22,28 @@
 
 ```mermaid
 graph TD
-  A[roscamp-repo-3] --> B[HW_Controller]
-  A --> C[Service]
-  A --> D[Technology_Survey]
-  D --> E[robotCamtoArm]
-  A --> F[docs]
-  F --> G[images]
-  A --> H[.gitignore]
-  A --> I[README.md]
+  A[roscamp-repo-3]
+  A --> B[docs]
+  B --> C[images]
+
+  A --> D[HW_Controller]
+  D --> D1[DomainBridge]
+  D --> D2[Location Manger_GUI]
+  D2 --> D21[aruco_interfaces/msg]
+  D2 --> D22[aruco_marker_pkg/...]
+  D --> D3[Mobile_Robot_Controller/pid_controller_node/...]
+  D --> D4[Robot_Arm_Controller/ros2_mycobot_pick_and_place/src/...]
+
+  A --> E[Service]
+  E --> E1[.vscode]
+  E --> E2[Control_Service/RoboCallee_Server/...]
+  E --> E3[Lib/{opencv_r, YAML}]
+  E --> E4[Robocallee_PickBot/{Core, ImageProcessing, Interface, RobotArm}]
+  E --> E5[ROS_Task_Manager/robocallee_fms/{Adapters, Core, Manager, Task, Traffic}]
+  E --> E6[Utile/{Common, Logger}]
+
+  A --> F[Technology_Survey/robotCamtoArm/{Calib, Calib_Image, include, src}]
+
 ```
 
 ---
