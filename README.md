@@ -92,10 +92,13 @@ roscamp-repo-3/
 ## 7. 자율 주행 로봇
 
 ### ● PID 제어
-![PID 주행](./docs/images/mobile_pid.gif)
+
+| ![이미지1](./docs/images/P.gif) | ![이미지2](./docs/images/image71.gif) |
+|:--------------------------------------------:|:--------------------------------------------:|
+| Before gain tuning                           | After gain tuning                            |
 
 ### ● 강화학습 주행 (DQN)
-![강화학습 주행](./docs/images/mobile_dqn.gif)
+![강화학습 주행](./docs/images/DQN_collision_avoidance.gif)
 
 ### ● Vision 기반 주행
 
