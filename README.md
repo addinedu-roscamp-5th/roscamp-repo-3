@@ -30,11 +30,12 @@
 
 ![FMS SW 아키텍처](./docs/images/slide_14_img_0.png)
 
-### 배달 시나리오
-![FMS 배달 시나리오](./docs/images/fms_delivery.gif)
+### 시나리오 수행 영상
+[![FMS 배달 시나리오](./docs/images/fms_delivery.gif)](https://youtu.be/GBW1qsYFHe4)
 
-### 수거 시나리오
-![FMS 수거 시나리오](./docs/images/slide_19_img_1.gif)
+| [![FMS 수거 시나리오](./docs/images/fms_delivery.gif)](https://www.youtube.com/watch?v=zXWMFyJrSFo) |[![FMS 수거 시나리오](./docs/images/fms_delivery.gif)](https://www.youtube.com/watch?v=zXWMFyJrSFo) |
+|---------------------------------------------|---------------------------------------------|
+[![FMS 수거 시나리오](./docs/images/fms_delivery.gif)](https://youtu.be/GBW1qsYFHe4)
 
 ---
 
