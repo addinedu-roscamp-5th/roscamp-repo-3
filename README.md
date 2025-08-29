@@ -90,17 +90,16 @@ roscamp-repo-3/
 ---
 
 ## 7. 자율 주행 로봇
+### ● Aruco marker Localization
+
+### ● Navigation State Machin
 
 ### ● PID 제어
-| ![PID 제어](./docs/images/P.gif) | ![PID 제어](./docs/images/image71.gif) |
-|:--------------------------------------------:|:--------------------------------------------:|
-| Before gain tuning                           | After gain tuning                            |
+![PID 제어](./docs/images/P.gif)
+![PID 제어](./docs/images/PID Control logic.png)
 
 ### ● 강화학습 주행 (DQN)
-| ![강화학습 주행](./docs/images/P.gif) | ![강화학습 주행](./docs/images/DQN_collision_avoidance.gif) |
-|:--------------------------------------------:|:--------------------------------------------:|
-| DQN waypoint following                       | DQN waypoint collision avoidance             |
-
+![강화학습 주행](./docs/images/P.gif)
 ### ● Vision 기반 주행
 
 #### □ vision tracker
