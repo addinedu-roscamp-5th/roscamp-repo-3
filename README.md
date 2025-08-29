@@ -1,7 +1,7 @@
 # RoboCallee (Robot + Callee)
 
 <p align="center">
-  <img src="./docs/images/logo.png" alt="RoboCallee Logo" width="200"/>
+  <img src="./docs/images/slide_1_img_4.png" alt="RoboCallee Logo" width="200"/>
 </p>
 
 ---
@@ -47,12 +47,28 @@
 
 ## 5. 로봇팔 제어
 
-### OCR
-| ![이미지1](./docs/images/slide_23_img_1.gif) | ![이미지2](./docs/images/slide_24_img_0.gif) | ![이미지3](./docs/images/slide_25_img_0.gif) | ![이미지4](./docs/images/slide_26_img_1.gif) |
-|---------------------------------------------|---------------------------------------------|---------------------------------------------|---------------------------------------------|
+### 로봇팔 수행
+
+<p align="center">
+  <figure style="display:inline-block; margin:10px;">
+    <img src="./docs/images/slide_23_img_1.gif" width="200"/>
+    <figcaption align="center">Shelf → Buffer</figcaption>
+  </figure>
+  <figure style="display:inline-block; margin:10px;">
+    <img src="./docs/images/slide_24_img_0.gif" width="200"/>
+    <figcaption align="center">Buffer → Robot</figcaption>
+  </figure>
+  <figure style="display:inline-block; margin:10px;">
+    <img src="./docs/images/slide_25_img_0.gif" width="200"/>
+    <figcaption align="center">Robot → Buffer</figcaption>
+  </figure>
+  <figure style="display:inline-block; margin:10px;">
+    <img src="./docs/images/slide_26_img_1.gif" width="200"/>
+    <figcaption align="center">Buffer → Shelf</figcaption>
+  </figure>
+</p>
 
 ### OCR
-
 ![이미지1](./docs/images/slide_27_img_17.gif)
  
 ---
