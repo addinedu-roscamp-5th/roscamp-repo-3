@@ -1,6 +1,6 @@
 # RoboCallee (Robot + Callee)
 <p align="center">
-  <img src="./docs/images/slide_1_img_4.png" alt="RoboCallee Logo" width="200"/>
+  <img src="./docs/images/image72.png" alt="RoboCallee Logo" width="200"/>
 </p>
 
 ---
@@ -11,7 +11,10 @@
 고객 편의성 증대와 매장 운영 효율화를 동시에 달성하는 **로봇 기반 스마트 스토어**를 목표로 합니다.
 
 ### 프로젝트 수행 시나리오
-![프로젝트 개요](./docs/images/slide_9_img_1.png)
+![프로젝트 개요](./docs/images/image39.png)
+
+### Map 구성
+![프로젝트 개요](./docs/images/image46.png)
 
 ---
 
@@ -21,47 +24,47 @@
 
 ## 3. SW 아키텍처
 
-![소프트웨어 아키텍처](./docs/images/slide_71_img_7.png)
+![소프트웨어 아키텍처](./docs/images/image38.png)
 
 ---
 
 ## 4. FMS (Fleet Management System)
 
 ### FMS SW 아키텍처
-![FMS SW 아키텍처](./docs/images/slide_14_img_0.png)
+![FMS SW 아키텍처](./docs/images/image36.png)
 
 ### 시나리오 수행 영상
-| [![FMS 배달 시나리오](https://img.youtube.com/vi/GBW1qsYFHe4/0.jpg)](https://www.youtube.com/watch?v=GBW1qsYFHe4) | [![FMS 수거 시나리오](https://img.youtube.com/vi/zXWMFyJrSFo/0.jpg)](https://www.youtube.com/watch?v=zXWMFyJrSFo) |
-|:----------------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------------:|
-| FMS 배달 시나리오 | FMS 수거 시나리오 |
+| [![FMS 배달 시나리오](https://img.youtube.com/vi/GBW1qsYFHe4/0.jpg)](https://www.youtube.com/watch?v=GBW1qsYFHe4) | [![FMS 수거 시나리오](https://img.youtube.com/vi/zXWMFyJrSFo/0.jpg)](https://www.youtube.com/watch?v=zXWMFyJrSFo) | [![FMS 수거 시나리오](https://img.youtube.com/vi/zXWMFyJrSFo/0.jpg)](https://www.youtube.com/watch?v=zXWMFyJrSFo) |
+|:----------------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------------:|
+| FMS 배달 시나리오 | FMS 수거 시나리오 | FMS 수거 시나리오 GUI 요청 |
 
 ---
 
 ## 5. Control Service
 
 ### User GUI
-| ![이미지1](./docs/images/slide_17_img_0.png) | ![이미지2](./docs/images/slide_17_img_1.png) | ![이미지3](./docs/images/slide_17_img_2.png) | ![이미지4](./docs/images/slide_17_img_3.png) |
+| ![이미지1](./docs/images/image26.png) | ![이미지2](./docs/images/image27.png) | ![이미지3](./docs/images/image29.png) | ![이미지4](./docs/images/image30.png) |
 |---------------------------------------------|---------------------------------------------|---------------------------------------------|---------------------------------------------|
 
 ### Admin GUI
 
 #### Web GUI
-![Control Service](./docs/images/slide_18_img_0.png)
+![Control Service](./docs/images/image89.png)
 
 #### QT GUI
-![Control Service](./docs/images/slide_13_img_2.jpg)
+![Control Service](./docs/images/image37.gif)
 
 ---
 
 ## 6. 로봇팔 제어
 
 ### 로봇팔 수행
-| ![이미지1](./docs/images/slide_23_img_1.gif) | ![이미지2](./docs/images/slide_24_img_0.gif) | ![이미지3](./docs/images/slide_25_img_0.gif) | ![이미지4](./docs/images/slide_26_img_1.gif) |
+| ![이미지1](./docs/images/image108.gif) | ![이미지2](./docs/images/image71.gif) | ![이미지3](./docs/images/image90.gif) | ![이미지4](./docs/images/image96.gif) |
 |:--------------------------------------------:|:--------------------------------------------:|:--------------------------------------------:|:--------------------------------------------:|
 | Shelf → Buffer                               | Buffer → Robot                               | Robot → Buffer                               | Buffer → Shelf                               |
 
 ### OCR
-![이미지1](./docs/images/slide_27_img_17.gif)
+![이미지1](./docs/images/image91.gif)
  
 ---
 
@@ -75,30 +78,13 @@
 ### Vision 기반 주행
 
 #### vision tracker
-| ![이미지1](./docs/images/slide_37_img_0.gif) | ![이미지2](./docs/images/slide_37_img_7.gif) |
+| ![이미지1](./docs/images/image81.gif) | ![이미지2](./docs/images/image67.gif) |
 |:--------------------------------------------:|:--------------------------------------------:|
 | vision tracker                               | 로봇 시야                                    |
 
 #### Obstacle avoidance
-![장애물 회피](./docs/images/obstacle_avoidance.gif)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+| ![이미지1](./docs/images/image87.gif) | ![이미지2](./docs/images/image93.gif) |
+|:--------------------------------------------:|:--------------------------------------------:|
+| 장애물 회피                               | 로봇 시야                                    |
 
 ---
