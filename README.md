@@ -20,30 +20,25 @@
 
 ## 2. Git 폴더 구조
 
-```mermaid
-graph TD
-  A[roscamp-repo-3]
-  A --> B[docs]
-  B --> C[images]
-
-  A --> D[HW_Controller]
-  D --> D1[DomainBridge]
-  D --> D2[Location Manger_GUI]
-  D2 --> D21[aruco_interfaces/msg]
-  D2 --> D22[aruco_marker_pkg/...]
-  D --> D3[Mobile_Robot_Controller/pid_controller_node/...]
-  D --> D4[Robot_Arm_Controller/ros2_mycobot_pick_and_place/src/...]
-
-  A --> E[Service]
-  E --> E1[.vscode]
-  E --> E2[Control_Service/RoboCallee_Server/...]
-  E --> E3[Lib/{opencv_r, YAML}]
-  E --> E4[Robocallee_PickBot/{Core, ImageProcessing, Interface, RobotArm}]
-  E --> E5[ROS_Task_Manager/robocallee_fms/{Adapters, Core, Manager, Task, Traffic}]
-  E --> E6[Utile/{Common, Logger}]
-
-  A --> F[Technology_Survey/robotCamtoArm/{Calib, Calib_Image, include, src}]
-
+```
+roscamp-repo-3/
+├── docs/
+│   └── images/
+├── HW_Controller/
+│   ├── DomainBridge/
+│   ├── Location Manger_GUI/
+│   │   ├── aruco_interfaces/msg
+│   │   └── aruco_marker_pkg/...
+│   ├── Mobile_Robot_Controller/pid_controller_node/...
+│   └── Robot_Arm_Controller/ros2_mycobot_pick_and_place/src/...
+├── Service/
+│   ├── .vscode/
+│   ├── Control_Service/RoboCallee_Server/{common, config, media, static, templates...}
+│   ├── Lib/{opencv_r, YAML...}
+│   ├── Robocallee_PickBot/{Core, ImageProcessing, Interface, RobotArm...}
+│   ├── ROS_Task_Manager/robocallee_fms/{Adapters, Core, Manager, Task, Traffic...}
+│   └── Utile/{Common, Logger}
+└── Technology_Survey/robotCamtoArm/{Calib, Calib_Image, include, src}
 ```
 
 ---
