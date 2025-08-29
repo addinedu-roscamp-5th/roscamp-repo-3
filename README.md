@@ -106,6 +106,8 @@ roscamp-repo-3/
 
 ### ● 강화학습 주행 (DQN)
 ![DQN](./docs/images/simple%20DQN%20structrue.png)
+#### □ Gazebo Simulation
+[DQN Gazebo Simulation](https://youtu.be/4HWVJNYS8s4?si=KnsqQ5FKuCiikGS4).
 #### □ Sim2Real
 | ![이미지1](./docs/images/DQN_waypoint_following.gif) | ![이미지2](./docs/images/DQN_collision_avoidance_failed.gif) |
 |:--------------------------------------------:|:--------------------------------------------:|
