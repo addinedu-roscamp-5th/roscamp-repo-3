@@ -28,10 +28,10 @@
 ![FMS SW 아키텍처](./docs/images/slide_14_img_0.png)
 
 ### 시나리오 수행 영상
-[![FMS 배달 시나리오](./docs/images/fms_delivery.gif)](https://youtu.be/GBW1qsYFHe4)
+| [![FMS 배달 시나리오](https://img.youtube.com/vi/GBW1qsYFHe4/0.jpg)](https://www.youtube.com/watch?v=GBW1qsYFHe4) | [![FMS 수거 시나리오](https://img.youtube.com/vi/zXWMFyJrSFo/0.jpg)](https://www.youtube.com/watch?v=zXWMFyJrSFo) |
+|:----------------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------------:|
+| FMS 배달 시나리오 | FMS 수거 시나리오 |
 
-| [![FMS 수거 시나리오](./docs/images/fms_delivery.gif)](https://www.youtube.com/watch?v=zXWMFyJrSFo) |[![FMS 수거 시나리오](./docs/images/fms_delivery.gif)](https://www.youtube.com/watch?v=zXWMFyJrSFo) |
-|---------------------------------------------|---------------------------------------------|
 
 ---
 
@@ -46,27 +46,11 @@
 ---
 
 ## 5. 로봇팔 제어
-
 ### 로봇팔 수행
+| ![이미지1](./docs/images/slide_23_img_1.gif) | ![이미지2](./docs/images/slide_24_img_0.gif) | ![이미지3](./docs/images/slide_25_img_0.gif) | ![이미지4](./docs/images/slide_26_img_1.gif) |
+|:--------------------------------------------:|:--------------------------------------------:|:--------------------------------------------:|:--------------------------------------------:|
+| Shelf → Buffer                               | Buffer → Robot                               | Robot → Buffer                               | Buffer → Shelf                               |
 
-<div style="display:flex; justify-content:center; flex-wrap:wrap;">
-  <div style="margin:10px; text-align:center;">
-    <img src="./docs/images/slide_23_img_1.gif" width="200"/>
-    <div>Shelf → Buffer</div>
-  </div>
-  <div style="margin:10px; text-align:center;">
-    <img src="./docs/images/slide_24_img_0.gif" width="200"/>
-    <div>Buffer → Robot</div>
-  </div>
-  <div style="margin:10px; text-align:center;">
-    <img src="./docs/images/slide_25_img_0.gif" width="200"/>
-    <div>Robot → Buffer</div>
-  </div>
-  <div style="margin:10px; text-align:center;">
-    <img src="./docs/images/slide_26_img_1.gif" width="200"/>
-    <div>Buffer → Shelf</div>
-  </div>
-</div>
 
 ### OCR
 ![이미지1](./docs/images/slide_27_img_17.gif)
