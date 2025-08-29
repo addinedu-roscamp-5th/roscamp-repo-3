@@ -99,7 +99,7 @@ roscamp-repo-3/
 ### ● Navigation State Machine
 ![Navigation](./docs/images/navigation%20state%20machine.gif)
 ### ● PID 제어
-![PID 제어](./docs/images/PID Control logic.png)
+![PID 제어](./docs/images/PID%20Control%20logic.png)
 ![PID tuning](./docs/images/PID%20tuning.gif)
 
 ### ● 강화학습 주행 (DQN)
