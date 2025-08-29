@@ -55,9 +55,9 @@ roscamp-repo-3/
 ![FMS SW 아키텍처](./docs/images/image36.png)
 
 ### ● 시나리오 수행 영상
-| [![FMS 배달 시나리오](https://img.youtube.com/vi/GBW1qsYFHe4/0.jpg)](https://www.youtube.com/watch?v=GBW1qsYFHe4) | [![FMS 수거 시나리오](https://img.youtube.com/vi/zXWMFyJrSFo/0.jpg)](https://www.youtube.com/watch?v=zXWMFyJrSFo) | [![FMS 수거 시나리오 GUI 요청](https://img.youtube.com/vi/4HWVJNYS8s4/0.jpg)](https://www.youtube.com/watch?v=4HWVJNYS8s4) |
+| [![FMS 배달 시나리오](https://img.youtube.com/vi/GBW1qsYFHe4/0.jpg)](https://www.youtube.com/watch?v=GBW1qsYFHe4) | [![FMS 수거 GUI 시나리오](https://img.youtube.com/vi/zXWMFyJrSFo/0.jpg)](https://www.youtube.com/watch?v=zXWMFyJrSFo) | [![FMS 수거 시나리오](https://img.youtube.com/vi/mT-UyDo27II/0.jpg)](https://www.youtube.com/watch?v=mT-UyDo27II) |
 |:----------------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------------:|
-| FMS 배달 시나리오 | FMS 수거 시나리오 | FMS 수거 시나리오 GUI 요청 |
+| FMS 배달 시나리오 | FMS 수거 GUI 시나리오 | FMS 수거 시나리오 |
 
 ---
 
@@ -90,6 +90,7 @@ roscamp-repo-3/
 ---
 
 ## 7. 자율 주행 로봇
+
 ### ● PID 제어
 ![PID 주행](./docs/images/mobile_pid.gif)
 
