@@ -34,7 +34,7 @@
 ![FMS SW 아키텍처](./docs/images/image36.png)
 
 ### 시나리오 수행 영상
-| [![FMS 배달 시나리오](https://img.youtube.com/vi/GBW1qsYFHe4/0.jpg)](https://www.youtube.com/watch?v=GBW1qsYFHe4) | [![FMS 수거 시나리오](https://img.youtube.com/vi/zXWMFyJrSFo/0.jpg)](https://www.youtube.com/watch?v=zXWMFyJrSFo) | [![FMS 수거 시나리오](https://img.youtube.com/vi/zXWMFyJrSFo/0.jpg)](https://www.youtube.com/watch?v=zXWMFyJrSFo) |
+| [![FMS 배달 시나리오](https://img.youtube.com/vi/GBW1qsYFHe4/0.jpg)](https://www.youtube.com/watch?v=GBW1qsYFHe4) | [![FMS 수거 시나리오](https://img.youtube.com/vi/zXWMFyJrSFo/0.jpg)](https://www.youtube.com/watch?v=zXWMFyJrSFo) | [![FMS 수거 시나리오](https://www.youtube.com/watch?v=zXWMFyJrSFo/0.jpg)](https://www.youtube.com/watch?v=zXWMFyJrSFo) |
 |:----------------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------------:|
 | FMS 배달 시나리오 | FMS 수거 시나리오 | FMS 수거 시나리오 GUI 요청 |
 
