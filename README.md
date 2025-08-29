@@ -52,19 +52,19 @@
 <p align="center">
   <figure style="display:inline-block; margin:10px;">
     <img src="./docs/images/slide_23_img_1.gif" width="200"/>
-    <figcaption align="center">Shelf → Buffer</figcaption>
+    <figcaption align="center">상품 리스트 화면</figcaption>
   </figure>
   <figure style="display:inline-block; margin:10px;">
     <img src="./docs/images/slide_24_img_0.gif" width="200"/>
-    <figcaption align="center">Buffer → Robot</figcaption>
+    <figcaption align="center">상품 상세 화면</figcaption>
   </figure>
   <figure style="display:inline-block; margin:10px;">
     <img src="./docs/images/slide_25_img_0.gif" width="200"/>
-    <figcaption align="center">Robot → Buffer</figcaption>
+    <figcaption align="center">주문 진행 화면</figcaption>
   </figure>
   <figure style="display:inline-block; margin:10px;">
     <img src="./docs/images/slide_26_img_1.gif" width="200"/>
-    <figcaption align="center">Buffer → Shelf</figcaption>
+    <figcaption align="center">품절 상품 화면</figcaption>
   </figure>
 </p>
 
