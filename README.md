@@ -91,21 +91,27 @@ roscamp-repo-3/
 
 ## 7. 자율 주행 로봇
 ### ● Aruco marker Localization
-
-### ● Navigation State Machin
-
+![이미지1](./docs/images/Aruco Marker Localization.png)
+* Aruco marker localization LPF
+![LPF](./docs/images/Aruco Marker Localization LPF.gif)
+### ● Navigation State Machine
+![Navigation](./docs/images/navigation state machine.gif)
 ### ● PID 제어
-![PID 제어](./docs/images/P.gif)
 ![PID 제어](./docs/images/PID Control logic.png)
+![PID tuning](./docs/images/PID tuning.gif)
 
 ### ● 강화학습 주행 (DQN)
-![강화학습 주행](./docs/images/P.gif)
+![DQN](./docs/images/simple DQN structrue.png)
+#### □ Sim2Real
+| ![이미지1](./docs/images/DQN_waypoint_following.gif) | ![이미지2](./docs/images/DQN_collision_avoidance_failed.gif) |
+|:--------------------------------------------:|:--------------------------------------------:|
+| DQN Navigation                               | DQN collision avoidance                      |
 ### ● Vision 기반 주행
 
 #### □ vision tracker
 | ![이미지1](./docs/images/image81.gif) | ![이미지2](./docs/images/image67.gif) |
 |:--------------------------------------------:|:--------------------------------------------:|
-| vision tracker                               | 로봇 시야                                    |
+| vision tracker                               | 로봇 시야                                      |
 
 #### □ Obstacle avoidance
 | ![이미지1](./docs/images/image87.gif) | ![이미지2](./docs/images/image93.gif) |
