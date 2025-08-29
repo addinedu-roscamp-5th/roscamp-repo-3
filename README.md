@@ -110,7 +110,9 @@ roscamp-repo-3/
 | DQN Navigation                               | DQN collision avoidance(failed)               |
 
 ### ● PID vs Nav2 (DQN)
-[Performance Comparison Video](https://youtu.be/zxgvcNaVX5w)
+[Performance Comparison Video](https://youtu.be/zxgvcNaVX5w)  
+Nav2는 2D lidar를 통해서 주변환경을 인식하고 Global 및 Local costmap을 업데이트하는데 업데이트 속도가 느려서 파라미터 Nav2 Params를 수정 필요, lidar scan data를 이용한 map matching 지연으로 인한 주행 성능 하락
+PID를 사용한 네비게이션은 비교적 간단하고 MAPF의 waypoint에 잘따라가는 장점을 갖기 떄문에 FMS 연동 과정에서 PID를 사용
 ### ● Vision 기반 주행
 
 #### □ vision tracker
