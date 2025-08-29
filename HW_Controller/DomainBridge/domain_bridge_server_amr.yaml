@@ -1,0 +1,161 @@
+name: server_amr_bridge
+topics:
+  # 현재 상태 (IDLE, RotateToGoal, MoveToGoal, RotateToFinal, GoalReached)
+  state:
+    type: std_msgs/msg/String
+    from_domain: 51  # AMR/PID 제어기 도메인
+    to_domain: 59    # GUI 도메인
+  state:
+    type: std_msgs/msg/String
+    from_domain: 52  # AMR/PID 제어기 도메인
+    to_domain: 59    # GUI 도메인
+  state:
+    type: std_msgs/msg/String
+    from_domain: 53  # AMR/PID 제어기 도메인
+    to_domain: 59    # GUI 도메인
+
+  # 각도 오차 (라디안)
+  angle_error:
+    type: std_msgs/msg/Float64
+    from_domain: 51
+    to_domain: 59
+  angle_error:
+    type: std_msgs/msg/Float64
+    from_domain: 52
+    to_domain: 59
+  angle_error:
+    type: std_msgs/msg/Float64
+    from_domain: 53
+    to_domain: 59
+
+  # 거리 오차 (미터)
+  distance_error:
+    type: std_msgs/msg/Float64
+    from_domain: 51
+    to_domain: 59
+  distance_error:
+    type: std_msgs/msg/Float64
+    from_domain: 52
+    to_domain: 59
+  distance_error:
+    type: std_msgs/msg/Float64
+    from_domain: 53
+    to_domain: 59
+
+  # 현재 로봇 위치 (궤적 그리기용)
+  camera_pose:
+    type: geometry_msgs/msg/PoseStamped
+    from_domain: 51
+    to_domain: 59
+  camera_pose:
+    type: geometry_msgs/msg/PoseStamped
+    from_domain: 52
+    to_domain: 59
+  camera_pose:
+    type: geometry_msgs/msg/PoseStamped
+    from_domain: 53
+    to_domain: 59
+
+  # 현재 추적 중인 목표 위치
+  target_pose:
+    type: geometry_msgs/msg/PoseStamped
+    from_domain: 51
+    to_domain: 59
+  target_pose:
+    type: geometry_msgs/msg/PoseStamped
+    from_domain: 52
+    to_domain: 59
+  target_pose:
+    type: geometry_msgs/msg/PoseStamped
+    from_domain: 53
+    to_domain: 59
+
+  # 현재 제어 명령 (선속도, 각속도)
+  current_cmd_vel:
+    type: geometry_msgs/msg/Twist
+    from_domain: 51
+    to_domain: 59
+  current_cmd_vel:
+    type: geometry_msgs/msg/Twist
+    from_domain: 52
+    to_domain: 59
+  current_cmd_vel:
+    type: geometry_msgs/msg/Twist
+    from_domain: 53
+    to_domain: 59
+
+  # PID 디버그 정보 (문자열)
+  pid_debug:
+    type: std_msgs/msg/String
+    from_domain: 51
+    to_domain: 59
+  pid_debug:
+    type: std_msgs/msg/String
+    from_domain: 52
+    to_domain: 59
+  pid_debug:
+    type: std_msgs/msg/String
+    from_domain: 53
+    to_domain: 59
+
+
+  #amr 속도 조절
+  cmd_vel:
+    type: geometry_msgs/msg/Twist
+    from_domain: 51
+    to_domain: 59
+  cmd_vel:
+    type: geometry_msgs/msg/Twist
+    from_domain: 52
+    to_domain: 59
+  cmd_vel:
+    type: geometry_msgs/msg/Twist
+    from_domain: 53
+    to_domain: 59
+
+
+  #amr 목표점
+  goalpose1:
+    remap: goal_pose
+    type: geometry_msgs/msg/PoseStamped 
+    from_domain: 59
+    to_domain: 51
+  goalpose2:
+    remap: goal_pose
+    type: geometry_msgs/msg/PoseStamped
+    from_domain: 59
+    to_domain: 52
+  goalpose3:
+    remap: goal_pose
+    type: geometry_msgs/msg/PoseStamped
+    from_domain: 59
+    to_domain: 53
+  # 추가: 실제 AMR 위치 정보 (odom_3)
+  odom_1:
+    type: nav_msgs/msg/Odometry
+    from_domain: 59
+    to_domain: 51
+  odom_2:
+    type: nav_msgs/msg/Odometry
+    from_domain: 59
+    to_domain: 52
+  odom_3:
+    type: nav_msgs/msg/Odometry
+    from_domain: 59
+    to_domain: 53
+  #amr 배터리 잔량
+  pinky_battery_present:
+    remap: /pinky1/pinky_battery_present
+    type: std_msgs/msg/Float32
+    from_domain: 51
+    to_domain: 59
+  pinky_battery_present:
+    remap: /pinky2/pinky_battery_present
+    type: std_msgs/msg/Float32
+    from_domain: 52
+    to_domain: 59
+  pinky_battery_present:
+    remap: /pinky3/pinky_battery_present
+    type: std_msgs/msg/Float32
+    from_domain: 53
+    to_domain: 59
