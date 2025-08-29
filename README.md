@@ -131,5 +131,6 @@ PID를 사용한 네비게이션은 비교적 간단하고 MAPF의 waypoint에 �
 ---
 ## 8. 팀원 소개
 <img width="2560" height="1440" alt="Screenshot from 2025-08-29 18-40-32" src="https://github.com/user-attachments/assets/643de403-7acc-4c12-afc6-6eadae42945f" />
-file:///home/jewoo/Pictures/Screenshots/Screenshot%20from%202025-08-29%2018-40-37.png
+<img width="2560" height="1440" alt="Screenshot from 2025-08-29 18-40-37" src="https://github.com/user-attachments/assets/282b6c16-23a0-4295-b575-167d87ab28ac" />
+
 
